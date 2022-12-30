@@ -22,7 +22,7 @@ export default function Home(
       />
 
       <PromoSection />
-      <Products />
+      <Products products={products} />
 
       <Footer />
 
@@ -33,11 +33,32 @@ export default function Home(
 export const getStaticProps = async () => {
   const data = await graphqlstorefront(producdsQuery)
 
-  console.log('getStaticPropsdata', data)
+
+
+  const products = data.products.edges.map((edge: any) => {
+
+    const { node } = edge
+
+    console.log("id", node)
+    return {
+      // id: node.id,
+      title: node.title,
+      handle: node.handle,
+      tags: node.tags,
+      price: node.priceRange.minVariantPrice.amount,
+      imgSrc: node.images.edges[0].node.transformedSrc,
+      imgAlt: node.title,
+      color: node.tags[0] || 'black'
+    }
+
+  })
+
+
+
 
   return {
     props: {
-      products: []
+      products: products
     }
   }
 }
@@ -48,6 +69,7 @@ query Products {
   products(first:6) {
     edges {
       node {
+        id
         title
         handle 
         tags
@@ -59,7 +81,8 @@ query Products {
         images(first:1) {
           edges {
             node {
-              transformedSrc
+                transformedSrc
+             
             }
           }
         }
