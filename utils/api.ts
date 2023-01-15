@@ -1,7 +1,7 @@
 
 export const graphqlstorefront = async (query, variables = {}) => {
 
-    console.log('process.env.NEXT_PUBLIC_STORE_DOMAIN', process.env.NEXT_PUBLIC_STORE_DOMAIN)
+    // console.log('process.env.NEXT_PUBLIC_STORE_DOMAIN', process.env.NEXT_PUBLIC_STORE_DOMAIN)
 
     const res = await fetch(`${process.env.NEXT_PUBLIC_STORE_DOMAIN}/api/2022-10/graphql.json`, {
 
