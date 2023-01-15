@@ -1,4 +1,6 @@
-export const formatPrice = (price: number) => {
+export const formatPrice = (price: string) => {
+
+    const convertStrToInt = parseInt(price.replace(/[^0-9]/g, ''))
 
 
     const formatCurr = Intl.NumberFormat("en-AU", {
@@ -10,9 +12,11 @@ export const formatPrice = (price: number) => {
         minimumSignificantDigits: 2,
         currencyDisplay: 'symbol',
 
-    }).format(price)
+    }).format(convertStrToInt)
 
     const addDollarSign = formatCurr.replace('NZD', '$')
+
+    console.log("object", addDollarSign)
 
     return addDollarSign
 

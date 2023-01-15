@@ -1,6 +1,8 @@
 import React from 'react'
 import { graphqlstorefront } from '../../utils/api'
 import Image from 'next/image'
+import { format } from 'date-fns'
+import { formatPrice } from '../../utils/utils'
 
 type Props = {}
 
@@ -91,8 +93,8 @@ export default function Example({ product }) {
                                     Product information
                                 </h2>
                                 <p className="mt-2 text-sm text-gray-500">
-                                    Version {product.title} (Updated{' '}
-                                    <time dateTime={product.updatedAt}>{product.updatedAt}</time>)
+                                    Version {product.tags[0]} &middot; (Updated{' '}
+                                    <time dateTime={format(new Date(product.updatedAt), "dd MM yyyy")}>{format(new Date(product.updatedAt), "dd MM yyyy")}</time>)
                                 </p>
                             </div>
 
@@ -106,7 +108,7 @@ export default function Example({ product }) {
                                 type="button"
                                 className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
                             >
-                                Pay {price}
+                                Pay {formatPrice(price)}
                             </button>
                             <button
                                 type="button"
@@ -189,7 +191,7 @@ export default function Example({ product }) {
                                             {product.name}
                                         </a>
                                     </h3>
-                                    {/* <p>{product.price}</p> */}
+                                    <p>{formatPrice(product.price)}</p>
                                 </div>
                                 <p className="mt-1 text-sm text-gray-500">{product.category}</p>
                             </div>
