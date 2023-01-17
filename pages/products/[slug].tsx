@@ -1,63 +1,82 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { graphqlstorefront } from '../../utils/api'
 import Image from 'next/image'
+import Link from 'next/link'
 import { format } from 'date-fns'
 import { formatPrice } from '../../utils/utils'
 
-type Props = {}
-
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-      require('@tailwindcss/typography'),
-      require('@tailwindcss/aspect-ratio'),
-    ],
-  }
-  ```
-*/
-import { Fragment, useState } from 'react'
-import { Dialog, Popover, Tab, Transition } from '@headlessui/react'
-import { Bars3Icon, MagnifyingGlassIcon, ShoppingBagIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { StarIcon } from '@heroicons/react/20/solid'
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from 'next/types'
 
 
 
-const relatedProducts = [
-    {
-        id: 1,
-        name: 'Fusion',
-        category: 'UI Kit',
-        href: '#',
-        price: '$49',
-        imageSrc: 'https://tailwindui.com/img/ecommerce-images/product-page-05-related-product-01.jpg',
-        imageAlt:
-            'Payment application dashboard screenshot with transaction table, financial highlights, and main clients on colorful purple background.',
-    },
-    // More products...
-]
+
 
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
 
-export default function Example({ product }) {
+export default function Example({ product, products }) {
+
+    const [click, setClick] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
+
+    console.log("product", product)
+    console.log("products", products)
+
+    const relatedProducts = products.filter((item) => item.node.handle !== product.handle).slice(0, 4)
+
+
+
+    console.log("relatedProducts", relatedProducts)
+
+
 
 
     const [open, setOpen] = useState(false)
 
-    const image = product.images.edges[0].node
+    const image = product.images.edges[0].node.transformedSrc
     const price = product.priceRange.minVariantPrice.amount
 
-    console.log("productProps", product)
+    const variantId = product.variants.edges[0].node.id
+
+    const checkout = async () => {
+        try {
+            setIsLoading(true)
+            const checkout = await graphqlstorefront(checkoutMutation, {
+                variantId: variantId
+            })
+            console.log("checkout", checkout)
+            window.open(checkout.checkoutCreate.checkout.webUrl, '_blank')
+            setIsLoading(false)
+        }
+        catch (error) {
+            console.log("error", error)
+            setIsLoading(false)
+        }
+
+    }
+
+    const checkoutMutation = gql` 
+    mutation ChecoutCreate($variantId: ID!) {
+        checkoutCreate(input: {
+          lineItems: {
+          variantId: $variantId, 
+          quantity: 1
+    }
+  }) {
+    checkout {
+      webUrl
+    }
+  } 
+        }
+
+
+    `
+
+    console.log("isLoading", isLoading)
+
+
 
     return (
         <div className="bg-white">
@@ -76,7 +95,7 @@ export default function Example({ product }) {
                     {/* Product image */}
                     <div className="lg:col-span-4 lg:row-end-1">
                         <div className="aspect-w-4 aspect-h-3 overflow-hidden rounded-lg bg-gray-100">
-                            {/* <Image src={image.transformedSrc} alt={image.altText} width={250} height={250} /> */}
+                            <Image src={image} alt={image.altText} width={250} height={250} />
 
 
 
@@ -107,7 +126,14 @@ export default function Example({ product }) {
                             <button
                                 type="button"
                                 className="flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-50"
+                                onClick={checkout}
+
                             >
+                                {isLoading && <svg className="animate-spin h-5 w-5 mr-3  text-white bg-white" viewBox="0 0 24 24" >
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                </svg>}
+
+
                                 Pay {formatPrice(price)}
                             </button>
                             <button
@@ -174,28 +200,37 @@ export default function Example({ product }) {
                         </a>
                     </div>
                     <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 sm:gap-y-10 lg:grid-cols-4">
-                        {relatedProducts.map((product) => (
-                            <div key={product.id} className="group relative">
-                                <div className="aspect-w-4 aspect-h-3 overflow-hidden rounded-lg bg-gray-100">
-                                    <img src={product.imageSrc} alt={product.imageAlt} className="object-cover object-center" />
-                                    <div className="flex items-end p-4 opacity-0 group-hover:opacity-100" aria-hidden="true">
-                                        <div className="w-full rounded-md bg-white bg-opacity-75 py-2 px-4 text-center text-sm font-medium text-gray-900 backdrop-blur backdrop-filter">
-                                            View Product
-                                        </div>
+                        {relatedProducts.map((product) => {
+
+                            const image = product.node.images.edges[0].node.transformedSrc
+                            const handle = product.node.handle
+
+
+                            return (
+                                <div key={product.node.id} className="group relative">
+                                    <div className="w-full min-h-80 bg-gray-100 rounded-lg overflow-hidden group-hover:opacity-75 lg:h-80 lg:w-80">
+                                        <img src={image} alt="" className="w-full h-full object-center object-cover" />
                                     </div>
-                                </div>
-                                <div className="mt-4 flex items-center justify-between space-x-8 text-base font-medium text-gray-900">
-                                    <h3>
-                                        <a href="#">
+                                    <h3 className="mt-4 text-sm text-gray-700">
+                                        <Link href={`/products/${handle}`}>
                                             <span aria-hidden="true" className="absolute inset-0" />
-                                            {product.name}
-                                        </a>
+                                            {product.node.title}
+                                        </Link>
                                     </h3>
-                                    <p>{formatPrice(product.price)}</p>
+                                    <p className="mt-1 text-lg font-medium text-gray-900">${product.node.priceRange.minVariantPrice.amount}</p>
+
                                 </div>
-                                <p className="mt-1 text-sm text-gray-500">{product.category}</p>
-                            </div>
-                        ))}
+                            )
+
+
+
+
+
+
+                        }
+                        )}
+
+
                     </div>
                 </div>
             </main>
@@ -258,26 +293,28 @@ export const getStaticProps: GetStaticProps = async (
     context: GetStaticPropsContext
 ) => {
 
-    console.log("getStaticProps context", context)
-    const handle = context.params.slug //need error check
-    // const productId = context.params.productId
 
-    // if (!productId) {
-    //     return {
-    //         notFound: true
-    //     }
+    const handle = context.params.slug
 
-    // }
 
 
     const singleProduct = await graphqlstorefront(
         gql`
             query ProductByHandle($handle: String!) {
                 product(handle: $handle) {
+                    handle
                     id
                     title
                     updatedAt
                     tags 
+                    variants(first:1) {
+                        edges { 
+                            node {
+                                id
+                                
+                            }
+                        }
+                    }
                     priceRange {
                     minVariantPrice {
                         amount
@@ -293,15 +330,39 @@ export const getStaticProps: GetStaticProps = async (
                               }
                     }
                     }
-
-                 
-          
                 }
+
+                products(first:6) {
+    edges {
+      node {
+        id
+        title
+        handle 
+        tags
+        
+      
+        priceRange {
+          minVariantPrice {
+            amount
+          }
+        }
+        images(first:1) {
+          edges {
+            node {
+                transformedSrc
+             
+            }
+          }
+        }
+      }
+    }
+  }
+
+             
             }
         `,
         { handle })
     // console.log("context", product)
-
 
 
 
@@ -319,7 +380,9 @@ export const getStaticProps: GetStaticProps = async (
     // console.log('PRODUCTie', product)
     return {
         props: {
-            product
+            product,
+            products: singleProduct.products.edges
+
         }
     }
 }
