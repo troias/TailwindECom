@@ -1,6 +1,4 @@
 export const graphqlstorefront = async (query, variables = {}) => {
-  // console.log('process.env.NEXT_PUBLIC_STORE_DOMAIN', process.env.NEXT_PUBLIC_STORE_DOMAIN)
-
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_STORE_DOMAIN}/api/2023-04/graphql.json`,
     {
@@ -26,4 +24,49 @@ export const graphqlstorefront = async (query, variables = {}) => {
   const response = await res.json();
 
   return response.data || response.errors;
+};
+
+export const getCategories = async () => {
+  const query = `
+    query {
+      collections(first: 10) {
+        edges {
+          node {
+            id
+            title
+            handle
+            image {
+              originalSrc
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await graphqlstorefront(query);
+  console.log("getCategories", data);
+  return data.collections.edges;
+};
+
+export const getNavigation = async () => {
+  const query = `
+    query {
+      navigation {
+        main {
+          label
+          url
+          children {
+            label
+            url
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await graphqlstorefront(query);
+  console.log("getNavigation", data);
+
+  return data.navigation;
 };

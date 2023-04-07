@@ -19,14 +19,9 @@ export default function Example({ product, products }) {
   const [click, setClick] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log("product", product);
-  console.log("products", products);
-
   const relatedProducts = products
     .filter((item) => item.node.handle !== product.handle)
     .slice(0, 4);
-
-  console.log("relatedProducts", relatedProducts);
 
   const [open, setOpen] = useState(false);
 
@@ -41,11 +36,10 @@ export default function Example({ product, products }) {
       const checkout = await graphqlstorefront(checkoutMutation, {
         variantId: variantId,
       });
-      console.log("checkout", checkout);
+
       window.open(checkout.checkoutCreate.checkout.webUrl, "_blank");
       setIsLoading(false);
     } catch (error) {
-      console.log("error", error);
       setIsLoading(false);
     }
   };
@@ -61,8 +55,6 @@ export default function Example({ product, products }) {
       }
     }
   `;
-
-  console.log("isLoading", isLoading);
 
   return (
     <div className="bg-white">
@@ -266,8 +258,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
   `;
   const productPath = await graphqlstorefront(producdsQuery);
 
-  console.log("static path", productPath);
-
   const paths = productPath.products.edges.map((edge: any) => {
     return {
       params: {
@@ -275,8 +265,6 @@ export const getStaticPaths: GetStaticPaths = async () => {
       },
     };
   });
-
-  console.log("paths", paths);
 
   return {
     paths: paths,
@@ -348,13 +336,9 @@ export const getStaticProps: GetStaticProps = async (
     `,
     { handle }
   );
-  // console.log("context", product)
 
   const product = singleProduct.product;
 
-  // const product = await graphqlstorefront(productQuery)
-
-  // console.log('PRODUCTie', product)
   return {
     props: {
       product,

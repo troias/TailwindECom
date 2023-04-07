@@ -7,6 +7,7 @@ import {
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { getNavigation, getCategories } from "../../utils/api";
 
 const navigation = {
   categories: [
