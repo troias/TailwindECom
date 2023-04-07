@@ -19,9 +19,11 @@ export const graphqlstorefront = async (query, variables = {}) => {
     }
   );
 
-  const response = await res.json();
+  if (res.status !== 200) {
+    throw new Error("Failed to fetch API");
+  }
 
-  console.log("response", response);
+  const response = await res.json();
 
   return response.data || response.errors;
 };
