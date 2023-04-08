@@ -26,6 +26,41 @@ export const graphqlstorefront = async (query, variables = {}) => {
   return response.data || response.errors;
 };
 
+export const getProducts = async () => {
+  const gql = String.raw;
+  const query = gql`
+    query Products {
+      products(first: 6) {
+        edges {
+          node {
+            id
+            title
+            handle
+            tags
+
+            priceRange {
+              minVariantPrice {
+                amount
+              }
+            }
+            images(first: 1) {
+              edges {
+                node {
+                  transformedSrc
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const data = await graphqlstorefront(query);
+
+  return data.products.edges;
+};
+
 export const getCategories = async () => {
   const query = `
     query {
@@ -45,20 +80,19 @@ export const getCategories = async () => {
   `;
 
   const data = await graphqlstorefront(query);
-  console.log("getCategories", data);
+  // console.log("getCategories", data);
   return data.collections.edges;
 };
 
 export const getNavigation = async () => {
-  const query = `
-    query {
-      navigation {
-        main {
-          label
-          url
-          children {
-            label
-            url
+  const gql = String.raw;
+  const query = gql`
+    query Categories {
+      products(first: 5) {
+        edges {
+          node {
+            id
+            title
           }
         }
       }
@@ -66,7 +100,33 @@ export const getNavigation = async () => {
   `;
 
   const data = await graphqlstorefront(query);
-  console.log("getNavigation", data);
 
-  return data.navigation;
+  // console.log("getNavigation", data.products.edges);
 };
+
+//categories [
+// id,
+// name,
+// featured: [
+// {
+// name,
+// href,
+// imageSrc,
+// imageAlt
+// }
+// ],
+// sections: [
+// [{
+//   id,
+//   name,
+//   items: [
+//   {name,
+// href}
+// ]
+// }]
+// ],
+// ],
+// pages: [
+// {name, href}
+// ]
+// }

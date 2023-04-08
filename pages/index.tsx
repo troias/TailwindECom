@@ -1,12 +1,9 @@
-import Head from "next/head";
-import Image from "next/image";
 import styles from "../styles/Home.module.css";
 
 import PromoSection from "../components/promo-sections/promo-section1";
 
 import Products from "../components/products/products";
 import { graphqlstorefront } from "../utils/api";
-import { getCategories, getNavigation } from "../utils/api";
 
 export default function Home({ products }: { products: any[] }) {
   // console.log('products', products)
@@ -20,15 +17,47 @@ export default function Home({ products }: { products: any[] }) {
 }
 
 export const getStaticProps = async () => {
-  const data = await graphqlstorefront(producdsQuery);
+  const getProducts = async () => {
+    const gql = String.raw;
+    const query = gql`
+      query Products {
+        products(first: 6) {
+          edges {
+            node {
+              id
+              title
+              handle
+              tags
 
-  const categories = await getCategories();
-  const navigation = await getNavigation();
+              priceRange {
+                minVariantPrice {
+                  amount
+                }
+              }
+              images(first: 1) {
+                edges {
+                  node {
+                    transformedSrc
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
 
-  const products = data.products.edges.map((edge: any) => {
-    const { node } = edge;
+    const data = await graphqlstorefront(query);
 
-    // console.log("id", node)
+    return data.products.edges;
+  };
+
+  const data = await getProducts();
+
+  console.log("data", data);
+
+  const products = data.map((product: any) => {
+    const node = product.node;
     return {
       id: node.id,
       name: node.title,
@@ -37,11 +66,12 @@ export const getStaticProps = async () => {
       price: node.priceRange.minVariantPrice.amount,
       imgSrc: node.images.edges[0].node.transformedSrc,
       href: "#", //change
-      // name: node.name,
       imgAlt: node.title,
       color: node.tags[0] || "black",
     };
   });
+
+  // console.log("data", products);
 
   return {
     props: {
@@ -49,32 +79,3 @@ export const getStaticProps = async () => {
     },
   };
 };
-
-const gql = String.raw;
-const producdsQuery = gql`
-  query Products {
-    products(first: 6) {
-      edges {
-        node {
-          id
-          title
-          handle
-          tags
-
-          priceRange {
-            minVariantPrice {
-              amount
-            }
-          }
-          images(first: 1) {
-            edges {
-              node {
-                transformedSrc
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
