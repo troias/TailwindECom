@@ -7,14 +7,17 @@ import {
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { getNavigation, getCategories } from "../../utils/api";
-import { navigation } from "./dummyNavigationData";
+import { ExtendedNavigation } from "./dummyNavigationData";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Navigation() {
+export default function Navigation({
+  navigation,
+}: {
+  navigation: ExtendedNavigation;
+}) {
   const [open, setOpen] = useState(false);
 
   return (

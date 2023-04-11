@@ -1,3 +1,5 @@
+import type { ExtendedNavigation } from "./navigation/dummyNavigationData";
+
 export const graphqlstorefront = async (query, variables = {}) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_STORE_DOMAIN}/api/2023-04/graphql.json`,
@@ -87,109 +89,73 @@ export const getCategories = async () => {
 export const getNavigation = async () => {
   const gql = String.raw;
 
-  // const query = gql`
-  //   query Categories {
-  //     products(first: 4, query: "product_type:Womens") {
-  //       edges {
-  //         node {
-  //           title
-  //           productType
-  //         }
-  //       }
-  //     }
-  //   }
-  // `;
+  const navigationQuery = gql`
+    query Navigation {
+      collection(handle: "Women") {
+        id
+        title
+      }
+    }
+  `;
 
-  // const query = gql`
-  //   query Categories {
-  //     products(first: 250) {
-  //       edges {
-  //         node {
-  //           title
-  //           productType
-  //         }
-  //       }
-  //     }
-  //   }
-  // `;
+  const categories = await graphqlstorefront(navigationQuery);
 
-  // const data = await graphqlstorefront(query);
-  // const uniqueTypes = [
-  //   ...new Set(
-  //     data.products.edges.map(
-  //       (item: { node: { productType: String } }) => item.node.productType
-  //     )
-  //   ),
-  // ];
-  // console.log("Womens", uniqueTypes);
-  // const query2 = gql`
-  //   query Brand {
-  //     products(first: 250) {
-  //       edges {
-  //         node {
-  //           vendor
-  //         }
-  //       }
-  //     }
-  //   }
-  // `;
+  const featuredWomenQuery = gql`
+    query FeaturedWomen {
+      collections(first: 10, query: "title:Women") {
+        edges {
+          node {
+            title
+            products(first: 10) {
+              edges {
+                node {
+                  title
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
 
-  // const data2 = await graphqlstorefront(query2);
+  const featuredWomen = await graphqlstorefront(featuredWomenQuery);
 
-  // Enable downlevel iteration
-  //@ts-ignore
-  // const uniqueVendors = [
-  //   ...new Set(
-  //     data2.products.edges.map(
-  //       (item: { node: { vendor: String } }) => item.node.vendor
-  //     )
-  //   ),
-  // ];
+  const sectionsQuery = gql`
+    query Sections {
+      collections(
+        first: 10
+      ) {
+        edges {
+          node {
+            title
+          }
+          
+      }
+    }
+  `;
 
-  //   const query3 = gql`
-  //     query featured {
-  //       collections(first: 4) {
-  //         edges {
-  //           node {
-  //             id
-  //             title
-  //             handle
-  //             image {
-  //               originalSrc
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   `;
-  //   const data3 = await graphqlstorefront(query3);
+  //gets brands
 
-  //   console.log("featured", data3.collections.edges);
+  const query2 = gql`
+    query Brand {
+      products(first: 250) {
+        edges {
+          node {
+            vendor
+          }
+        }
+      }
+    }
+  `;
+
+  const data2 = await graphqlstorefront(query2);
+
+  const uniqueVendors = [
+    ...new Set(
+      data2.products.edges.map(
+        (item: { node: { vendor: String } }) => item.node.vendor
+      )
+    ),
+  ];
 };
-
-//categories [
-// id,
-// name,
-// featured: [
-// {
-// name,
-// href,
-// imageSrc,
-// imageAlt
-// }
-// ],
-// sections: [
-// [{
-//   id,
-//   name,
-//   items: [
-//   {name,
-// href}
-// ]
-// }]
-// ],
-// ],
-// pages: [
-// {name, href}
-// ]
-// }

@@ -25,7 +25,7 @@ interface Page {
   href: string;
 }
 
-type ExtendedNavigation = Navigation & {
+export type ExtendedNavigation = Navigation & {
   pages: Page[];
 };
 
