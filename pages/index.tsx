@@ -3,7 +3,7 @@ import styles from "../styles/Home.module.css";
 import PromoSection from "../components/promo-sections/promo-section1";
 
 import Products from "../components/products/products";
-import { graphqlstorefront } from "../utils/api";
+import { getProducts, getNavigation } from "../utils/api";
 
 export default function Home({ products }: { products: any[] }) {
   // console.log('products', products)
@@ -17,44 +17,11 @@ export default function Home({ products }: { products: any[] }) {
 }
 
 export const getStaticProps = async () => {
-  const getProducts = async () => {
-    const gql = String.raw;
-    const query = gql`
-      query Products {
-        products(first: 6) {
-          edges {
-            node {
-              id
-              title
-              handle
-              tags
-
-              priceRange {
-                minVariantPrice {
-                  amount
-                }
-              }
-              images(first: 1) {
-                edges {
-                  node {
-                    transformedSrc
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    `;
-
-    const data = await graphqlstorefront(query);
-
-    return data.products.edges;
-  };
-
   const data = await getProducts();
 
-  console.log("data", data);
+  const data1 = await getNavigation();
+
+  // console.log("data1", data1);
 
   const products = data.map((product: any) => {
     const node = product.node;

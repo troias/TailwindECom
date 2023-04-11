@@ -80,28 +80,91 @@ export const getCategories = async () => {
   `;
 
   const data = await graphqlstorefront(query);
-  // console.log("getCategories", data);
+
   return data.collections.edges;
 };
 
 export const getNavigation = async () => {
   const gql = String.raw;
-  const query = gql`
-    query Categories {
-      products(first: 5) {
-        edges {
-          node {
-            id
-            title
-          }
-        }
-      }
-    }
-  `;
 
-  const data = await graphqlstorefront(query);
+  // const query = gql`
+  //   query Categories {
+  //     products(first: 4, query: "product_type:Womens") {
+  //       edges {
+  //         node {
+  //           title
+  //           productType
+  //         }
+  //       }
+  //     }
+  //   }
+  // `;
 
-  // console.log("getNavigation", data.products.edges);
+  // const query = gql`
+  //   query Categories {
+  //     products(first: 250) {
+  //       edges {
+  //         node {
+  //           title
+  //           productType
+  //         }
+  //       }
+  //     }
+  //   }
+  // `;
+
+  // const data = await graphqlstorefront(query);
+  // const uniqueTypes = [
+  //   ...new Set(
+  //     data.products.edges.map(
+  //       (item: { node: { productType: String } }) => item.node.productType
+  //     )
+  //   ),
+  // ];
+  // console.log("Womens", uniqueTypes);
+  // const query2 = gql`
+  //   query Brand {
+  //     products(first: 250) {
+  //       edges {
+  //         node {
+  //           vendor
+  //         }
+  //       }
+  //     }
+  //   }
+  // `;
+
+  // const data2 = await graphqlstorefront(query2);
+
+  // Enable downlevel iteration
+  //@ts-ignore
+  // const uniqueVendors = [
+  //   ...new Set(
+  //     data2.products.edges.map(
+  //       (item: { node: { vendor: String } }) => item.node.vendor
+  //     )
+  //   ),
+  // ];
+
+  //   const query3 = gql`
+  //     query featured {
+  //       collections(first: 4) {
+  //         edges {
+  //           node {
+  //             id
+  //             title
+  //             handle
+  //             image {
+  //               originalSrc
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   `;
+  //   const data3 = await graphqlstorefront(query3);
+
+  //   console.log("featured", data3.collections.edges);
 };
 
 //categories [
