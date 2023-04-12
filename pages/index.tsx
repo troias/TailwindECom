@@ -19,9 +19,9 @@ export default function Home({ products }: { products: any[] }) {
 export const getStaticProps = async () => {
   const data = await getProducts();
 
-  const data1 = await getNavigation();
+  const navigation = await getNavigation();
 
-  // console.log("data1", data1);
+  // console.log("data1", data1.categories[0].featured);
 
   const products = data.map((product: any) => {
     const node = product.node;
@@ -43,6 +43,7 @@ export const getStaticProps = async () => {
   return {
     props: {
       products: products,
+      navigation: navigation,
     },
   };
 };
