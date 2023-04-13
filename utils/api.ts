@@ -87,6 +87,19 @@ export const getCategories = async () => {
 };
 
 export const getNavigation = async () => {
+  const menuSectionReformatter = (menu) => {
+    return {
+      id: menu.id,
+      name: menu.handle,
+      items: menu.items.map((item) => {
+        return {
+          name: item.title,
+          href: item.url,
+        };
+      }),
+    };
+  };
+
   const gql = String.raw;
 
   const womenNavigationQuery = gql`
@@ -116,7 +129,33 @@ export const getNavigation = async () => {
     }
   `;
 
-  const featuredWomen = await graphqlstorefront(featuredWomenQuery);
+  const featuredWomenData = await graphqlstorefront(featuredWomenQuery);
+
+  const featuredWomen = featuredWomenData.collections.edges.map((edge) => {
+    return {
+      name: edge.node.title,
+      href: "#",
+      imageSrc: edge.node.image.url,
+      imageAlt: edge.node.image.altText,
+    };
+  });
+
+  const womensSection1Req = gql`
+    query MensSections {
+      menu(handle: "womens-shoes-and-accessories") {
+        id
+        handle
+        items {
+          title
+          url
+        }
+      }
+    }
+  `;
+
+  const womensSection1 = await graphqlstorefront(womensSection1Req);
+
+  const womensSections = [[menuSectionReformatter(womensSection1.menu)]];
 
   //Men's Section
 
@@ -166,19 +205,6 @@ export const getNavigation = async () => {
 
   const mensSection1 = await graphqlstorefront(mensSection1Req);
 
-  const menuSectionReformatter = (menu) => {
-    return {
-      id: menu.id,
-      name: menu.handle,
-      items: menu.items.map((item) => {
-        return {
-          name: item.title,
-          href: item.url,
-        };
-      }),
-    };
-  };
-
   const mensSection2Req = gql`
     query MensBrandSection {
       menu(handle: "brands") {
@@ -203,37 +229,51 @@ export const getNavigation = async () => {
     };
   });
 
-  const sections = [
+  const mensSections = [
     [
       menuSectionReformatter(mensSection1.menu),
       menuSectionReformatter(mensSection2.menu),
     ],
   ];
+
+  const pagesQuery = gql`
+    query Pages {
+      pages(first: 2) {
+        edges {
+          node {
+            title
+          }
+        }
+      }
+    }
+  `;
+  const pageData = await graphqlstorefront(pagesQuery);
+
+  const pages = pageData.pages.edges.map((page) => {
+    return {
+      name: page.node.title,
+      href: page.node.url || "#",
+    };
+  });
+
+  console.log("object", pages);
+
   const mensMenuObj = {
     id: "mens",
     name: menNavigation.collection.title,
     featured: mensFeatured,
-    sections: sections,
+    sections: mensSections,
   };
 
   const womensMenuObj = {
     id: "womens",
     name: womenNavigation.collection.title,
-    featured: mensFeatured,
-    sections: sections,
+    featured: featuredWomen,
+    sections: womensSections,
   };
 
   return {
     categories: [womensMenuObj, mensMenuObj],
-    pages: [
-      { name: "Company", href: "#" },
-      { name: "Stores", href: "#" },
-    ],
+    pages: pages,
   };
-
-  // return {
-  //   categories: [
-  //     {
-
-  // };
 };
