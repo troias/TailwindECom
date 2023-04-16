@@ -90,7 +90,7 @@ export const getNavigation = async () => {
   const menuSectionReformatter = (menu) => {
     return {
       id: menu.id,
-      name: menu.handle,
+      name: menu.title || menu.handle,
       items: menu.items.map((item) => {
         return {
           name: item.title,
@@ -132,19 +132,22 @@ export const getNavigation = async () => {
   const featuredWomenData = await graphqlstorefront(featuredWomenQuery);
 
   const featuredWomen = featuredWomenData.collections.edges.map((edge) => {
+    const name = edge.node.title.replace(/^Women's Featured\s/, "");
     return {
-      name: edge.node.title,
+      name,
       href: "#",
       imageSrc: edge.node.image.url,
       imageAlt: edge.node.image.altText,
     };
   });
 
+  console.log("featuredWomen", featuredWomen);
   const womensSection1Req = gql`
     query MensSections {
       menu(handle: "womens-shoes-and-accessories") {
         id
         handle
+        title
         items {
           title
           url
@@ -187,6 +190,8 @@ export const getNavigation = async () => {
   `;
 
   const featuredMens = await graphqlstorefront(featuredMenQuery);
+
+  console.log(featuredMens);
 
   //Men's Section Menu
 
@@ -255,8 +260,6 @@ export const getNavigation = async () => {
       href: page.node.url || "#",
     };
   });
-
-  console.log("object", pages);
 
   const mensMenuObj = {
     id: "mens",
