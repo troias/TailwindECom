@@ -1,6 +1,13 @@
-import type { ExtendedNavigation } from "./navigation/dummyNavigationData";
+type Query = string;
 
-export const graphqlstorefront = async (query, variables = {}) => {
+type Variables = {
+  [key: string]: string;
+};
+
+export const graphqlstorefront = async (
+  query: Query,
+  variables?: Variables
+) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_STORE_DOMAIN}/api/2023-04/graphql.json`,
     {
@@ -10,7 +17,7 @@ export const graphqlstorefront = async (query, variables = {}) => {
         "Content-Type": "application/json",
         "X-Shopify-Storefront-Access-Token":
           process.env.NEXT_PUBLIC_STOREFRONT_API_TOKEN,
-      },
+      } as any,
 
       body: JSON.stringify({
         query,
@@ -30,6 +37,7 @@ export const graphqlstorefront = async (query, variables = {}) => {
 
 export const getProducts = async () => {
   const gql = String.raw;
+
   const query = gql`
     query Products {
       products(first: 6) {
@@ -107,20 +115,31 @@ export const getNavigation = async () => {
 
   const gql = String.raw;
 
+  const womensNavigationHandle = "Women";
+
   const womenNavigationQuery = gql`
-    query Navigation {
-      collection(handle: "Women") {
+    query Navigation($handle: String!) {
+      collection(handle: $handle) {
         id
         title
       }
     }
   `;
 
-  const womenNavigation = await graphqlstorefront(womenNavigationQuery);
+  const womensNavVar = {
+    handle: womensNavigationHandle,
+  };
+
+  const womenNavigation = await graphqlstorefront(
+    womenNavigationQuery,
+    womensNavVar
+  );
+
+  const featuredWomenQueryHandle = "title:Women's Featured*" as string;
 
   const featuredWomenQuery = gql`
-    query FeaturedWomensCollections {
-      collections(first: 10, query: "title:Women's Featured*") {
+    query FeaturedWomensCollections($title: String!) {
+      collections(first: 10, query: $title) {
         edges {
           node {
             title
@@ -134,7 +153,14 @@ export const getNavigation = async () => {
     }
   `;
 
-  const featuredWomenData = await graphqlstorefront(featuredWomenQuery);
+  const featuredWomenVars = {
+    title: featuredWomenQueryHandle,
+  };
+
+  const featuredWomenData = await graphqlstorefront(
+    featuredWomenQuery,
+    featuredWomenVars
+  );
 
   const featuredWomen = featuredWomenData.collections.edges.map(
     (edge: { node: { title: string; image: { url: any; altText: any } } }) => {
@@ -148,9 +174,11 @@ export const getNavigation = async () => {
     }
   );
 
+  const womensSection1handle = "womens-shoes-and-accessories";
+
   const womensSection1Req = gql`
-    query WomensShoesAndAccessories {
-      menu(handle: "womens-shoes-and-accessories") {
+    query WomensShoesAndAccessories($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -161,10 +189,16 @@ export const getNavigation = async () => {
       }
     }
   `;
+
+  const womensSection1Vars = {
+    handle: womensSection1handle,
+  };
+
+  const womensSection2Handle = "brands";
 
   const womensSection2Req = gql`
-    query WomensBrandSection {
-      menu(handle: "brands") {
+    query WomensBrandSection($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -175,10 +209,16 @@ export const getNavigation = async () => {
       }
     }
   `;
+
+  const womensSection2Vars = {
+    handle: womensSection2Handle,
+  };
+
+  const womensSection3Handle = "womens-collection";
 
   const womensSection3Req = gql`
-    query WomensCollection {
-      menu(handle: "womens-collection") {
+    query WomensCollection($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -189,10 +229,16 @@ export const getNavigation = async () => {
       }
     }
   `;
+
+  const womensSection3Vars = {
+    handle: womensSection3Handle,
+  };
+
+  const womensSection4Handle = "womens-collection";
 
   const womensSection4Req = gql`
-    query WomensClothing {
-      menu(handle: "womens-clothing") {
+    query WomensClothing($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -203,10 +249,16 @@ export const getNavigation = async () => {
       }
     }
   `;
+
+  const womensSection4Vars = {
+    handle: womensSection4Handle,
+  };
+
+  const womensSection5Handle = "womens-accessories";
 
   const womensSection5Req = gql`
-    query WomensAccessories {
-      menu(handle: "womens-accessories") {
+    query WomensAccessories($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -217,12 +269,30 @@ export const getNavigation = async () => {
       }
     }
   `;
+  const womensSection5Vars = {
+    handle: womensSection5Handle,
+  };
 
-  const womensSection1 = await graphqlstorefront(womensSection1Req);
-  const womensSection2 = await graphqlstorefront(womensSection2Req);
-  const womensSection3 = await graphqlstorefront(womensSection3Req);
-  const womensSection4 = await graphqlstorefront(womensSection4Req);
-  const womensSection5 = await graphqlstorefront(womensSection5Req);
+  const womensSection1 = await graphqlstorefront(
+    womensSection1Req,
+    womensSection1Vars
+  );
+  const womensSection2 = await graphqlstorefront(
+    womensSection2Req,
+    womensSection2Vars
+  );
+  const womensSection3 = await graphqlstorefront(
+    womensSection3Req,
+    womensSection3Vars
+  );
+  const womensSection4 = await graphqlstorefront(
+    womensSection4Req,
+    womensSection4Vars
+  );
+  const womensSection5 = await graphqlstorefront(
+    womensSection5Req,
+    womensSection5Vars
+  );
 
   const womensSections = [
     [
@@ -237,19 +307,25 @@ export const getNavigation = async () => {
   //Men's Section
 
   const menNavigationQuery = gql`
-    query Navigation {
-      collection(handle: "Men") {
+    query Navigation($handle: String!) {
+      collection(handle: $handle) {
         id
         title
       }
     }
   `;
 
-  const menNavigation = await graphqlstorefront(menNavigationQuery);
+  const variables = {
+    handle: "Men",
+  };
+
+  const menNavigation = await graphqlstorefront(menNavigationQuery, variables);
+
+  const mensFeaturedHandle = "Men's Featured";
 
   const featuredMenQuery = gql`
-    query FeaturedMensCollections {
-      collections(first: 10, query: "title:Men's Featured") {
+    query FeaturedMensCollections($title: String!) {
+      collections(first: 10, query: $title) {
         edges {
           node {
             title
@@ -263,9 +339,16 @@ export const getNavigation = async () => {
     }
   `;
 
-  const featuredMens = await graphqlstorefront(featuredMenQuery);
+  const mensFeaturedHandleVariable = {
+    title: `title:${mensFeaturedHandle}`,
+  };
 
-  const mensFeatured = featuredMens.collections.edges.map(
+  const featuredMenCollections = await graphqlstorefront(
+    featuredMenQuery,
+    mensFeaturedHandleVariable
+  );
+
+  const mensFeatured = featuredMenCollections.collections.edges.map(
     (collection: {
       node: {
         title: any;
@@ -288,9 +371,11 @@ export const getNavigation = async () => {
 
   //Men's Section Menu
 
+  const mensSection1Handle = "mens-shoes-accessories";
+
   const mensSection1Req = gql`
-    query MensSections {
-      menu(handle: "mens-shoes-accessories") {
+    query MensSections($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -301,10 +386,16 @@ export const getNavigation = async () => {
       }
     }
   `;
+
+  const mensSection1Variables = {
+    handle: mensSection1Handle,
+  };
+
+  const mensSection2Handle = "brands";
 
   const mensSection2Req = gql`
-    query MensBrandSection {
-      menu(handle: "brands") {
+    query MensBrandSection($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -315,10 +406,16 @@ export const getNavigation = async () => {
       }
     }
   `;
+
+  const mensSection2Variables = {
+    handle: mensSection2Handle,
+  };
+
+  const mensSection3Handle = "mens-collections";
 
   const mensSection3Req = gql`
-    query MensCollection {
-      menu(handle: "mens-collections") {
+    query MensCollection($handle: String!) {
+      menu(handle: $handle) {
         id
         handle
         title
@@ -330,9 +427,22 @@ export const getNavigation = async () => {
     }
   `;
 
-  const mensSection1 = await graphqlstorefront(mensSection1Req);
-  const mensSection2 = await graphqlstorefront(mensSection2Req);
-  const mensSection3 = await graphqlstorefront(mensSection3Req);
+  const mensSection3Variables = {
+    handle: mensSection3Handle,
+  };
+
+  const mensSection1 = await graphqlstorefront(
+    mensSection1Req,
+    mensSection1Variables
+  );
+  const mensSection2 = await graphqlstorefront(
+    mensSection2Req,
+    mensSection2Variables
+  );
+  const mensSection3 = await graphqlstorefront(
+    mensSection3Req,
+    mensSection3Variables
+  );
 
   const mensSections = [
     [
