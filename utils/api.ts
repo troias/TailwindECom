@@ -94,8 +94,11 @@ export const getCategories = async () => {
   return data.collections.edges;
 };
 
+// Navigation function to get the navigation data from the Shopify Storefront API and then reformatted to be used in the navigation component on the front end.
+
 export const getNavigation = async () => {
   // Womens Navigation Data
+
   const womensNavigationHandle = "Women";
   const featuredWomenQueryHandle = "title:Women's Featured*" as string;
   const womensSection1handle = "womens-shoes-and-accessories";
@@ -111,6 +114,8 @@ export const getNavigation = async () => {
   const mensSection1Handle = "mens-shoes-accessories";
   const mensSection2Handle = "brands";
   const mensSection3Handle = "mens-collections";
+
+  // Mens Navigation Data Reformatter Function to be used in the navigation component on the front end.
 
   const menuSectionReformatter = (menu: {
     id: any;
@@ -132,6 +137,8 @@ export const getNavigation = async () => {
 
   const gql = String.raw;
 
+  // Womens Navigation queries and variables for the navigation menu data to be returned from the Shopify Storefront API and then reformatted to be used in the navigation component on the front end.
+
   const womenNavigationQuery = gql`
     query Navigation($handle: String!) {
       collection(handle: $handle) {
@@ -149,6 +156,8 @@ export const getNavigation = async () => {
     womenNavigationQuery,
     womensNavVar
   );
+
+  // Featured Womens Collection queries and variables for the navigation menu data to be returned from the Shopify Storefront API and then reformatted to be used in the navigation component on the front end.
 
   const featuredWomenQuery = gql`
     query FeaturedWomensCollections($title: String!) {
@@ -175,6 +184,8 @@ export const getNavigation = async () => {
     featuredWomenVars
   );
 
+  // Reformating featured womens data to be used in the navigation component on the front end.
+
   const featuredWomen = featuredWomenData.collections.edges.map(
     (edge: { node: { title: string; image: { url: any; altText: any } } }) => {
       const name = edge.node.title.replace(/^Women's Featured\s/, "");
@@ -186,6 +197,8 @@ export const getNavigation = async () => {
       };
     }
   );
+
+  // Womens Section queries and variables for the navigation menu data to be returned from the Shopify Storefront API and then reformatted to be used in the navigation component on the front end.
 
   const womensSection1Req = gql`
     query WomensShoesAndAccessories($handle: String!) {
@@ -276,6 +289,8 @@ export const getNavigation = async () => {
     handle: womensSection5Handle,
   };
 
+  // Womens Section Data Fetching for the Navigation Component to use in the Header Component to render the Womens Navigation Section
+
   const womensSection1 = await graphqlstorefront(
     womensSection1Req,
     womensSection1Vars
@@ -297,6 +312,8 @@ export const getNavigation = async () => {
     womensSection5Vars
   );
 
+  // Womens Section Data Formatting for the Navigation Component to use in the Header Component
+
   const womensSections = [
     [
       menuSectionReformatter(womensSection1.menu),
@@ -308,6 +325,8 @@ export const getNavigation = async () => {
   ];
 
   //Men's Section
+
+  // Mens Navigation Query and Variables for the query below
 
   const menNavigationQuery = gql`
     query Navigation($handle: String!) {
@@ -323,6 +342,8 @@ export const getNavigation = async () => {
   };
 
   const menNavigation = await graphqlstorefront(menNavigationQuery, variables);
+
+  // Featured Mens Collections Query and Variables for the query below
 
   const featuredMenQuery = gql`
     query FeaturedMensCollections($title: String!) {
@@ -344,10 +365,14 @@ export const getNavigation = async () => {
     title: `title:${mensFeaturedHandle}`,
   };
 
+  // Featured Mens Collections Array of Objects with title, image properties for each collection in the array of collections returned from the query above (featuredMenCollections)
+
   const featuredMenCollections = await graphqlstorefront(
     featuredMenQuery,
     mensFeaturedHandleVariable
   );
+
+  // Mens Featured Collections Array of Objects with name, href, imageSrc, imageAlt properties for each collection in the array of collections returned from the query above (featuredMenCollections)
 
   const mensFeatured = featuredMenCollections.collections.edges.map(
     (collection: {
@@ -366,11 +391,9 @@ export const getNavigation = async () => {
     }
   );
 
-  {
-    /*Mens Section Menu*/
-  }
-
   //Men's Section Menu
+
+  //Mens Section 1
 
   const mensSection1Req = gql`
     query MensSections($handle: String!) {
@@ -390,6 +413,8 @@ export const getNavigation = async () => {
     handle: mensSection1Handle,
   };
 
+  // Mens Section 2
+
   const mensSection2Req = gql`
     query MensBrandSection($handle: String!) {
       menu(handle: $handle) {
@@ -407,6 +432,8 @@ export const getNavigation = async () => {
   const mensSection2Variables = {
     handle: mensSection2Handle,
   };
+
+  // Mens Section 3
 
   const mensSection3Req = gql`
     query MensCollection($handle: String!) {
@@ -426,6 +453,8 @@ export const getNavigation = async () => {
     handle: mensSection3Handle,
   };
 
+  // MensSectionGraphQLRequests
+
   const mensSection1 = await graphqlstorefront(
     mensSection1Req,
     mensSection1Variables
@@ -439,6 +468,8 @@ export const getNavigation = async () => {
     mensSection3Variables
   );
 
+  // MensSectionArray for Menu
+
   const mensSections = [
     [
       menuSectionReformatter(mensSection1.menu),
@@ -446,6 +477,8 @@ export const getNavigation = async () => {
       menuSectionReformatter(mensSection3.menu),
     ],
   ];
+
+  // Pages Query
 
   const pagesQuery = gql`
     query Pages {
@@ -458,7 +491,10 @@ export const getNavigation = async () => {
       }
     }
   `;
+
   const pageData = await graphqlstorefront(pagesQuery);
+
+  // Pages Array for Menu
 
   const pages = pageData.pages.edges.map(
     (page: { node: { title: any; url: any } }) => {
@@ -469,6 +505,8 @@ export const getNavigation = async () => {
     }
   );
 
+  // Mens Menu Object for Menu
+
   const mensMenuObj = {
     id: "mens",
     name: menNavigation.collection.title,
@@ -476,12 +514,16 @@ export const getNavigation = async () => {
     sections: mensSections,
   };
 
+  // Womens Menu Object
+
   const womensMenuObj = {
     id: "womens",
     name: womenNavigation.collection.title,
     featured: featuredWomen,
     sections: womensSections,
   };
+
+  // Return Menu Object
 
   return {
     categories: [womensMenuObj, mensMenuObj],
