@@ -95,6 +95,23 @@ export const getCategories = async () => {
 };
 
 export const getNavigation = async () => {
+  // Womens Navigation Data
+  const womensNavigationHandle = "Women";
+  const featuredWomenQueryHandle = "title:Women's Featured*" as string;
+  const womensSection1handle = "womens-shoes-and-accessories";
+  const womensSection2Handle = "brands";
+  const womensSection3Handle = "womens-collection";
+  const womensSection4Handle = "womens-collection";
+  const womensSection5Handle = "womens-accessories";
+
+  // Mens Navigation Data
+
+  const mensNavigationHandle = "Men";
+  const mensFeaturedHandle = "Men's Featured";
+  const mensSection1Handle = "mens-shoes-accessories";
+  const mensSection2Handle = "brands";
+  const mensSection3Handle = "mens-collections";
+
   const menuSectionReformatter = (menu: {
     id: any;
     title: any;
@@ -115,8 +132,6 @@ export const getNavigation = async () => {
 
   const gql = String.raw;
 
-  const womensNavigationHandle = "Women";
-
   const womenNavigationQuery = gql`
     query Navigation($handle: String!) {
       collection(handle: $handle) {
@@ -134,8 +149,6 @@ export const getNavigation = async () => {
     womenNavigationQuery,
     womensNavVar
   );
-
-  const featuredWomenQueryHandle = "title:Women's Featured*" as string;
 
   const featuredWomenQuery = gql`
     query FeaturedWomensCollections($title: String!) {
@@ -174,8 +187,6 @@ export const getNavigation = async () => {
     }
   );
 
-  const womensSection1handle = "womens-shoes-and-accessories";
-
   const womensSection1Req = gql`
     query WomensShoesAndAccessories($handle: String!) {
       menu(handle: $handle) {
@@ -193,8 +204,6 @@ export const getNavigation = async () => {
   const womensSection1Vars = {
     handle: womensSection1handle,
   };
-
-  const womensSection2Handle = "brands";
 
   const womensSection2Req = gql`
     query WomensBrandSection($handle: String!) {
@@ -214,8 +223,6 @@ export const getNavigation = async () => {
     handle: womensSection2Handle,
   };
 
-  const womensSection3Handle = "womens-collection";
-
   const womensSection3Req = gql`
     query WomensCollection($handle: String!) {
       menu(handle: $handle) {
@@ -234,8 +241,6 @@ export const getNavigation = async () => {
     handle: womensSection3Handle,
   };
 
-  const womensSection4Handle = "womens-collection";
-
   const womensSection4Req = gql`
     query WomensClothing($handle: String!) {
       menu(handle: $handle) {
@@ -253,8 +258,6 @@ export const getNavigation = async () => {
   const womensSection4Vars = {
     handle: womensSection4Handle,
   };
-
-  const womensSection5Handle = "womens-accessories";
 
   const womensSection5Req = gql`
     query WomensAccessories($handle: String!) {
@@ -316,12 +319,10 @@ export const getNavigation = async () => {
   `;
 
   const variables = {
-    handle: "Men",
+    handle: mensNavigationHandle,
   };
 
   const menNavigation = await graphqlstorefront(menNavigationQuery, variables);
-
-  const mensFeaturedHandle = "Men's Featured";
 
   const featuredMenQuery = gql`
     query FeaturedMensCollections($title: String!) {
@@ -371,8 +372,6 @@ export const getNavigation = async () => {
 
   //Men's Section Menu
 
-  const mensSection1Handle = "mens-shoes-accessories";
-
   const mensSection1Req = gql`
     query MensSections($handle: String!) {
       menu(handle: $handle) {
@@ -391,8 +390,6 @@ export const getNavigation = async () => {
     handle: mensSection1Handle,
   };
 
-  const mensSection2Handle = "brands";
-
   const mensSection2Req = gql`
     query MensBrandSection($handle: String!) {
       menu(handle: $handle) {
@@ -410,8 +407,6 @@ export const getNavigation = async () => {
   const mensSection2Variables = {
     handle: mensSection2Handle,
   };
-
-  const mensSection3Handle = "mens-collections";
 
   const mensSection3Req = gql`
     query MensCollection($handle: String!) {
