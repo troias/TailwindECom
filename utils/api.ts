@@ -87,7 +87,12 @@ export const getCategories = async () => {
 };
 
 export const getNavigation = async () => {
-  const menuSectionReformatter = (menu) => {
+  const menuSectionReformatter = (menu: {
+    id: any;
+    title: any;
+    handle: any;
+    items: any[];
+  }) => {
     return {
       id: menu.id,
       name: menu.title || menu.handle,
@@ -131,19 +136,20 @@ export const getNavigation = async () => {
 
   const featuredWomenData = await graphqlstorefront(featuredWomenQuery);
 
-  const featuredWomen = featuredWomenData.collections.edges.map((edge) => {
-    const name = edge.node.title.replace(/^Women's Featured\s/, "");
-    return {
-      name,
-      href: "#",
-      imageSrc: edge.node.image.url,
-      imageAlt: edge.node.image.altText,
-    };
-  });
+  const featuredWomen = featuredWomenData.collections.edges.map(
+    (edge: { node: { title: string; image: { url: any; altText: any } } }) => {
+      const name = edge.node.title.replace(/^Women's Featured\s/, "");
+      return {
+        name,
+        href: "#",
+        imageSrc: edge.node.image.url,
+        imageAlt: edge.node.image.altText,
+      };
+    }
+  );
 
-  console.log("featuredWomen", featuredWomen);
   const womensSection1Req = gql`
-    query MensSections {
+    query WomensShoesAndAccessories {
       menu(handle: "womens-shoes-and-accessories") {
         id
         handle
@@ -156,9 +162,77 @@ export const getNavigation = async () => {
     }
   `;
 
-  const womensSection1 = await graphqlstorefront(womensSection1Req);
+  const womensSection2Req = gql`
+    query WomensBrandSection {
+      menu(handle: "brands") {
+        id
+        handle
+        title
+        items {
+          title
+          url
+        }
+      }
+    }
+  `;
 
-  const womensSections = [[menuSectionReformatter(womensSection1.menu)]];
+  const womensSection3Req = gql`
+    query WomensCollection {
+      menu(handle: "womens-collection") {
+        id
+        handle
+        title
+        items {
+          title
+          url
+        }
+      }
+    }
+  `;
+
+  const womensSection4Req = gql`
+    query WomensClothing {
+      menu(handle: "womens-clothing") {
+        id
+        handle
+        title
+        items {
+          title
+          url
+        }
+      }
+    }
+  `;
+
+  const womensSection5Req = gql`
+    query WomensAccessories {
+      menu(handle: "womens-accessories") {
+        id
+        handle
+        title
+        items {
+          title
+          url
+        }
+      }
+    }
+  `;
+
+  const womensSection1 = await graphqlstorefront(womensSection1Req);
+  const womensSection2 = await graphqlstorefront(womensSection2Req);
+  const womensSection3 = await graphqlstorefront(womensSection3Req);
+  const womensSection4 = await graphqlstorefront(womensSection4Req);
+  const womensSection5 = await graphqlstorefront(womensSection5Req);
+
+  const womensSections = [
+    [
+      menuSectionReformatter(womensSection1.menu),
+      menuSectionReformatter(womensSection2.menu),
+      menuSectionReformatter(womensSection3.menu),
+      menuSectionReformatter(womensSection4.menu),
+      menuSectionReformatter(womensSection5.menu),
+    ],
+  ];
 
   //Men's Section
 
@@ -191,7 +265,26 @@ export const getNavigation = async () => {
 
   const featuredMens = await graphqlstorefront(featuredMenQuery);
 
-  console.log(featuredMens);
+  const mensFeatured = featuredMens.collections.edges.map(
+    (collection: {
+      node: {
+        title: any;
+        onlineStoreUrl: any;
+        image: { url: any; altText: any };
+      };
+    }) => {
+      return {
+        name: collection.node.title.replace(/^Men's Featured\s/, ""),
+        href: collection.node.onlineStoreUrl || "#",
+        imageSrc: collection.node.image.url,
+        imageAlt: collection.node.image.altText,
+      };
+    }
+  );
+
+  {
+    /*Mens Section Menu*/
+  }
 
   //Men's Section Menu
 
@@ -200,6 +293,35 @@ export const getNavigation = async () => {
       menu(handle: "mens-shoes-accessories") {
         id
         handle
+        title
+        items {
+          title
+          url
+        }
+      }
+    }
+  `;
+
+  const mensSection2Req = gql`
+    query MensBrandSection {
+      menu(handle: "brands") {
+        id
+        handle
+        title
+        items {
+          title
+          url
+        }
+      }
+    }
+  `;
+
+  const mensSection3Req = gql`
+    query MensCollection {
+      menu(handle: "mens-collections") {
+        id
+        handle
+        title
         items {
           title
           url
@@ -209,35 +331,14 @@ export const getNavigation = async () => {
   `;
 
   const mensSection1 = await graphqlstorefront(mensSection1Req);
-
-  const mensSection2Req = gql`
-    query MensBrandSection {
-      menu(handle: "brands") {
-        id
-        handle
-
-        items {
-          title
-          url
-        }
-      }
-    }
-  `;
   const mensSection2 = await graphqlstorefront(mensSection2Req);
-
-  const mensFeatured = featuredMens.collections.edges.map((collection) => {
-    return {
-      name: collection.node.title,
-      href: collection.node.onlineStoreUrl || "#",
-      imageSrc: collection.node.image.url,
-      imageAlt: collection.node.image.altText,
-    };
-  });
+  const mensSection3 = await graphqlstorefront(mensSection3Req);
 
   const mensSections = [
     [
       menuSectionReformatter(mensSection1.menu),
       menuSectionReformatter(mensSection2.menu),
+      menuSectionReformatter(mensSection3.menu),
     ],
   ];
 
@@ -254,12 +355,14 @@ export const getNavigation = async () => {
   `;
   const pageData = await graphqlstorefront(pagesQuery);
 
-  const pages = pageData.pages.edges.map((page) => {
-    return {
-      name: page.node.title,
-      href: page.node.url || "#",
-    };
-  });
+  const pages = pageData.pages.edges.map(
+    (page: { node: { title: any; url: any } }) => {
+      return {
+        name: page.node.title,
+        href: page.node.url || "#",
+      };
+    }
+  );
 
   const mensMenuObj = {
     id: "mens",
