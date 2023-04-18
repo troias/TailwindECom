@@ -224,3 +224,38 @@ export const navigation: ExtendedNavigation = {
     { name: "Stores", href: "#" },
   ],
 };
+
+export const dummySearchMenuData = [
+  {
+    id: "desktop-0",
+    name: "Shop",
+    featured: [
+      {
+        name: "New Arrivals",
+        href: "#",
+        imageSrc:
+          "https://tailwindui.com/img/ecommerce-images/home-page-04-category-01.jpg",
+        imageAlt:
+          "Models sitting back to back, wearing Basic Tee in black and bone.",
+      },
+    ],
+    sections: [
+      [
+        {
+          name: "Clothing",
+          href: "#",
+          items: [
+            { name: "Tops", href: "#" },
+            { name: "Dresses", href: "#" },
+          ],
+        },
+      ],
+    ],
+    pages: [
+      {
+        name: "New Arrivals",
+        href: "#",
+      },
+    ],
+  },
+];
