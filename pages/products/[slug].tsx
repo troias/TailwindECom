@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { graphqlstorefront } from "../../utils/api";
+import { graphqlstorefront, getNavigation } from "../../utils/api";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -276,7 +276,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
+  const navigation = await getNavigation();
   const handle = context.params.slug;
+
+  console.log("handle", handle);
 
   const singleProduct = await graphqlstorefront(
     gql`
@@ -343,6 +346,7 @@ export const getStaticProps: GetStaticProps = async (
     props: {
       product,
       products: singleProduct.products.edges,
+      navigation,
     },
   };
 };

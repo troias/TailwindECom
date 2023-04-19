@@ -1,5 +1,6 @@
-import { Fragment, useState, useRef } from "react";
+import { Fragment, useState, useRef, useCallback, useEffect } from "react";
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
+import Link from "next/link";
 import {
   Bars3Icon,
   MagnifyingGlassIcon,
@@ -7,8 +8,12 @@ import {
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import { ExtendedNavigation } from "./dummyNavigationData";
+import {
+  ExtendedNavigation,
+  dummySearchResultsData,
+} from "./dummyNavigationData";
 import CartModal from "../cart/cartModal";
+import { searchMenuQuery } from "../../utils/api";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -19,21 +24,45 @@ export default function Navigation({
 }: {
   navigation: ExtendedNavigation;
 }) {
+  console.log("navigation", navigation);
   const [open, setOpen] = useState(false);
 
   const [cartModalOpen, setCartModalOpen] = useState(false);
 
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
-
-  console.log("searchInput", searchInput);
-  console.log("searchModalOpen", searchModalOpen);
+  const [searchResults, setSearchResults] = useState(dummySearchResultsData);
+  const [searchModalHack, setSearchModalHack] = useState(false);
 
   const searchInputRef = useRef(null);
 
-  function handleSearchInputChange(e) {
-    setSearchInput(e.target.value);
-  }
+  console.log("searchResults", searchModalHack);
+
+  useEffect(() => {
+    if (searchModalOpen) {
+      searchInputRef.current.focus();
+      setSearchModalHack(true);
+    }
+    if (!searchModalOpen && searchModalHack) {
+      setSearchModalHack(false);
+    }
+  }, [searchModalOpen]);
+
+  const performSearchQuery = useCallback(
+    async (input) => {
+      const data = await searchMenuQuery(input);
+      setSearchResults(data);
+    },
+    [searchMenuQuery, setSearchResults]
+  );
+
+  const handleSearchInputChange = useCallback(
+    (e) => {
+      setSearchInput(e.target.value);
+      performSearchQuery(e.target.value);
+    },
+    [performSearchQuery]
+  );
 
   const searchModalHander = () => {
     setSearchModalOpen(!searchModalOpen);
@@ -42,8 +71,6 @@ export default function Navigation({
   const cartModalHander = () => {
     setCartModalOpen(!cartModalOpen);
   };
-
-  console.log("cartModalOpen", cartModalOpen);
 
   return (
     <>
@@ -286,7 +313,6 @@ export default function Navigation({
                               leaveTo="opacity-0"
                             >
                               <Popover.Panel className="absolute inset-x-0 top-full  ">
-                                {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
                                 <div
                                   className="absolute inset-0 top-1/2   shadow "
                                   aria-hidden="true"
@@ -429,6 +455,16 @@ export default function Navigation({
                                 value={searchInput}
                               />
                             )}
+                            {!searchModalOpen && open && (
+                              <input
+                                type="text"
+                                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm placeholder-gray-400"
+                                placeholder="Search..."
+                                ref={searchInputRef}
+                                onChange={handleSearchInputChange}
+                                value={searchInput}
+                              />
+                            )}
                             <Popover.Button
                               className={classNames(
                                 !open && !searchModalOpen
@@ -468,23 +504,77 @@ export default function Navigation({
                               leave="transition ease-in duration-150"
                               leaveFrom="opacity-100"
                               leaveTo="opacity-0"
-                              show={!open && searchModalOpen}
+                              show={searchModalOpen && searchModalHack}
                             >
-                              <Popover.Panel
-                                className="absolute inset-x-0 top-full"
-                                onClick={searchModalHander}
-                              >
+                              <Popover.Panel className="absolute inset-x-0 top-full">
                                 {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
                                 <div
-                                  className="absolute inset-0 top-1/2   shadow "
+                                  className="absolute inset-0 top-1/2 shadow"
                                   aria-hidden="true"
                                 />
 
                                 {/* Panel contents */}
-
-                                <div className="relative bg-white ">
+                                <div className="relative bg-white">
                                   <div className="mx-auto max-w-7xl px-8">
-                                    <div className="grid grid-cols-2 gap-y-10 gap-x-8 py-16"></div>
+                                    <div className="pt-4 pb-2 flex justify-end">
+                                      <XMarkIcon
+                                        className="h-6 w-6"
+                                        aria-hidden="true"
+                                        onClick={searchModalHander}
+                                      />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 py-8">
+                                      {/* Loop through the search results and render each product */}
+
+                                      {searchResults.results &&
+                                        searchResults.results.map(
+                                          (product, index) => (
+                                            <div
+                                              key={index}
+                                              className="rounded-lg overflow-hidden bg-gray-100"
+                                            >
+                                              <Link
+                                                href={`/products/${product.handle}`}
+                                                id={product.id}
+                                              >
+                                                <img
+                                                  className="object-cover w-full h-48"
+                                                  src={product.imageSrc}
+                                                  alt={product.imageAlt}
+                                                />
+                                              </Link>
+                                              <div className="p-4">
+                                                <a
+                                                  href={product.href}
+                                                  className="block font-medium text-gray-900 mb-2"
+                                                >
+                                                  {product.name}
+                                                </a>
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-600">
+                                                    {/* ${product.price} */}
+                                                  </span>
+                                                  {product.tags.length > 0 && (
+                                                    <div className="flex flex-wrap">
+                                                      {product.tags.map(
+                                                        (tag, index) => (
+                                                          <span
+                                                            key={index}
+                                                            className="text-sm font-medium bg-gray-300 rounded-full px-2 py-1 mr-2 mb-2"
+                                                          >
+                                                            {tag}
+                                                          </span>
+                                                        )
+                                                      )}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          )
+                                        )}
+                                    </div>
                                   </div>
                                 </div>
                               </Popover.Panel>

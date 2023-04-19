@@ -8,7 +8,7 @@ import { navigation } from "../components/navigation/dummyNavigationData";
 import type { ExtendedNavigation } from "../components/navigation/dummyNavigationData";
 
 export default function App({ Component, pageProps }: AppProps) {
-  console.log("navigation", pageProps.navigation);
+  console.log("navigation", pageProps);
 
   // console.log("navigation", navigation);
   return (
@@ -21,23 +21,23 @@ export default function App({ Component, pageProps }: AppProps) {
   );
 }
 
-// export async function getServerSideProps(context) {
-//   try {
-//     const navigation = await getNavigation();
-//     console.log("navigationnavigation", navigation);
+export async function getServerSideProps() {
+  try {
+    const navigation = await getNavigation();
+    console.log("navigationnavigation", navigation);
 
-//     return {
-//       props: {
-//         navigation: navigation,
-//       },
-//     };
-//   } catch (error) {
-//     console.log("error", error);
-//     console.error(error);
-//     return {
-//       props: {
-//         navigation: [],
-//       },
-//     };
-//   }
-// }
+    return {
+      props: {
+        navigation: navigation,
+      },
+    };
+  } catch (error) {
+    console.log("error", error);
+    console.error(error);
+    return {
+      props: {
+        navigation: [],
+      },
+    };
+  }
+}

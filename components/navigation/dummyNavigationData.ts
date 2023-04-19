@@ -262,15 +262,17 @@ export const dummySearchMenuData = [
 
 export const dummySearchResultsData = [
   {
-    name: "New Arrivals",
+    name: "product One",
     href: "#",
     imageSrc:
       "https://tailwindui.com/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
     imageAlt:
       "Drawstring top with elastic loop closure and textured interior padding.",
+    price: "$35.00",
+    tags: ["New", "Sale"],
   },
   {
-    name: "Artwork Tees",
+    name: "product One",
     href: "#",
     imageSrc:
       "https://tailwindui.com/img/ecommerce-images/category-page-02-image-card-06.jpg",

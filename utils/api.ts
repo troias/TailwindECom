@@ -530,3 +530,80 @@ export const getNavigation = async () => {
     pages: pages,
   };
 };
+
+//Search Menu Object
+
+export const searchMenuQuery = async (searchHandle: string) => {
+  const gql = String.raw;
+
+  const searchQuery = gql`
+    query Products($query: String!) {
+      products(first: 2, query: $query) {
+        edges {
+          node {
+            onlineStoreUrl
+            title
+            handle
+            tags
+            priceRange {
+              minVariantPrice {
+                amount
+              }
+            }
+            images(first: 1) {
+              edges {
+                node {
+                  transformedSrc
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const searchVariables = {
+    query: `title:${searchHandle}*`,
+  };
+
+  const searchResultsData = await graphqlstorefront(
+    searchQuery,
+    searchVariables
+  );
+
+  const searchResults = searchResultsData.products.edges.map(
+    (product: {
+      node: {
+        onlineStoreUrl: any;
+        title: any;
+        handle: any;
+        tags: any;
+        priceRange: {
+          minVariantPrice: { amount: any };
+        };
+        images: { edges: { node: { transformedSrc: any } }[] };
+      };
+    }) => {
+      return {
+        name: product.node.title,
+        handle: product.node.handle,
+        href: product.node.onlineStoreUrl || "#",
+        imageSrc: product.node.images.edges[0].node.transformedSrc,
+        imageAlt: product.node.title,
+        price: product.node.priceRange.minVariantPrice.amount,
+        tags: product.node.tags,
+      };
+    }
+  );
+
+  console.log("searchResults", searchResults);
+
+  const searchMenuObj = {
+    id: "search",
+    name: "Search",
+    results: searchResults,
+  };
+
+  return searchMenuObj;
+};
