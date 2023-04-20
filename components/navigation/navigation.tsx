@@ -260,16 +260,151 @@ export default function Navigation({
                     <span className="sr-only ">Open menu</span>
                     <Bars3Icon className="h-6 w-6" aria-hidden="true" />
                   </button>
-                  <a
-                    href="#"
-                    className="ml-2 p-2 text-gray-400 hover:text-gray-500"
-                  >
-                    <span className="sr-only">Search</span>
-                    <MagnifyingGlassIcon
-                      className="h-6 w-6"
-                      aria-hidden="true"
-                    />
-                  </a>
+
+                  {searchModalOpen ? (
+                    <div className="flex items-center justify-center px-6">
+                      <input
+                        type="text"
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm placeholder-gray-400"
+                        placeholder="Search..."
+                        ref={searchInputRef}
+                        onChange={handleSearchInputChange}
+                        value={searchInput}
+                      />
+                    </div>
+                  ) : (
+                    <button className="ml-6  p-2 text-gray-400 hover:text-gray-500">
+                      <MagnifyingGlassIcon
+                        className="h- w-6"
+                        aria-hidden="true"
+                        onClick={searchModalHander}
+                      />
+                    </button>
+                  )}
+                  <Popover.Group className="  ">
+                    <div className="flex h-full space-x-8 justify-end">
+                      <Popover key="" className="flex justify-center ">
+                        {({ open }) => (
+                          <>
+                            {console.log("searchOpen", open)}
+
+                            <Popover.Button
+                              className={classNames(
+                                (open && !searchModalOpen) ||
+                                  (!open && !searchModalOpen)
+                                  ? "text-indigo-600"
+                                  : "text-gray-700 hover:text-gray-800 hidden",
+                                "relative z-10 text-sm font-medium transition-colors duration-200 ease-out"
+                              )}
+                              onClick={searchModalHander}
+                            >
+                              <a
+                                href="#"
+                                className="ml-6 hidden p-2 text-gray-400 hover:text-gray-500 lg:block"
+                                onClick={searchModalHander}
+                              >
+                                <span className="sr-only flex justify-center items-center">
+                                  Search
+                                </span>
+                              </a>
+
+                              <span
+                                className={classNames(
+                                  open ? "bg-indigo-600" : "",
+                                  "absolute inset-x-0 bottom-0 h-0.5 transition-colors duration-200 ease-out sm:mt-5 sm:translate-y-px sm:transform"
+                                )}
+                                aria-hidden="true"
+                              />
+                            </Popover.Button>
+                            {console.log("searchModalOpen", searchModalOpen)}
+                            <Transition
+                              as={Fragment}
+                              enter="transition ease-out duration-200"
+                              enterFrom="opacity-0"
+                              enterTo="opacity-100"
+                              leave="transition ease-in duration-150"
+                              leaveFrom="opacity-100"
+                              leaveTo="opacity-0"
+                              show={searchModalOpen && searchModalHack}
+                            >
+                              <Popover.Panel className="absolute inset-x-0 top-full">
+                                {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
+                                <div
+                                  className="absolute inset-0 top-1/2 shadow"
+                                  aria-hidden="true"
+                                />
+
+                                {/* Panel contents */}
+                                <div className="relative bg-white">
+                                  <div className="mx-auto max-w-7xl px-8">
+                                    <div className="pt-4 pb-2 flex justify-end">
+                                      <XMarkIcon
+                                        className="h-6 w-6"
+                                        aria-hidden="true"
+                                        onClick={searchModalHander}
+                                      />
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 py-8">
+                                      {/* Loop through the search results and render each product */}
+
+                                      {searchResults.results &&
+                                        searchResults.results.map(
+                                          (product, index) => (
+                                            <div
+                                              key={index}
+                                              className="rounded-lg overflow-hidden bg-gray-100"
+                                            >
+                                              <Link
+                                                href={`/products/${product.handle}`}
+                                                id={product.id}
+                                              >
+                                                <img
+                                                  className="object-cover w-full h-48"
+                                                  src={product.imageSrc}
+                                                  alt={product.imageAlt}
+                                                />
+                                              </Link>
+                                              <div className="p-4">
+                                                <a
+                                                  href={product.href}
+                                                  className="block font-medium text-gray-900 mb-2"
+                                                >
+                                                  {product.name}
+                                                </a>
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-600">
+                                                    {/* ${product.price} */}
+                                                  </span>
+                                                  {product.tags.length > 0 && (
+                                                    <div className="flex flex-wrap">
+                                                      {product.tags.map(
+                                                        (tag, index) => (
+                                                          <span
+                                                            key={index}
+                                                            className="text-sm font-medium bg-gray-300 rounded-full px-2 py-1 mr-2 mb-2"
+                                                          >
+                                                            {tag}
+                                                          </span>
+                                                        )
+                                                      )}
+                                                    </div>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          )
+                                        )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </Popover.Panel>
+                            </Transition>
+                          </>
+                        )}
+                      </Popover>
+                    </div>
+                  </Popover.Group>
                 </div>
 
                 {/* Flyout menus */}
@@ -444,7 +579,6 @@ export default function Navigation({
                       <Popover key="" className="flex justify-center ">
                         {({ open }) => (
                           <>
-                            {console.log("open", open)}
                             {searchModalOpen && (
                               <input
                                 type="text"
