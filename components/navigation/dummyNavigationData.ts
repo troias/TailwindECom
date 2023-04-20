@@ -1,3 +1,5 @@
+import { id } from "date-fns/locale";
+
 interface NavigationCategory {
   id: string;
   name: string;
@@ -260,23 +262,38 @@ export const dummySearchMenuData = [
   },
 ];
 
-export const dummySearchResultsData = [
-  {
-    name: "product One",
-    href: "#",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
-    imageAlt:
-      "Drawstring top with elastic loop closure and textured interior padding.",
-    price: "$35.00",
-    tags: ["New", "Sale"],
-  },
-  {
-    name: "product One",
-    href: "#",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-02-image-card-06.jpg",
-    imageAlt:
-      "Three shirts in gray, white, and blue arranged on table with same line drawing of hands and shapes overlapping on front of shirt.",
-  },
-];
+interface SearchResultsObject {
+  id: string;
+  name: string;
+
+  results: {
+    id: string;
+    name: string;
+    handle: string;
+    href: string;
+    price: string;
+    imageSrc: string;
+    imageAlt: string;
+    tags: string[];
+  }[];
+}
+
+export const dummySearchResultsData: SearchResultsObject = {
+  id: "desktop-0",
+  name: "product One",
+
+  results: [
+    {
+      id: "desktop-0",
+      name: "product One",
+      handle: "product-one",
+      href: "#",
+      imageSrc:
+        "https://tailwindui.com/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
+      imageAlt:
+        "Drawstring top with elastic loop closure and textured interior padding.",
+      price: "$35.00",
+      tags: ["New", "Sale"],
+    },
+  ],
+};

@@ -15,7 +15,7 @@ import {
 import CartModal from "../cart/cartModal";
 import { searchMenuQuery } from "../../utils/api";
 
-function classNames(...classes) {
+function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -36,20 +36,25 @@ export default function Navigation({
 
   const searchInputRef = useRef(null);
 
-  console.log("searchResults", searchModalHack);
-
   useEffect(() => {
     if (searchModalOpen) {
-      searchInputRef.current.focus();
-      setSearchModalHack(true);
-    }
-    if (!searchModalOpen && searchModalHack) {
-      setSearchModalHack(false);
+      function isDefined<T>(
+        value: T
+      ): value is Exclude<T, undefined | null | never> {
+        return value !== undefined && value !== null;
+      }
+
+      if (searchModalOpen) {
+        if (isDefined(searchInputRef.current)) {
+          searchInputRef.current.focus();
+        }
+        setSearchModalHack(true);
+      }
     }
   }, [searchModalOpen]);
 
   const performSearchQuery = useCallback(
-    async (input) => {
+    async (input: string) => {
       const data = await searchMenuQuery(input);
       setSearchResults(data);
     },
@@ -57,7 +62,7 @@ export default function Navigation({
   );
 
   const handleSearchInputChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchInput(e.target.value);
       performSearchQuery(e.target.value);
     },
@@ -376,20 +381,21 @@ export default function Navigation({
                                                   <span className="text-gray-600">
                                                     {/* ${product.price} */}
                                                   </span>
-                                                  {product.tags.length > 0 && (
-                                                    <div className="flex flex-wrap">
-                                                      {product.tags.map(
-                                                        (tag, index) => (
-                                                          <span
-                                                            key={index}
-                                                            className="text-sm font-medium bg-gray-300 rounded-full px-2 py-1 mr-2 mb-2"
-                                                          >
-                                                            {tag}
-                                                          </span>
-                                                        )
-                                                      )}
-                                                    </div>
-                                                  )}
+                                                  {product.tags &&
+                                                    product.tags.length > 0 && (
+                                                      <div className="flex flex-wrap">
+                                                        {product.tags.map(
+                                                          (tag, index) => (
+                                                            <span
+                                                              key={index}
+                                                              className="text-sm font-medium bg-gray-300 rounded-full px-2 py-1 mr-2 mb-2"
+                                                            >
+                                                              {tag}
+                                                            </span>
+                                                          )
+                                                        )}
+                                                      </div>
+                                                    )}
                                                 </div>
                                               </div>
                                             </div>

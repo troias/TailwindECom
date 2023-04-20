@@ -541,6 +541,7 @@ export const searchMenuQuery = async (searchHandle: string) => {
       products(first: 2, query: $query) {
         edges {
           node {
+            id
             onlineStoreUrl
             title
             handle
@@ -575,6 +576,7 @@ export const searchMenuQuery = async (searchHandle: string) => {
   const searchResults = searchResultsData.products.edges.map(
     (product: {
       node: {
+        id: any;
         onlineStoreUrl: any;
         title: any;
         handle: any;
@@ -586,6 +588,7 @@ export const searchMenuQuery = async (searchHandle: string) => {
       };
     }) => {
       return {
+        id: product.node.id,
         name: product.node.title,
         handle: product.node.handle,
         href: product.node.onlineStoreUrl || "#",
@@ -599,7 +602,22 @@ export const searchMenuQuery = async (searchHandle: string) => {
 
   console.log("searchResults", searchResults);
 
-  const searchMenuObj = {
+  interface SearchMenuObj {
+    id: string;
+    name: string;
+    results: {
+      id: any;
+      name: any;
+      handle: any;
+      href: any;
+      imageSrc: any;
+      imageAlt: any;
+      price: any;
+      tags: any;
+    }[];
+  }
+
+  const searchMenuObj: SearchMenuObj = {
     id: "search",
     name: "Search",
     results: searchResults,
