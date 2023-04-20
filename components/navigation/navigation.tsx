@@ -455,27 +455,21 @@ export default function Navigation({
                                 value={searchInput}
                               />
                             )}
-                            {!searchModalOpen && open && (
-                              <input
-                                type="text"
-                                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm placeholder-gray-400"
-                                placeholder="Search..."
-                                ref={searchInputRef}
-                                onChange={handleSearchInputChange}
-                                value={searchInput}
-                              />
-                            )}
+
                             <Popover.Button
                               className={classNames(
-                                !open && !searchModalOpen
+                                (open && !searchModalOpen) ||
+                                  (!open && !searchModalOpen)
                                   ? "text-indigo-600"
                                   : "text-gray-700 hover:text-gray-800 hidden",
                                 "relative z-10 text-sm font-medium transition-colors duration-200 ease-out"
                               )}
+                              onClick={searchModalHander}
                             >
                               <a
                                 href="#"
                                 className="ml-6 hidden p-2 text-gray-400 hover:text-gray-500 lg:block"
+                                onClick={searchModalHander}
                               >
                                 <span className="sr-only flex justify-center items-center">
                                   Search
