@@ -6,6 +6,7 @@ interface NavigationCategory {
   featured: {
     name: string;
     href: string;
+    handle: string;
     imageSrc: string;
     imageAlt: string;
   }[];
@@ -40,6 +41,7 @@ export const navigation: ExtendedNavigation = {
         {
           name: "New Arrivals",
           href: "#",
+
           imageSrc:
             "https://tailwindui.com/img/ecommerce-images/mega-menu-category-01.jpg",
           imageAlt:

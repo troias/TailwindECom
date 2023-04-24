@@ -126,6 +126,7 @@ export const getNavigation = async () => {
     return {
       id: menu.id,
       name: menu.title || menu.handle,
+      handle: menu.handle,
       items: menu.items.map((item) => {
         return {
           name: item.title,
@@ -165,6 +166,7 @@ export const getNavigation = async () => {
         edges {
           node {
             title
+            handle
             image {
               url
               altText
@@ -187,10 +189,17 @@ export const getNavigation = async () => {
   // Reformating featured womens data to be used in the navigation component on the front end.
 
   const featuredWomen = featuredWomenData.collections.edges.map(
-    (edge: { node: { title: string; image: { url: any; altText: any } } }) => {
+    (edge: {
+      node: {
+        title: string;
+        handle: String;
+        image: { url: any; altText: any };
+      };
+    }) => {
       const name = edge.node.title.replace(/^Women's Featured\s/, "");
       return {
         name,
+        handle: edge.node.handle,
         href: "#",
         imageSrc: edge.node.image.url,
         imageAlt: edge.node.image.altText,
@@ -351,6 +360,7 @@ export const getNavigation = async () => {
         edges {
           node {
             title
+            handle
             image {
               url
               altText
@@ -379,11 +389,13 @@ export const getNavigation = async () => {
       node: {
         title: any;
         onlineStoreUrl: any;
+        handle: any;
         image: { url: any; altText: any };
       };
     }) => {
       return {
         name: collection.node.title.replace(/^Men's Featured\s/, ""),
+        handle: collection.node.handle,
         href: collection.node.onlineStoreUrl || "#",
         imageSrc: collection.node.image.url,
         imageAlt: collection.node.image.altText,
@@ -485,6 +497,7 @@ export const getNavigation = async () => {
       pages(first: 2) {
         edges {
           node {
+            handle
             title
           }
         }
@@ -497,10 +510,11 @@ export const getNavigation = async () => {
   // Pages Array for Menu
 
   const pages = pageData.pages.edges.map(
-    (page: { node: { title: any; url: any } }) => {
+    (page: { node: { title: any; url: any; handle: string } }) => {
       return {
         name: page.node.title,
         href: page.node.url || "#",
+        handle: page.node.handle || "#",
       };
     }
   );

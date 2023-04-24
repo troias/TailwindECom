@@ -1,4 +1,5 @@
 import { Fragment, useState, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/router";
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import Link from "next/link";
 import {
@@ -25,6 +26,7 @@ export default function Navigation({
   navigation: ExtendedNavigation;
 }) {
   const [open, setOpen] = useState(false);
+
   const [cartModalOpen, setCartModalOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -32,6 +34,8 @@ export default function Navigation({
   const [searchModalHack, setSearchModalHack] = useState(false);
 
   const searchInputRef = useRef(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (searchModalOpen) {
@@ -75,7 +79,7 @@ export default function Navigation({
   };
 
   return (
-    <>
+    <div>
       <div className="bg-white ">
         {/* Mobile menu */}
         <Transition.Root show={open} as={Fragment}>
@@ -145,42 +149,41 @@ export default function Navigation({
                           key={category.name}
                           className="space-y-10 px-4 pt-10 pb-8 z-40 "
                         >
-                          <Link href={`/collections/${category.slug}`}>
-                            <div className="space-y-4">
-                              {category.featured.map((item, itemIdx) => (
-                                <div
-                                  key={itemIdx}
-                                  className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100  "
-                                >
-                                  <img
-                                    src={item.imageSrc}
-                                    alt={item.imageAlt}
-                                    className="object-cover object-center group-hover:opacity-75"
-                                  />
-                                  <div className="flex flex-col justify-end">
-                                    <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
-                                      <a
-                                        href={item.href}
-                                        className="font-medium text-gray-900"
-                                      >
-                                        <span
-                                          className="absolute inset-0"
-                                          aria-hidden="true"
-                                        />
-                                        {item.name}
-                                      </a>
-                                      <p
+                          <div className="space-y-4">
+                            {category.featured.map((item, itemIdx) => (
+                              <div
+                                key={itemIdx}
+                                className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100  "
+                              >
+                                <img
+                                  src={item.imageSrc}
+                                  alt={item.imageAlt}
+                                  className="object-cover object-center group-hover:opacity-75"
+                                />
+                                <div className="flex flex-col justify-end">
+                                  <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
+                                    <a
+                                      href={item.href}
+                                      className="font-medium text-gray-900"
+                                    >
+                                      <span
+                                        className="absolute inset-0"
                                         aria-hidden="true"
-                                        className="mt-0.5 text-gray-700 sm:mt-1"
-                                      >
-                                        Shop now
-                                      </p>
-                                    </div>
+                                      />
+                                      {item.name}
+                                    </a>
+                                    <p
+                                      aria-hidden="true"
+                                      className="mt-0.5 text-gray-700 sm:mt-1"
+                                    >
+                                      Shop now
+                                    </p>
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          </Link>
+                              </div>
+                            ))}
+                          </div>
+
                           {category.sections.map((column, columnIdx) => (
                             <div key={columnIdx} className="space-y-10">
                               {column.map((section) => (
@@ -247,6 +250,8 @@ export default function Navigation({
             </div>
           </Dialog>
         </Transition.Root>
+
+        {/* Static navbar for desktop */}
 
         <header className="relative bg-white z-40">
           <nav
@@ -418,7 +423,7 @@ export default function Navigation({
                         key={category.name}
                         className="flex justify-center items-center"
                       >
-                        {({ open }) => (
+                        {({ open, close }) => (
                           <>
                             <div className="relative flex ">
                               <Popover.Button
@@ -428,12 +433,14 @@ export default function Navigation({
                                     : "text-gray-700 hover:text-gray-800",
                                   "relative z-10 flex items-center justify-center text-sm font-medium transition-colors duration-200 ease-out"
                                 )}
-                                onClick={() => setSearchModalOpen(false)}
+                                onClick={() => {
+                                  setSearchModalOpen(false);
+                                }}
                               >
                                 {category.name}
                                 <span
                                   className={classNames(
-                                    open ? "bg-indigo-600 " : "",
+                                    open && open ? "bg-indigo-600 " : "",
                                     "absolute inset-x-0 bottom-0 h-0.5 transition-colors duration-200 ease-out sm:mt-5 sm:translate-y-px sm:transform  "
                                   )}
                                   aria-hidden="true"
@@ -449,6 +456,7 @@ export default function Navigation({
                               leave="transition ease-in duration-150"
                               leaveFrom="opacity-100"
                               leaveTo="opacity-0"
+                              show={open}
                             >
                               <Popover.Panel className="absolute inset-x-0 top-full  ">
                                 <div
@@ -471,31 +479,38 @@ export default function Navigation({
                                                 "group relative aspect-w-1 aspect-h-1 rounded-md bg-gray-100 overflow-hidden"
                                               )}
                                             >
-                                              <img
-                                                src={item.imageSrc}
-                                                alt={item.imageAlt}
-                                                className="object-cover object-center group-hover:opacity-75"
-                                              />
-                                              <div className="flex flex-col justify-end">
-                                                <div className="bg-white bg-opacity-60 p-4 text-sm">
-                                                  <a
-                                                    href={item.href}
-                                                    className="font-medium text-gray-900"
-                                                  >
-                                                    <span
-                                                      className="absolute inset-0"
+                                              <Link
+                                                href={`/collections/${item.handle}`}
+                                                onClick={() => {
+                                                  close();
+                                                }}
+                                              >
+                                                <img
+                                                  src={item.imageSrc}
+                                                  alt={item.imageAlt}
+                                                  className="object-cover object-center group-hover:opacity-75"
+                                                />
+                                                <div className="flex flex-col justify-end">
+                                                  <div className="bg-white bg-opacity-60 p-4 text-sm">
+                                                    <a
+                                                      href={item.href}
+                                                      className="font-medium text-gray-900"
+                                                    >
+                                                      <span
+                                                        className="absolute inset-0"
+                                                        aria-hidden="true"
+                                                      />
+                                                      {item.name}
+                                                    </a>
+                                                    <p
                                                       aria-hidden="true"
-                                                    />
-                                                    {item.name}
-                                                  </a>
-                                                  <p
-                                                    aria-hidden="true"
-                                                    className="mt-0.5 text-gray-700 sm:mt-1"
-                                                  >
-                                                    Shop now
-                                                  </p>
+                                                      className="mt-0.5 text-gray-700 sm:mt-1"
+                                                    >
+                                                      Shop now
+                                                    </p>
+                                                  </div>
                                                 </div>
-                                              </div>
+                                              </Link>
                                             </div>
                                           )
                                         )}
@@ -763,6 +778,6 @@ export default function Navigation({
           <CartModal handler={cartModalHander} />
         </Dialog>
       </Transition>
-    </>
+    </div>
   );
 }
