@@ -4,10 +4,9 @@ import PromoSection from "../components/promo-sections/promo-section1";
 
 import Products from "../components/products/products";
 import { getProducts, getNavigation } from "../utils/api";
+import { get } from "http";
 
 export default function Home({ products }: { products: any[] }) {
-  // console.log('products', products)
-
   return (
     <div className={styles.container}>
       <PromoSection />

@@ -24,11 +24,8 @@ export default function Navigation({
 }: {
   navigation: ExtendedNavigation;
 }) {
-  console.log("navigation", navigation);
   const [open, setOpen] = useState(false);
-
   const [cartModalOpen, setCartModalOpen] = useState(false);
-
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
   const [searchResults, setSearchResults] = useState(dummySearchResultsData);
@@ -148,40 +145,42 @@ export default function Navigation({
                           key={category.name}
                           className="space-y-10 px-4 pt-10 pb-8 z-40 "
                         >
-                          <div className="space-y-4">
-                            {category.featured.map((item, itemIdx) => (
-                              <div
-                                key={itemIdx}
-                                className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100  "
-                              >
-                                <img
-                                  src={item.imageSrc}
-                                  alt={item.imageAlt}
-                                  className="object-cover object-center group-hover:opacity-75"
-                                />
-                                <div className="flex flex-col justify-end">
-                                  <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
-                                    <a
-                                      href={item.href}
-                                      className="font-medium text-gray-900"
-                                    >
-                                      <span
-                                        className="absolute inset-0"
+                          <Link href={`/collections/${category.slug}`}>
+                            <div className="space-y-4">
+                              {category.featured.map((item, itemIdx) => (
+                                <div
+                                  key={itemIdx}
+                                  className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100  "
+                                >
+                                  <img
+                                    src={item.imageSrc}
+                                    alt={item.imageAlt}
+                                    className="object-cover object-center group-hover:opacity-75"
+                                  />
+                                  <div className="flex flex-col justify-end">
+                                    <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
+                                      <a
+                                        href={item.href}
+                                        className="font-medium text-gray-900"
+                                      >
+                                        <span
+                                          className="absolute inset-0"
+                                          aria-hidden="true"
+                                        />
+                                        {item.name}
+                                      </a>
+                                      <p
                                         aria-hidden="true"
-                                      />
-                                      {item.name}
-                                    </a>
-                                    <p
-                                      aria-hidden="true"
-                                      className="mt-0.5 text-gray-700 sm:mt-1"
-                                    >
-                                      Shop now
-                                    </p>
+                                        className="mt-0.5 text-gray-700 sm:mt-1"
+                                      >
+                                        Shop now
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
-                          </div>
+                              ))}
+                            </div>
+                          </Link>
                           {category.sections.map((column, columnIdx) => (
                             <div key={columnIdx} className="space-y-10">
                               {column.map((section) => (
@@ -291,8 +290,6 @@ export default function Navigation({
                       <Popover key="" className="flex justify-center ">
                         {({ open }) => (
                           <>
-                            {console.log("searchOpen", open)}
-
                             <Popover.Button
                               className={classNames(
                                 (open && !searchModalOpen) ||
@@ -321,7 +318,7 @@ export default function Navigation({
                                 aria-hidden="true"
                               />
                             </Popover.Button>
-                            {console.log("searchModalOpen", searchModalOpen)}
+
                             <Transition
                               as={Fragment}
                               enter="transition ease-out duration-200"
@@ -629,7 +626,7 @@ export default function Navigation({
                                 aria-hidden="true"
                               />
                             </Popover.Button>
-                            {console.log("searchModalOpen", searchModalOpen)}
+
                             <Transition
                               as={Fragment}
                               enter="transition ease-out duration-200"

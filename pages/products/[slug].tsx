@@ -279,8 +279,6 @@ export const getStaticProps: GetStaticProps = async (
   const navigation = await getNavigation();
   const handle = context.params.slug;
 
-  console.log("handle", handle);
-
   const singleProduct = await graphqlstorefront(
     gql`
       query ProductByHandle($handle: String!) {
