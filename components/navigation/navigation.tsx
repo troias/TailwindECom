@@ -37,6 +37,16 @@ export default function Navigation({
 
   const router = useRouter();
 
+  const closeOnLinkChangeHandler = () => {
+    const handleChange = () => {
+      setOpen(false);
+    };
+    router.events.on("routeChangeStart", handleChange);
+    return () => {
+      router.events.off("routeChangeStart", handleChange);
+    };
+  };
+
   useEffect(() => {
     if (searchModalOpen) {
       function isDefined<T>(
@@ -151,36 +161,41 @@ export default function Navigation({
                         >
                           <div className="space-y-4">
                             {category.featured.map((item, itemIdx) => (
-                              <div
-                                key={itemIdx}
-                                className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100  "
+                              <Link
+                                href={`/collections/${item.handle}`}
+                                onClick={closeOnLinkChangeHandler}
                               >
-                                <img
-                                  src={item.imageSrc}
-                                  alt={item.imageAlt}
-                                  className="object-cover object-center group-hover:opacity-75"
-                                />
-                                <div className="flex flex-col justify-end">
-                                  <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
-                                    <a
-                                      href={item.href}
-                                      className="font-medium text-gray-900"
-                                    >
-                                      <span
-                                        className="absolute inset-0"
+                                <div
+                                  key={itemIdx}
+                                  className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100  "
+                                >
+                                  <img
+                                    src={item.imageSrc}
+                                    alt={item.imageAlt}
+                                    className="object-cover object-center group-hover:opacity-75"
+                                  />
+                                  <div className="flex flex-col justify-end">
+                                    <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
+                                      <a
+                                        href={item.href}
+                                        className="font-medium text-gray-900"
+                                      >
+                                        <span
+                                          className="absolute inset-0"
+                                          aria-hidden="true"
+                                        />
+                                        {item.name}
+                                      </a>
+                                      <p
                                         aria-hidden="true"
-                                      />
-                                      {item.name}
-                                    </a>
-                                    <p
-                                      aria-hidden="true"
-                                      className="mt-0.5 text-gray-700 sm:mt-1"
-                                    >
-                                      Shop now
-                                    </p>
+                                        className="mt-0.5 text-gray-700 sm:mt-1"
+                                      >
+                                        Shop now
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
+                              </Link>
                             ))}
                           </div>
 
