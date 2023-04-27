@@ -639,3 +639,78 @@ export const searchMenuQuery = async (searchHandle: string) => {
 
   return searchMenuObj;
 };
+
+export const getHeroProducts = async (handle: string) => {
+  const gql = String.raw;
+
+  const heroDataHande = handle;
+
+  const heroDataQuery = gql`
+    query heroDataQueryCollections($title: String!) {
+      collections(first: 1, query: $title) {
+        edges {
+          node {
+            id
+            title
+            handle
+            image {
+              url
+              altText
+            }
+            products(first: 3) {
+              edges {
+                node {
+                  id
+                  title
+                  handle
+                  tags
+                  images(first: 1) {
+                    edges {
+                      node {
+                        id
+                        url
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const heroDataVars = {
+    title: heroDataHande,
+  };
+
+  const heroData = await graphqlstorefront(heroDataQuery, heroDataVars);
+
+  const heroDataReformated = heroData.collections.edges.map((product: any) => {
+    const node = product.node;
+    return {
+      id: node.id,
+      name: node.title,
+      handle: node.handle,
+      image: node.image.url,
+      products: node.products.edges.map((product: any) => {
+        const node = product.node;
+        return {
+          id: node.id,
+          name: node.title,
+          handle: node.handle,
+          tags: node.tags,
+          images: node.images.edges.map((image: any) => {
+            return {
+              id: image.node.id,
+              src: image.node.url,
+            };
+          }),
+        };
+      }),
+    };
+  });
+
+  return heroDataReformated;
+};

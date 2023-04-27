@@ -8,7 +8,7 @@ import { navigation } from "../components/navigation/dummyNavigationData";
 import type { ExtendedNavigation } from "../components/navigation/dummyNavigationData";
 
 export default function App({ Component, pageProps }: AppProps) {
-  console.log("navigation", pageProps);
+  // console.log("navigation", pageProps);
 
   // console.log("navigation", navigation);
   return (

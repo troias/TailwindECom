@@ -13,6 +13,7 @@ interface NavigationCategory {
   sections: {
     id: string;
     name: string;
+    handle: string;
     items: {
       name: string;
       href: string;
@@ -41,6 +42,7 @@ export const navigation: ExtendedNavigation = {
         {
           name: "New Arrivals",
           href: "#",
+          handle: "new-arrivals",
 
           imageSrc:
             "https://tailwindui.com/img/ecommerce-images/mega-menu-category-01.jpg",
@@ -50,6 +52,7 @@ export const navigation: ExtendedNavigation = {
         {
           name: "Basic Tees",
           href: "#",
+          handle: "basic-tees",
           imageSrc:
             "https://tailwindui.com/img/ecommerce-images/mega-menu-category-02.jpg",
           imageAlt:
@@ -57,6 +60,7 @@ export const navigation: ExtendedNavigation = {
         },
         {
           name: "Accessories",
+          handle: "accessories",
           href: "#",
           imageSrc:
             "https://tailwindui.com/img/ecommerce-images/mega-menu-category-03.jpg",
@@ -68,6 +72,7 @@ export const navigation: ExtendedNavigation = {
         [
           {
             id: "shoes",
+            handle: "shoes",
             name: "Shoes & Accessories",
             items: [
               { name: "Sneakers", href: "#" },
@@ -80,6 +85,7 @@ export const navigation: ExtendedNavigation = {
           },
           {
             id: "collection",
+            handle: "collection",
             name: "Shop Collection",
             items: [
               { name: "Everything", href: "#" },
@@ -93,6 +99,7 @@ export const navigation: ExtendedNavigation = {
         [
           {
             id: "clothing",
+            handle: "clothing",
             name: "All Clothing",
             items: [
               { name: "Basic Tees", href: "#" },
@@ -105,6 +112,7 @@ export const navigation: ExtendedNavigation = {
           },
           {
             id: "accessories",
+            handle: "accessories",
             name: "All Accessories",
             items: [
               { name: "Watches", href: "#" },
@@ -119,6 +127,7 @@ export const navigation: ExtendedNavigation = {
         [
           {
             id: "brands",
+            handle: "brands",
             name: "Brands",
             items: [
               { name: "Full Nelson", href: "#" },
@@ -137,6 +146,7 @@ export const navigation: ExtendedNavigation = {
       featured: [
         {
           name: "Accessories",
+          handle: "accessories",
           href: "#",
           imageSrc:
             "https://tailwindui.com/img/ecommerce-images/home-page-03-category-01.jpg",
@@ -145,6 +155,7 @@ export const navigation: ExtendedNavigation = {
         },
         {
           name: "New Arrivals",
+          handle: "new-arrivals",
           href: "#",
           imageSrc:
             "https://tailwindui.com/img/ecommerce-images/product-page-04-detail-product-shot-01.jpg",
@@ -153,6 +164,7 @@ export const navigation: ExtendedNavigation = {
         },
         {
           name: "Artwork Tees",
+          handle: "artwork-tees",
           href: "#",
           imageSrc:
             "https://tailwindui.com/img/ecommerce-images/category-page-02-image-card-06.jpg",
@@ -164,6 +176,7 @@ export const navigation: ExtendedNavigation = {
         [
           {
             id: "shoes",
+            handle: "shoes",
             name: "Shoes & Accessories",
             items: [
               { name: "Sneakers", href: "#" },
@@ -174,6 +187,7 @@ export const navigation: ExtendedNavigation = {
           },
           {
             id: "collection",
+            handle: "collection",
             name: "Shop Collection",
             items: [
               { name: "Everything", href: "#" },
@@ -186,6 +200,7 @@ export const navigation: ExtendedNavigation = {
         [
           {
             id: "clothing",
+            handle: "clothing",
             name: "All Clothing",
             items: [
               { name: "Basic Tees", href: "#" },
@@ -197,6 +212,7 @@ export const navigation: ExtendedNavigation = {
           },
           {
             id: "accessories",
+            handle: "accessories",
             name: "All Accessories",
             items: [
               { name: "Watches", href: "#" },
@@ -211,6 +227,7 @@ export const navigation: ExtendedNavigation = {
         [
           {
             id: "brands",
+            handle: "brands",
             name: "Brands",
             items: [
               { name: "Re-Arranged", href: "#" },
@@ -237,6 +254,7 @@ export const dummySearchMenuData = [
       {
         name: "New Arrivals",
         href: "#",
+        handle: "new-arrivals",
         imageSrc:
           "https://tailwindui.com/img/ecommerce-images/home-page-04-category-01.jpg",
         imageAlt:
@@ -248,6 +266,7 @@ export const dummySearchMenuData = [
         {
           name: "Clothing",
           href: "#",
+          handle: "clothing",
           items: [
             { name: "Tops", href: "#" },
             { name: "Dresses", href: "#" },

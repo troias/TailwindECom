@@ -3,13 +3,20 @@ import styles from "../styles/Home.module.css";
 import PromoSection from "../components/promo-sections/promo-section1";
 
 import Products from "../components/products/products";
-import { getProducts, getNavigation } from "../utils/api";
+import { getProducts, getNavigation, getHeroProducts } from "../utils/api";
 import { get } from "http";
 
-export default function Home({ products }: { products: any[] }) {
+export default function Home({
+  products,
+  heroData,
+}: {
+  products: any[];
+  heroData: any[];
+}) {
+  console.log("heroData", heroData);
   return (
     <div className={styles.container}>
-      <PromoSection />
+      <PromoSection products={heroData} />
       <Products products={products} />
     </div>
   );
@@ -20,7 +27,7 @@ export const getStaticProps = async () => {
 
   const navigation = await getNavigation();
 
-  // console.log("data1", data1.categories[0].featured);
+  const heroData = await getHeroProducts("Men's Featured Artwork Tees");
 
   const products = data.map((product: any) => {
     const node = product.node;
@@ -37,12 +44,15 @@ export const getStaticProps = async () => {
     };
   });
 
+  console.log("heroData", heroData);
+
   // console.log("data", products);
 
   return {
     props: {
-      products: products,
-      navigation: navigation,
+      products,
+      navigation,
+      heroData,
     },
   };
 };

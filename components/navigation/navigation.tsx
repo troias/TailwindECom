@@ -2,6 +2,8 @@ import { Fragment, useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import Link from "next/link";
+import Image from "next/image";
+
 import {
   Bars3Icon,
   MagnifyingGlassIcon,
@@ -169,10 +171,12 @@ export default function Navigation({
                                   key={itemIdx}
                                   className="group aspect-w-1 aspect-h-1 relative overflow-hidden rounded-md bg-gray-100  "
                                 >
-                                  <img
+                                  <Image
                                     src={item.imageSrc}
                                     alt={item.imageAlt}
                                     className="object-cover object-center group-hover:opacity-75"
+                                    width={200}
+                                    height={200}
                                   />
                                   <div className="flex flex-col justify-end">
                                     <div className="bg-white bg-opacity-60 p-4 text-base sm:text-sm">
@@ -202,30 +206,45 @@ export default function Navigation({
                           {category.sections.map((column, columnIdx) => (
                             <div key={columnIdx} className="space-y-10">
                               {column.map((section) => (
-                                <div key={section.name}>
-                                  <p
-                                    id={`${category.id}-${section.id}-heading-mobile`}
-                                    className="font-medium text-gray-900"
-                                  >
-                                    {section.name}
-                                  </p>
-                                  <ul
-                                    role="list"
-                                    aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
-                                    className="mt-6 flex flex-col space-y-6"
-                                  >
-                                    {section.items.map((item) => (
-                                      <li key={item.name} className="flow-root">
-                                        <a
-                                          href={item.href}
-                                          className="-m-2 block p-2 text-gray-500"
+                                <Link
+                                  href={{
+                                    pathname: `/`,
+
+                                    query: {
+                                      category: category.name,
+                                      section: section.name,
+                                    },
+                                  }}
+                                  onClick={closeOnLinkChangeHandler}
+                                >
+                                  <div key={section.name}>
+                                    <p
+                                      id={`${category.id}-${section.id}-heading-mobile`}
+                                      className="font-medium text-gray-900"
+                                    >
+                                      {section.name}
+                                    </p>
+                                    <ul
+                                      role="list"
+                                      aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
+                                      className="mt-6 flex flex-col space-y-6"
+                                    >
+                                      {section.items.map((item) => (
+                                        <li
+                                          key={item.name}
+                                          className="flow-root"
                                         >
-                                          {item.name}
-                                        </a>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
+                                          <a
+                                            href={item.href}
+                                            className="-m-2 block p-2 text-gray-500"
+                                          >
+                                            {item.name}
+                                          </a>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </Link>
                               ))}
                             </div>
                           ))}
@@ -381,10 +400,12 @@ export default function Navigation({
                                                 href={`/products/${product.handle}`}
                                                 id={product.id}
                                               >
-                                                <img
+                                                <Image
                                                   className="object-cover w-full h-48"
                                                   src={product.imageSrc}
                                                   alt={product.imageAlt}
+                                                  width={200}
+                                                  height={200}
                                                 />
                                               </Link>
                                               <div className="p-4">
@@ -485,30 +506,32 @@ export default function Navigation({
                                       <div className="grid grid-cols-2 grid-rows-1 gap-8 text-sm">
                                         {category.featured.map(
                                           (item, itemIdx) => (
-                                            <div
-                                              key={item.name}
-                                              className={classNames(
-                                                itemIdx === 0
-                                                  ? "col-span-2 aspect-w-2"
-                                                  : "",
-                                                "group relative aspect-w-1 aspect-h-1 rounded-md bg-gray-100 overflow-hidden"
-                                              )}
+                                            <Link
+                                              href={`/collections/${item.handle}`}
+                                              onClick={() => {
+                                                close();
+                                              }}
                                             >
-                                              <Link
-                                                href={`/collections/${item.handle}`}
-                                                onClick={() => {
-                                                  close();
-                                                }}
+                                              <div
+                                                key={item.name}
+                                                className={classNames(
+                                                  itemIdx === 0
+                                                    ? "col-span-2 aspect-w-2 h-full"
+                                                    : "h-full aspect-w-1",
+                                                  "group relative aspect-w-1 aspect-h-1 rounded-md bg-gray-100 overflow-hidden"
+                                                )}
                                               >
-                                                <img
+                                                <Image
                                                   src={item.imageSrc}
                                                   alt={item.imageAlt}
+                                                  width={700}
+                                                  height={700}
                                                   className="object-cover object-center group-hover:opacity-75"
                                                 />
                                                 <div className="flex flex-col justify-end">
                                                   <div className="bg-white bg-opacity-60 p-4 text-sm">
-                                                    <a
-                                                      href={item.href}
+                                                    <Link
+                                                      href={`/collections/${item.handle}`}
                                                       className="font-medium text-gray-900"
                                                     >
                                                       <span
@@ -516,7 +539,7 @@ export default function Navigation({
                                                         aria-hidden="true"
                                                       />
                                                       {item.name}
-                                                    </a>
+                                                    </Link>
                                                     <p
                                                       aria-hidden="true"
                                                       className="mt-0.5 text-gray-700 sm:mt-1"
@@ -525,8 +548,8 @@ export default function Navigation({
                                                     </p>
                                                   </div>
                                                 </div>
-                                              </Link>
-                                            </div>
+                                              </div>
+                                            </Link>
                                           )
                                         )}
                                       </div>
@@ -556,12 +579,15 @@ export default function Navigation({
                                                           key={item.name}
                                                           className="flex"
                                                         >
-                                                          <a
-                                                            href={item.href}
+                                                          <Link
+                                                            href={`/collections/${item.name}`}
                                                             className="hover:text-gray-800"
+                                                            onClick={() => {
+                                                              close();
+                                                            }}
                                                           >
                                                             {item.name}
-                                                          </a>
+                                                          </Link>
                                                         </li>
                                                       )
                                                     )}
@@ -597,11 +623,7 @@ export default function Navigation({
                 {/* Logo */}
                 <a href="/" className="flex">
                   <span className="sr-only">Grey-Mon</span>
-                  <img
-                    className="h-8 w-auto"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                    alt=""
-                  />
+                  <img className="h-12 w-auto" src="/Logo.svg" alt="" />
                 </a>
 
                 <div className="flex flex-1 items-center justify-end">
@@ -699,10 +721,12 @@ export default function Navigation({
                                                 href={`/products/${product.handle}`}
                                                 id={product.id}
                                               >
-                                                <img
+                                                <Image
                                                   className="object-cover w-full h-48"
                                                   src={product.imageSrc}
                                                   alt={product.imageAlt}
+                                                  width={500}
+                                                  height={500}
                                                 />
                                               </Link>
                                               <div className="p-4">
