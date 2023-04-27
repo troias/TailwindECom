@@ -657,7 +657,7 @@ export const getHeroProducts = async (handle: string) => {
               url
               altText
             }
-            products(first: 3) {
+            products(first: 10) {
               edges {
                 node {
                   id

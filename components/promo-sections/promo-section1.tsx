@@ -2,14 +2,28 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Props = {
-  products: any[];
+  id: string;
+  name: string;
+  handle: string;
+  products: {
+    id: number;
+    name: string;
+    tags: string[];
+    images: {
+      id: number;
+      src: string;
+    }[];
+  };
+
+  title?: string;
+  subHeading?: string;
 };
 
-export default function PromoSection({ products }: Props) {
-  //   console.log("products", products);
+export default function PromoSection({ products, title, subHeading }: Props) {
+  console.log("products", products[0].products);
 
   // A function to shuffle an array randomly
-  function shuffleArray(array: any[]) {
+  function shuffleArray(array: any[], limit: number = 0) {
     let currentIndex = array.length,
       temporaryValue,
       randomIndex;
@@ -27,8 +41,27 @@ export default function PromoSection({ products }: Props) {
     }
 
     // Return the shuffled array
-    return array;
+    if (limit > 0) {
+      return array.slice(0, limit);
+    }
+    //remove duplicates
+
+    const itemSet = new Set(array);
+    return itemSet;
   }
+
+  const productsData = products[0].products;
+
+  console.log("shuffled products", productsData);
+
+  const dummyData = {
+    id: 1,
+    title: "Summer styles are finally here",
+    subHeading:
+      "This year, our new summer collection will shelter you from the harsh elements of a world that doesn't care if you live or die.",
+    buttonTitle: "Shop Collection",
+    link: "/",
+  };
 
   return (
     <div className="relative overflow-hidden bg-white">
@@ -36,12 +69,9 @@ export default function PromoSection({ products }: Props) {
         <div className="relative mx-auto max-w-7xl px-4 sm:static sm:px-6 lg:px-8">
           <div className="sm:max-w-lg">
             <h1 className="font text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-              Summer styles are finally here
+              {dummyData.title}
             </h1>
-            <p className="mt-4 text-xl text-gray-500">
-              This year, our new summer collection will shelter you from the
-              harsh elements of a world that doesn't care if you live or die.
-            </p>
+            <p className="mt-4 text-xl text-gray-500">{dummyData.subHeading}</p>
           </div>
           <div>
             <div className="mt-10">
@@ -53,56 +83,44 @@ export default function PromoSection({ products }: Props) {
                 <div className="absolute transform sm:left-1/2 sm:top-0 sm:translate-x-8 lg:left-1/2 lg:top-1/2 lg:-translate-y-1/2 lg:translate-x-8">
                   <div className="flex items-center space-x-6 lg:space-x-8">
                     <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
-                      <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
-                        <img
-                          src="https://tailwindui.com/img/ecommerce-images/home-page-03-hero-image-tile-01.jpg"
-                          alt=""
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                      <div className="h-64 w-44 overflow-hidden rounded-lg">
-                        <img
-                          src="https://tailwindui.com/img/ecommerce-images/home-page-03-hero-image-tile-02.jpg"
-                          alt=""
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
-                      <div className="h-64 w-44 overflow-hidden rounded-lg">
-                        <img
-                          src="https://tailwindui.com/img/ecommerce-images/home-page-03-hero-image-tile-03.jpg"
-                          alt=""
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                      <div className="h-64 w-44 overflow-hidden rounded-lg">
-                        <img
-                          src="https://tailwindui.com/img/ecommerce-images/home-page-03-hero-image-tile-04.jpg"
-                          alt=""
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                      <div className="h-64 w-44 overflow-hidden rounded-lg">
-                        <img
-                          src="https://tailwindui.com/img/ecommerce-images/home-page-03-hero-image-tile-05.jpg"
-                          alt=""
-                          className="h-full w-full object-cover object-center"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
-                      {/* {shuffleArray(products).map((product) => (
-                        <div className="h-64 w-44 overflow-hidden rounded-lg">
+                      {/* two products  */}
+                      {shuffleArray(productsData, 2).map((product) => (
+                        <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
                           <img
-                            src={product.imgSrc}
+                            src={product.images[0].src}
                             alt=""
                             className="h-full w-full object-cover object-center"
                           />
                         </div>
-                      ))} */}
+                      ))}
+                    </div>
+
+                    <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
+                      {/* three products  */}
+
+                      {shuffleArray(productsData, 3).map((product) => (
+                        <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
+                          <img
+                            src={product.images[0].src}
+                            alt=""
+                            className="h-full w-full object-cover object-center"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
+                      {/* two products  */}
+
+                      {shuffleArray(productsData, 2).map((product) => (
+                        <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
+                          <img
+                            src={product.images[0].src}
+                            alt=""
+                            className="h-full w-full object-cover object-center"
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -112,7 +130,7 @@ export default function PromoSection({ products }: Props) {
                 href="#"
                 className="inline-block rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-center font-medium text-white hover:bg-indigo-700"
               >
-                Shop Collection
+                {dummyData.buttonTitle}
               </a>
             </div>
           </div>

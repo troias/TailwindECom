@@ -24,7 +24,6 @@ export default function App({ Component, pageProps }: AppProps) {
 export async function getServerSideProps() {
   try {
     const navigation = await getNavigation();
-    console.log("navigationnavigation", navigation);
 
     return {
       props: {
