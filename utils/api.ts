@@ -614,8 +614,6 @@ export const searchMenuQuery = async (searchHandle: string) => {
     }
   );
 
-  console.log("searchResults", searchResults);
-
   interface SearchMenuObj {
     id: string;
     name: string;
@@ -713,4 +711,35 @@ export const getHeroProducts = async (handle: string) => {
   });
 
   return heroDataReformated;
+};
+
+export const getFooterMenuData = async () => {
+  const gql = String.raw;
+
+  const footerMenuQuery = gql`
+    query FooterMenu {
+      menu(handle: "footer") {
+        title
+        items {
+          title
+        }
+      }
+      menu1: menu(handle: "support") {
+        title
+        items {
+          title
+        }
+      }
+      menu2: menu(handle: "contact") {
+        title
+        items {
+          title
+        }
+      }
+    }
+  `;
+
+  const footerMenuData = await graphqlstorefront(footerMenuQuery);
+
+  return footerMenuData;
 };

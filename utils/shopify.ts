@@ -49,5 +49,5 @@ export const getCategories = async () => {
   `;
 
   const data = await graphqlAdmin(query);
-  console.log("getCategoriesAdmin", data);
+  // console.log("getCategoriesAdmin", data);
 };

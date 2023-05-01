@@ -20,8 +20,6 @@ type Props = {
 };
 
 export default function PromoSection({ products, title, subHeading }: Props) {
-  console.log("products", products[0].products);
-
   // A function to shuffle an array randomly
   function shuffleArray(array: any[], limit: number = 0) {
     let currentIndex = array.length,
@@ -50,9 +48,9 @@ export default function PromoSection({ products, title, subHeading }: Props) {
     return itemSet;
   }
 
-  const productsData = products[0].products;
+  // Shuffle the products array so that the products displayed are random and not the same every time
 
-  console.log("shuffled products", productsData);
+  const productsData = products[0].products;
 
   const dummyData = {
     id: 1,
@@ -126,12 +124,12 @@ export default function PromoSection({ products, title, subHeading }: Props) {
                 </div>
               </div>
 
-              <a
-                href="#"
+              <Link
+                href={`/collections/${products[0].handle}`}
                 className="inline-block rounded-md border border-transparent bg-indigo-600 py-3 px-8 text-center font-medium text-white hover:bg-indigo-700"
               >
                 {dummyData.buttonTitle}
-              </a>
+              </Link>
             </div>
           </div>
         </div>
