@@ -1,17 +1,3 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
 const navigation = {
   solutions: [
     { name: "Marketing", href: "#" },
@@ -102,7 +88,8 @@ const navigation = {
   ],
 };
 
-export default function Footer() {
+export default function Footer({ footer }) {
+  console.log("footer", footer);
   return (
     <footer className="bg-white" aria-labelledby="footer-heading">
       <h2 id="footer-heading" className="sr-only">

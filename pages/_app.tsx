@@ -15,7 +15,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <Navigation navigation={pageProps.navigation} />
       <Component {...pageProps} />
-      <Footer />
+      <Footer footer={pageProps.footer} />
     </>
     // @ts-ignore
   );
