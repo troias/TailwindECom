@@ -15,3 +15,113 @@ export const formatPrice = (price: string) => {
 
   return addDollarSign;
 };
+
+export function convertFooterDataToNavigation(
+  footerData: {
+    [x: string]: {
+      title: string;
+      items: { title: string }[];
+      href?: string;
+    };
+  },
+  socialMedia: {
+    [x: string]: {
+      name: string;
+      href: string;
+    }[];
+  }[]
+) {
+  const navigation = {};
+
+  // iterate over the menus in the footerData object
+  Object.values(footerData).forEach((menu) => {
+    const menuTitle = menu.title;
+
+    // check if the navigation already has a category for this menu
+    // if not, create a new category in the navigation object for this menu
+    if (!navigation[menuTitle]) {
+      navigation[menuTitle] = [];
+    }
+
+    // iterate over the menu items and add them to the category
+    menu.items.forEach((item) => {
+      navigation[menuTitle].push({
+        name: item.title || "Item",
+        href: item.href || "#",
+      });
+    });
+  });
+
+  // add the social media and legal categories to the footer navigation
+  Object.values(socialMedia).forEach((menu) => {
+    const menuTitle = menu[0].name || "Social Media";
+
+    // check if the navigation already has a category for this menu
+    // if not, create a new category in the navigation object for this menu
+    if (!navigation[menuTitle]) {
+      navigation[menuTitle] = [];
+    }
+
+    // iterate over the menu items and add them to the category
+    menu.forEach((item) => {
+      navigation[menuTitle].push({
+        name: item.name,
+        href: item.href || "#",
+      });
+    });
+  });
+
+  return navigation;
+}
+
+export const addSocialIconsToFooter = (
+  footer: {
+    [x: string]: [
+      {
+        title?: string;
+        items: [
+          {
+            title?: string;
+            href?: string;
+          }
+        ];
+      }
+    ];
+  },
+  social: {
+    [x: string]: [
+      {
+        name: string;
+        href: string;
+        icon: (props: { fill: string; viewBox: string }) => JSX.Element;
+      }
+    ];
+  }
+) => {
+  const footerObj: {
+    [key: string]: {
+      name: string;
+      href: string;
+      icon?: (props: { fill: string; viewBox: string }) => JSX.Element;
+    }[];
+  } = { ...footer, ...social };
+
+  //remove quotemarks from keys
+
+  function makeIterableObject(obj) {
+    const iterableObj = [];
+    for (const key in obj) {
+      if (Object.hasOwnProperty.call(obj, key)) {
+        iterableObj.push({
+          key: key.trim(),
+          value: obj[key],
+        });
+      }
+    }
+    return iterableObj;
+  }
+
+  const iterableObj = makeIterableObject(footerObj);
+
+  return iterableObj;
+};

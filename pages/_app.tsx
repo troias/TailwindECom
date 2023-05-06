@@ -4,18 +4,15 @@ import type { AppProps } from "next/app";
 import Navigation from "../components/navigation/navigation";
 import Footer from "../components/navigation/footer";
 import { getNavigation } from ".././utils/api";
-import { navigation } from "../components/navigation/dummyNavigationData";
-import type { ExtendedNavigation } from "../components/navigation/dummyNavigationData";
+import { useFooter } from "../utils/customHooks/useFooter";
+import { useEffect } from "react";
 
 export default function App({ Component, pageProps }: AppProps) {
-  // console.log("navigation", pageProps);
-
-  // console.log("navigation", navigation);
   return (
     <>
       <Navigation navigation={pageProps.navigation} />
       <Component {...pageProps} />
-      <Footer footer={pageProps.footer} />
+      <Footer />
     </>
     // @ts-ignore
   );

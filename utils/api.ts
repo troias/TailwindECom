@@ -714,23 +714,31 @@ export const getHeroProducts = async (handle: string) => {
 };
 
 export const getFooterMenuData = async () => {
+  const menuHandle = "footer";
+  const menu1Handle = "support";
+  const menu2Handle = "contact";
+
   const gql = String.raw;
 
   const footerMenuQuery = gql`
-    query FooterMenu {
-      menu(handle: "footer") {
+    query FooterMenu(
+      $menuHandle: String!
+      $menu1Handle: String!
+      $menu2Handle: String!
+    ) {
+      menu(handle: $menuHandle) {
         title
         items {
           title
         }
       }
-      menu1: menu(handle: "support") {
+      menu1: menu(handle: $menu1Handle) {
         title
         items {
           title
         }
       }
-      menu2: menu(handle: "contact") {
+      menu2: menu(handle: $menu2Handle) {
         title
         items {
           title
@@ -739,7 +747,16 @@ export const getFooterMenuData = async () => {
     }
   `;
 
-  const footerMenuData = await graphqlstorefront(footerMenuQuery);
+  const footerMenuVars = {
+    menuHandle: menuHandle,
+    menu1Handle: menu1Handle,
+    menu2Handle: menu2Handle,
+  };
+
+  const footerMenuData = await graphqlstorefront(
+    footerMenuQuery,
+    footerMenuVars
+  );
 
   return footerMenuData;
 };
