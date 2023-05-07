@@ -730,19 +730,25 @@ export const getFooterMenuData = async () => {
         title
         items {
           title
+          id
         }
       }
       menu1: menu(handle: $menu1Handle) {
         title
         items {
           title
+          id
         }
       }
       menu2: menu(handle: $menu2Handle) {
         title
         items {
           title
+          id
         }
+      }
+      shop {
+        name
       }
     }
   `;
@@ -759,4 +765,28 @@ export const getFooterMenuData = async () => {
   );
 
   return footerMenuData;
+};
+
+//Get Page Data
+
+export const getPageData = async (handle: string) => {
+  const gql = String.raw;
+
+  const pageDataQuery = gql`
+    query PageData($handle: String!) {
+      pageByHandle(handle: $handle) {
+        title
+        body
+        url
+      }
+    }
+  `;
+
+  const pageDataVars = {
+    handle: handle,
+  };
+
+  const pageData = await graphqlstorefront(pageDataQuery, pageDataVars);
+
+  return pageData;
 };

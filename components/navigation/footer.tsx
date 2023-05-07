@@ -1,11 +1,15 @@
 import { useFooter } from "../../utils/customHooks/useFooter";
+import {
+  capitalizeFirstLetter,
+  displayCurrentYear,
+  checkArrPopulated,
+} from "../../utils/utils";
+import Link from "next/link";
 
 export default function Footer() {
   const footer = useFooter();
 
   console.log("footer", footer);
-
-  const checkFooterPopulated = footer.length > 0;
 
   return (
     <footer className="bg-white" aria-labelledby="footer-heading">
@@ -18,36 +22,40 @@ export default function Footer() {
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
-                  {checkFooterPopulated && footer[0].value.title}
+                  {checkArrPopulated(footer) && footer[0].value.title}
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
-                  {checkFooterPopulated &&
+                  {checkArrPopulated(footer) &&
                     footer[0].value.items.map((item) => (
                       <li key={item.title}>
-                        <a
-                          href={item.href}
+                        <Link
+                          href={`pages/${item.title
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
                           {item.title}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
                 <h3 className="text-base font-medium text-gray-900">
-                  {checkFooterPopulated && footer[1].value.title}
+                  {checkArrPopulated(footer) && footer[1].value.title}
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
-                  {checkFooterPopulated &&
+                  {checkArrPopulated(footer) &&
                     footer[1].value.items.map((item) => (
                       <li key={item.name}>
-                        <a
-                          href={item.href}
+                        <Link
+                          href={`pages/${item.title
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
                           {item.title}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                 </ul>
@@ -56,18 +64,20 @@ export default function Footer() {
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
-                  {checkFooterPopulated && footer[2].value.title}
+                  {checkArrPopulated(footer) && footer[2].value.title}
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
-                  {checkFooterPopulated &&
+                  {checkArrPopulated(footer) &&
                     footer[2].value.items.map((item) => (
                       <li key={item.name}>
-                        <a
-                          href={item.href}
+                        <Link
+                          href={`pages/${item.title
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")}`}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
                           {item.title}
-                        </a>
+                        </Link>
                       </li>
                     ))}
                 </ul>
@@ -75,7 +85,7 @@ export default function Footer() {
               <div className="mt-12 md:mt-0">
                 {/* <h3 className="text-base font-medium text-gray-900">Legal</h3> */}
                 <ul role="list" className="mt-4 space-y-4">
-                  {/* {footer[3].value.items.map((item) => (
+                  {/* {footer[4].value.items.map((item) => (
                     <li key={item.name}>
                       <a
                         href={item.href}
@@ -123,20 +133,23 @@ export default function Footer() {
         </div>
         <div className="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
           <div className="flex space-x-6 md:order-2">
-            {checkFooterPopulated &&
-              footer[3].value.map((item) => (
-                <a
+            {checkArrPopulated(footer) &&
+              footer[4].value.map((item) => (
+                <Link
                   key={item.name}
-                  href={item.href}
+                  href={`pages/${item.name.toLowerCase().replace(/\s+/g, "-")}`}
                   className="text-gray-400 hover:text-gray-500"
                 >
                   <span className="sr-only">{item.name}</span>
                   <item.icon className="h-6 w-6" aria-hidden="true" />
-                </a>
+                </Link>
               ))}
           </div>
           <p className="mt-8 text-base text-gray-400 md:order-1 md:mt-0">
-            &copy; 2020 Your Company, Inc. All rights reserved.
+            &copy; {displayCurrentYear} &nbsp;
+            {checkArrPopulated(footer) &&
+              capitalizeFirstLetter(footer[3].value.name)}
+            , Inc. All rights reserved.
           </p>
         </div>
       </div>

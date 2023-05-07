@@ -125,3 +125,18 @@ export const addSocialIconsToFooter = (
 
   return iterableObj;
 };
+
+//String functions
+
+export function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+//date functions
+
+export const displayCurrentYear = new Date().getFullYear();
+
+//check if array is populated
+export const checkArrPopulated = (footerData: any[]) => {
+  return footerData.length > 0 ? true : false;
+};

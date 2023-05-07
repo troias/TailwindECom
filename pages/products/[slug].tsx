@@ -16,7 +16,6 @@ function classNames(...classes) {
 }
 
 export default function Example({ product, products }) {
-  const [click, setClick] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const relatedProducts = products
