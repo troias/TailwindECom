@@ -763,17 +763,18 @@ export const getFooterMenuData = async () => {
     footerMenuQuery,
     footerMenuVars
   );
+  console.log("footerMenuData", footerMenuData);
 
   return footerMenuData;
 };
 
 //Get Page Data
 
-export const getPageData = async (handle: string) => {
+export const getPageData = async (id: string) => {
   const gql = String.raw;
 
   const pageDataQuery = gql`
-    query PageData($handle: String!) {
+    query PageData($id: String!) {
       pageByHandle(handle: $handle) {
         title
         body
@@ -783,7 +784,7 @@ export const getPageData = async (handle: string) => {
   `;
 
   const pageDataVars = {
-    handle: handle,
+    id: id,
   };
 
   const pageData = await graphqlstorefront(pageDataQuery, pageDataVars);

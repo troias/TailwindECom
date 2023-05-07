@@ -1,15 +1,24 @@
 import React from "react";
 import { getNavigation, getPageData } from "../../utils/api";
+import { useRouter } from "next/router";
 
 type Props = {};
 
 const Page = (props: Props) => {
+  const router = useRouter();
+
+  //get Query from router
+
+  const { id } = router.query;
+
+  console.log("slugRR", id);
+
   return <div>[slug]</div>;
 };
 
 export default Page;
 
-export const getStaticPaths = async () => {
+export const getStaticPaths = async (ctx) => {
   //dummy data
   const paths = [
     { params: { slug: "about-us" } },
@@ -24,20 +33,13 @@ export const getStaticPaths = async () => {
   };
 };
 
-export const getStaticProps = async ({
-  params,
-}: {
-  params: { slug: string };
-}) => {
+export const getStaticProps = async (ctx) => {
   const navigation = await getNavigation();
-  const slug = params.slug;
-
-  console.log("slug", slug);
+  // const slug = params.slug;
 
   return {
     props: {
       navigation,
-      slug,
     },
   };
 };

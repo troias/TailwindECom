@@ -5,11 +5,18 @@ import {
   checkArrPopulated,
 } from "../../utils/utils";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Footer() {
   const footer = useFooter();
 
   console.log("footer", footer);
+
+  const router = useRouter();
+
+  //If on pages page dont add page to url
+
+  const page = router.pathname === "/pages/[slug]" ? "/pages" : "pages";
 
   return (
     <footer className="bg-white" aria-labelledby="footer-heading">
@@ -29,9 +36,12 @@ export default function Footer() {
                     footer[0].value.items.map((item) => (
                       <li key={item.title}>
                         <Link
-                          href={`pages/${item.title
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}`}
+                          href={{
+                            pathname: `${page}/${item.title
+                              .toLowerCase()
+                              .replace(/\s+/g, "-")}`,
+                            query: { id: item.id },
+                          }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
                           {item.title}
@@ -49,7 +59,7 @@ export default function Footer() {
                     footer[1].value.items.map((item) => (
                       <li key={item.name}>
                         <Link
-                          href={`pages/${item.title
+                          href={`${page}/${item.title
                             .toLowerCase()
                             .replace(/\s+/g, "-")}`}
                           className="text-base text-gray-500 hover:text-gray-900"
@@ -71,7 +81,7 @@ export default function Footer() {
                     footer[2].value.items.map((item) => (
                       <li key={item.name}>
                         <Link
-                          href={`pages/${item.title
+                          href={`${page}/${item.title
                             .toLowerCase()
                             .replace(/\s+/g, "-")}`}
                           className="text-base text-gray-500 hover:text-gray-900"
@@ -137,7 +147,9 @@ export default function Footer() {
               footer[4].value.map((item) => (
                 <Link
                   key={item.name}
-                  href={`pages/${item.name.toLowerCase().replace(/\s+/g, "-")}`}
+                  href={`${page}/${item.name
+                    .toLowerCase()
+                    .replace(/\s+/g, "-")}`}
                   className="text-gray-400 hover:text-gray-500"
                 >
                   <span className="sr-only">{item.name}</span>
