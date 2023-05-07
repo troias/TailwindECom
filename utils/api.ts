@@ -763,31 +763,31 @@ export const getFooterMenuData = async () => {
     footerMenuQuery,
     footerMenuVars
   );
-  console.log("footerMenuData", footerMenuData);
 
   return footerMenuData;
 };
 
 //Get Page Data
 
-export const getPageData = async (id: string) => {
+export const getPageDataByHandle = async (handle: string) => {
   const gql = String.raw;
 
   const pageDataQuery = gql`
-    query PageData($id: String!) {
-      pageByHandle(handle: $handle) {
+    query PageData($handle: String!) {
+      page(handle: $handle) {
         title
         body
-        url
       }
     }
   `;
 
   const pageDataVars = {
-    id: id,
+    handle: handle,
   };
 
   const pageData = await graphqlstorefront(pageDataQuery, pageDataVars);
+
+  console.log("getPageDataByHanle", pageData);
 
   return pageData;
 };

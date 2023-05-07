@@ -10,8 +10,6 @@ import { useRouter } from "next/router";
 export default function Footer() {
   const footer = useFooter();
 
-  console.log("footer", footer);
-
   const router = useRouter();
 
   //If on pages page dont add page to url
@@ -59,9 +57,12 @@ export default function Footer() {
                     footer[1].value.items.map((item) => (
                       <li key={item.name}>
                         <Link
-                          href={`${page}/${item.title
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}`}
+                          href={{
+                            pathname: `${page}/${item.title
+                              .toLowerCase()
+                              .replace(/\s+/g, "-")}`,
+                            query: { id: item.id },
+                          }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
                           {item.title}
@@ -81,9 +82,12 @@ export default function Footer() {
                     footer[2].value.items.map((item) => (
                       <li key={item.name}>
                         <Link
-                          href={`${page}/${item.title
-                            .toLowerCase()
-                            .replace(/\s+/g, "-")}`}
+                          href={{
+                            pathname: `${page}/${item.title
+                              .toLowerCase()
+                              .replace(/\s+/g, "-")}`,
+                            query: { id: item.id },
+                          }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
                           {item.title}

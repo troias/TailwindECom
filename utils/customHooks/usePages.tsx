@@ -1,23 +1,26 @@
 import { useState, useEffect } from "react";
-import { socialMedia } from "../../components/navigation/dummyNavigationData";
-import { addSocialIconsToFooter } from "../utils";
-import { getFooterMenuData } from "../api";
 
-export const usePages = () => {
-  const [footer, setFooter] = useState([]);
+import { getPageDataByHandle } from "../api";
+
+export const usePages = (handle) => {
+  const [pageData, setFooter] = useState([]);
   useEffect(() => {
     //when the component is mounted
-    const getFooterData = async () => {
-      const footerData = await getFooterMenuData();
-      const footer = addSocialIconsToFooter(footerData, socialMedia);
-      return footer;
-    };
-    getFooterData();
+    const getPageData = async () => {
+      try {
+        const pageData = await getPageDataByHandle(handle);
+        console.log("usePagesid", handle);
 
-    getFooterData().then((footer) => {
+        return pageData;
+      } catch (err) {
+        console.log("pageDataerr", err);
+      }
+    };
+
+    getPageData().then((footer) => {
       setFooter(footer);
     });
   }, []);
 
-  return page;
+  return pageData;
 };
