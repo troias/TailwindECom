@@ -818,9 +818,64 @@ export const getAllPages = async () => {
 
 export const getCollectionPageDataByHandle = async (
   handle: string,
-  amount: number = 5 //default 10
+  amount: number = 6 //default 10
 ) => {
   const gql = String.raw;
+
+  const getTotalProductCount = async (handle: string) => {
+    const gql = String.raw;
+
+    const collectionPageDataQueryTotal = gql`
+      query CollectionByHande($handle: String!) {
+        collection(handle: $handle) {
+          products(first: 250) {
+            pageInfo {
+              hasNextPage
+              hasPreviousPage
+            }
+            edges {
+              cursor
+              node {
+                id
+                title
+                priceRange {
+                  maxVariantPrice {
+                    amount
+                  }
+                }
+                description
+                images(first: 1) {
+                  edges {
+                    node {
+                      url
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const collectionPageDataVarsTotal = {
+      handle: handle,
+    };
+
+    const collectionPageDataTotal = await graphqlstorefront(
+      collectionPageDataQueryTotal,
+      collectionPageDataVarsTotal
+    );
+
+    const totalProductCount =
+      collectionPageDataTotal.collection.products.edges.length;
+
+    return totalProductCount;
+  };
+
+  const totalProductCount = await getTotalProductCount(handle);
+
+  console.log("totalProductCount", totalProductCount);
 
   const collectionPageDataQueryFirst = gql`
     query CollectionByHande($handle: String!, $amount: Int!) {
@@ -899,6 +954,17 @@ export const getCollectionPageDataByHandle = async (
       }
     }
   `;
+  // const getAmount = () => {
+  //   if (totalProductCount > amount) {
+  //     return Number(totalProductCount);
+  //   } else {
+  //     return Number(amount);
+  //   }
+  // };
+
+  // const amountNxt = getAmount();
+  // console.log("amountNxt", amountNxt, amount);
+
   const collectionPageDataVarsNxt = {
     handle: handle,
     amount: amount,
@@ -912,28 +978,13 @@ export const getCollectionPageDataByHandle = async (
 
   console.log(
     "collectionPageDataNxt",
-    collectionPageDataFirst.collection.products.edges[amount - 1].cursor
+    collectionPageDataFirst.collection.products.edges.length
   );
 
-  // const collectionPageDataReformatedFirst =
-  //   collectionPageDataFirst.collection.products.edges.map((product: any) => {
-  //     const node = product.node;
-  //     return {
-  //       id: node.id,
-  //       name: node.title,
-  //       price: node.priceRange.maxVariantPrice.amount,
-  //       description: node.description,
-  //       imgSrc: node.images.edges[0].node.url,
-  //       imageAlt: node.title,
-  //     };
-  //   });
-
-  //pagination
-
-  const collectionPageDataQueryLast = gql`
-    query CollectionByHande($handle: String!, $amount: Int!, $cursor: String!) {
+  const collectionPageDataQueryPrev = gql`
+    query CollectionByHande($handle: String!, $amount: Int!, $before: String!) {
       collection(handle: $handle) {
-        products(last: $amount, before: $cursor) {
+        products(last: $amount, before: $before) {
           pageInfo {
             hasNextPage
             hasPreviousPage
@@ -962,19 +1013,82 @@ export const getCollectionPageDataByHandle = async (
       }
     }
   `;
-
-  const collectionPageDataVarsLast = {
+  const collectionPageDataVarsPrev = {
     handle: handle,
     amount: amount,
-    cursor: collectionPageDataFirst.collection.products.edges[0].cursor,
+    before: collectionPageDataNxt.collection.products.edges[0].cursor || null,
   };
 
-  const collectionPageDataLast = await graphqlstorefront(
-    collectionPageDataQueryLast,
-    collectionPageDataVarsLast
+  const collectionPageDataPrev = await graphqlstorefront(
+    collectionPageDataQueryPrev,
+    collectionPageDataVarsPrev
   );
 
-  console.log("collectionPageDataLast", collectionPageDataLast);
+  console.log(
+    "collectionPageDataPrevBeforeVar",
+    collectionPageDataFirst.collection.products.edges
+  );
+
+  // const collectionPageDataReformatedFirst =
+  //   collectionPageDataFirst.collection.products.edges.map((product: any) => {
+  //     const node = product.node;
+  //     return {
+  //       id: node.id,
+  //       name: node.title,
+  //       price: node.priceRange.maxVariantPrice.amount,
+  //       description: node.description,
+  //       imgSrc: node.images.edges[0].node.url,
+  //       imageAlt: node.title,
+  //     };
+  //   });
+
+  //pagination
+
+  // const collectionPageDataQueryLast = gql`
+  //   query CollectionByHande($handle: String!, $amount: Int!, $cursor: String!) {
+  //     collection(handle: $handle) {
+  //       products(last: $amount, before: $cursor) {
+  //         pageInfo {
+  //           hasNextPage
+  //           hasPreviousPage
+  //         }
+  //         edges {
+  //           cursor
+  //           node {
+  //             id
+  //             title
+  //             priceRange {
+  //               maxVariantPrice {
+  //                 amount
+  //               }
+  //             }
+  //             description
+  //             images(first: $amount) {
+  //               edges {
+  //                 node {
+  //                   url
+  //                 }
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // `;
+
+  // const collectionPageDataVarsLast = {
+  //   handle: handle,
+  //   amount: amount,
+  //   cursor: collectionPageDataFirst.collection.products.edges[0].cursor,
+  // };
+
+  // const collectionPageDataLast = await graphqlstorefront(
+  //   collectionPageDataQueryLast,
+  //   collectionPageDataVarsLast
+  // );
+
+  // console.log("collectionPageDataLast", collectionPageDataLast);
 
   // const collectionPageDataReformatedLast =
   //   collectionPageDataLast.collection.products.edges.map((product: any) => {
@@ -996,6 +1110,8 @@ export const getCollectionPageDataByHandle = async (
 
   return {
     first: collectionPageDataFirst,
-    last: collectionPageDataLast,
+    next: collectionPageDataNxt,
+    previous: collectionPageDataPrev,
+    totalProductCount: totalProductCount,
   };
 };

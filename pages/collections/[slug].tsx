@@ -12,7 +12,7 @@ import {
 
 type Props = {};
 
-import { Fragment, useState } from "react";
+import { Fragment, useState, useCallback, useEffect } from "react";
 import {
   Dialog,
   Disclosure,
@@ -166,51 +166,152 @@ export default function Example({ products11, products22 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  console.log("products22", products22);
+  const [data, setData] = useState(null);
 
-  //Pagination Logic
-
-  const currentPage = () => {
-    console.log("currentPage", currentPage);
-  };
-
-  const totalPages = () => {
-    console.log("totalPages", totalPages);
-  };
-
-  const handleMoveRight = () => {
-    //cleck if there is a next page
-    const { hasNextPage } =
-      extractPaginationDataShopifyStoreFrontApi(products22);
-    console.log("hasNextPage", hasNextPage);
-    return hasNextPage;
-  };
-
-  const handleMoveLeft = () => {
-    console.log("handleMoveLeft", handleMoveLeft);
-    const { hasPreviousPage } =
-      extractPaginationDataShopifyStoreFrontApi(products22);
-    console.log("hasPreviousPage", hasPreviousPage);
-    return hasPreviousPage;
-  };
-
-  const gotoPage = () => {
-    console.log("gotoPage", gotoPage);
-  };
+  //extractPaginationDataShopifyStoreFrontApi(products22);
 
   const extractPaginationDataShopifyStoreFrontApi = (data) => {
-    const {
-      pageInfo: { hasNextPage, hasPreviousPage },
-      edges,
-    } = data.first.collection.products;
+    const hasNextPage = data.first.collection.products.pageInfo.hasNextPage;
+    const hasPreviousPage =
+      data.first.collection.products.pageInfo.hasPreviousPage;
 
-    //totalPages: Math.ceil(data.first.collection.products.edges.length / 10),
+    const edges = data.first.collection.products.edges;
+
+    const totalCount = data.totalProductCount || 5;
+
+    console.log("totalCount", totalCount);
+
+    const reformateedProducts = edges.map((product) => {
+      return {
+        id: product.node.id,
+        name: product.node.title,
+        href: "#",
+        price: product.node.priceRange.maxVariantPrice.amount,
+        description: product.node.description,
+        imageSrc: product.node.images.edges[0].node.url,
+        imageAlt: product.node.images.edges[0].node.altText,
+      };
+    });
+
+    // reformatt products data
 
     return {
       hasNextPage,
       hasPreviousPage,
       edges,
+      reformateedProducts,
+      totalCount,
     };
+  };
+
+  const productsData = extractPaginationDataShopifyStoreFrontApi(products22);
+
+  const [products, setProducts] = useState(
+    productsData.reformateedProducts || []
+  );
+
+  console.log("products22data", products);
+
+  const fetchNextPageData = useCallback(
+    async (data) => {
+      const fetchNextPage = async () => {
+        const nextPage = await data.next;
+        return nextPage;
+      };
+
+      const nextPage = await fetchNextPage();
+
+      const reformattedProducts = nextPage.collection.products.edges.map(
+        (product) => {
+          return {
+            id: product.node.id,
+            name: product.node.title,
+            href: "#",
+            price: product.node.priceRange.maxVariantPrice.amount,
+            description: product.node.description,
+            imageSrc: product.node.images.edges[0].node.url,
+            imageAlt: "",
+          };
+        }
+      );
+
+      setProducts(reformattedProducts);
+    },
+    [products]
+  );
+
+  const fetchPreviousPageData = useCallback(
+    async (data) => {
+      const fetchPreviousPage = async () => {
+        const previousPage = await data.previous;
+        return previousPage;
+      };
+
+      const previousPage = await fetchPreviousPage();
+
+      const reformattedProducts = previousPage.collection.products.edges.map(
+        (product) => {
+          return {
+            id: product.node.id,
+            name: product.node.title,
+            href: "#",
+            price: product.node.priceRange.maxVariantPrice.amount,
+            description: product.node.description,
+            imageSrc: product.node.images.edges[0].node.url,
+            imageAlt: "",
+          };
+        }
+      );
+
+      setProducts(reformattedProducts);
+
+      console.log("previousPage", previousPage);
+    },
+    [products]
+  );
+
+  // const productObjReformatted = products.map((product) => {
+  //   return {
+  //     id: product.node.id,
+  //     name: product.node.title,
+  //     href: "#",
+  //     price: product.node.priceRange.maxVariantPrice.amount,
+  //     description: product.node.description,
+  //     imageSrc: product.node.images.edges[0].node.url,
+  //   };
+  // });
+
+  //if product
+
+  // console.log("products22", productObjReformatted);
+
+  //Pagination Logic
+
+  const currentPage = () => {};
+
+  const totalPages = () => {
+    extractPaginationDataShopifyStoreFrontApi(products22);
+
+    //totalPages: Math.ceil(data.first.collection.products.edges.length / 10),
+
+    const totalPages = Math.ceil(
+      products22.first.collection.products.edges.length / 10
+    );
+
+    console.log("totalPages1", totalPages);
+  };
+
+  const handleMoveRight = () => {
+    //on click of next button fetch next page
+    fetchNextPageData(products22);
+  };
+
+  const handleMoveLeft = () => {
+    fetchPreviousPageData(products22);
+  };
+
+  const gotoPage = () => {
+    console.log("gotoPage", gotoPage);
   };
 
   // console.log(
@@ -471,7 +572,7 @@ export default function Example({ products11, products22 }) {
                 </h2>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                  {products1.map((product) => (
+                  {products.map((product) => (
                     <a key={product.id} href={product.href} className="group">
                       <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg sm:aspect-h-3 sm:aspect-w-2">
                         <img

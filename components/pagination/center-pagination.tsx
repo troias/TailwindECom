@@ -26,7 +26,9 @@ export default function CenterPagination({
     handleMoveLeft();
   };
 
-  // const [currentPage, setCurrentPage] = useState(2);
+  totalPages();
+
+  // const [currentPage, setCurrentPage] = useState(1);
   // const [totalPages, setTotalPages] = useState(10);
   // const [pageNeighbours, setPageNeighbours] = useState(2);
 
