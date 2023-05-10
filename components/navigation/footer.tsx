@@ -38,7 +38,7 @@ export default function Footer() {
                             pathname: `${page}/${item.title
                               .toLowerCase()
                               .replace(/\s+/g, "-")}`,
-                            query: { id: item.id },
+                            // query: { id: item.id },
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
@@ -61,7 +61,7 @@ export default function Footer() {
                             pathname: `${page}/${item.title
                               .toLowerCase()
                               .replace(/\s+/g, "-")}`,
-                            query: { id: item.id },
+                            // query: { id: item.id },
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
@@ -86,7 +86,7 @@ export default function Footer() {
                             pathname: `${page}/${item.title
                               .toLowerCase()
                               .replace(/\s+/g, "-")}`,
-                            query: { id: item.id },
+                            // query: { id: item.id },
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >

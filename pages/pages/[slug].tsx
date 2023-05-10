@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { getNavigation } from "../../utils/api";
+import { getNavigation, getAllPages } from "../../utils/api";
 import { useRouter } from "next/router";
 import { usePages } from "../../utils/customHooks/usePages";
 
@@ -16,6 +16,8 @@ const Page = (props: Props) => {
 
   // get slug from router query
   const { slug } = router.query;
+
+  //check Slug is populated
 
   const data = usePages(slug as string);
 
@@ -49,13 +51,30 @@ const Page = (props: Props) => {
 export default Page;
 
 export const getStaticPaths = async (ctx) => {
+  //get all pages
+
+  const { pages } = await getAllPages();
+
+  console.log("pages", pages);
+
+  //get all slugs from pages
+
+  const paths = pages.edges.map((page) => {
+    return {
+      params: {
+        slug: page.node.handle,
+      },
+    };
+  });
+
   //dummy data
-  const paths = [
-    { params: { slug: "about-us" } },
-    { params: { slug: "contact" } },
-    { params: { slug: "faq" } },
-    { params: { slug: "search" } },
-  ];
+
+  // const paths = [
+  //   { params: { slug: "about-us" } },
+  //   { params: { slug: "contact" } },
+  //   { params: { slug: "faq" } },
+  //   { params: { slug: "search" } },
+  // ];
 
   return {
     paths,

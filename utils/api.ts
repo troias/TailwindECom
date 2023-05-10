@@ -1,7 +1,7 @@
 type Query = string;
 
 type Variables = {
-  [key: string]: string;
+  [key: string]: string | number | boolean | undefined;
 };
 
 export const graphqlstorefront = async (
@@ -787,7 +787,215 @@ export const getPageDataByHandle = async (handle: string) => {
 
   const pageData = await graphqlstorefront(pageDataQuery, pageDataVars);
 
-  console.log("getPageDataByHanle", pageData);
-
   return pageData;
+};
+
+export const getAllPages = async () => {
+  const gql = String.raw;
+
+  const allPagesQuery = gql`
+    query AllPages {
+      pages(first: 10) {
+        edges {
+          node {
+            id
+            handle
+            title
+          }
+        }
+      }
+    }
+  `;
+
+  const allPages = await graphqlstorefront(allPagesQuery);
+
+  console.log("getPageDataByHanle", allPages);
+
+  return allPages;
+};
+
+// Collection page query
+
+export const getCollectionPageDataByHandle = async (
+  handle: string,
+  amount: number = 5 //default 10
+) => {
+  const gql = String.raw;
+
+  const collectionPageDataQueryFirst = gql`
+    query CollectionByHande($handle: String!, $amount: Int!) {
+      collection(handle: $handle) {
+        products(first: $amount) {
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+          }
+          edges {
+            cursor
+            node {
+              id
+              title
+              priceRange {
+                maxVariantPrice {
+                  amount
+                }
+              }
+              description
+              images(first: $amount) {
+                edges {
+                  node {
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const collectionPageDataVarsFirst = {
+    handle: handle,
+    amount: amount,
+  };
+
+  const collectionPageDataFirst = await graphqlstorefront(
+    collectionPageDataQueryFirst,
+    collectionPageDataVarsFirst
+  );
+
+  //Get next products if there are any for pagination
+
+  const collectionPageDataQueryNxt = gql`
+    query CollectionByHande($handle: String!, $amount: Int!, $after: String!) {
+      collection(handle: $handle) {
+        products(first: $amount, after: $after) {
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+          }
+          edges {
+            cursor
+            node {
+              id
+              title
+              priceRange {
+                maxVariantPrice {
+                  amount
+                }
+              }
+              description
+              images(first: $amount) {
+                edges {
+                  node {
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+  const collectionPageDataVarsNxt = {
+    handle: handle,
+    amount: amount,
+    after: collectionPageDataFirst.collection.products.edges[amount - 1].cursor,
+  };
+
+  const collectionPageDataNxt = await graphqlstorefront(
+    collectionPageDataQueryNxt,
+    collectionPageDataVarsNxt
+  );
+
+  console.log(
+    "collectionPageDataNxt",
+    collectionPageDataFirst.collection.products.edges[amount - 1].cursor
+  );
+
+  // const collectionPageDataReformatedFirst =
+  //   collectionPageDataFirst.collection.products.edges.map((product: any) => {
+  //     const node = product.node;
+  //     return {
+  //       id: node.id,
+  //       name: node.title,
+  //       price: node.priceRange.maxVariantPrice.amount,
+  //       description: node.description,
+  //       imgSrc: node.images.edges[0].node.url,
+  //       imageAlt: node.title,
+  //     };
+  //   });
+
+  //pagination
+
+  const collectionPageDataQueryLast = gql`
+    query CollectionByHande($handle: String!, $amount: Int!, $cursor: String!) {
+      collection(handle: $handle) {
+        products(last: $amount, before: $cursor) {
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+          }
+          edges {
+            cursor
+            node {
+              id
+              title
+              priceRange {
+                maxVariantPrice {
+                  amount
+                }
+              }
+              description
+              images(first: $amount) {
+                edges {
+                  node {
+                    url
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const collectionPageDataVarsLast = {
+    handle: handle,
+    amount: amount,
+    cursor: collectionPageDataFirst.collection.products.edges[0].cursor,
+  };
+
+  const collectionPageDataLast = await graphqlstorefront(
+    collectionPageDataQueryLast,
+    collectionPageDataVarsLast
+  );
+
+  console.log("collectionPageDataLast", collectionPageDataLast);
+
+  // const collectionPageDataReformatedLast =
+  //   collectionPageDataLast.collection.products.edges.map((product: any) => {
+  //     const node = product.node;
+  //     return {
+  //       id: node.id,
+  //       name: node.title,
+  //       price: node.priceRange.maxVariantPrice.amount,
+  //       description: node.description,
+  //       imgSrc: node.images.edges[0].node.url,
+  //       imageAlt: node.title,
+  //     };
+  //   });
+
+  // console.log(
+  //   "collectionPageDataReformatedLast",
+  //   collectionPageDataReformatedLast
+  // );
+
+  return {
+    first: collectionPageDataFirst,
+    last: collectionPageDataLast,
+  };
 };
