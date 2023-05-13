@@ -166,10 +166,6 @@ export default function Example({ products11, products22 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const [data, setData] = useState(null);
-
-  //extractPaginationDataShopifyStoreFrontApi(products22);
-
   const extractPaginationDataShopifyStoreFrontApi = (data) => {
     const hasNextPage = data.first.collection.products.pageInfo.hasNextPage;
     const hasPreviousPage =
@@ -179,7 +175,7 @@ export default function Example({ products11, products22 }) {
 
     const totalCount = data.totalProductCount || 5;
 
-    console.log("totalCount", totalCount);
+    // console.log("totalCount", totalCount);
 
     const reformateedProducts = edges.map((product) => {
       return {
@@ -210,7 +206,11 @@ export default function Example({ products11, products22 }) {
     productsData.reformateedProducts || []
   );
 
-  console.log("products22data", products);
+  const [data, setData] = useState(null);
+
+  //extractPaginationDataShopifyStoreFrontApi(products22);
+
+  // console.log("products22data", products);
 
   const fetchNextPageData = useCallback(
     async (data) => {
@@ -265,7 +265,7 @@ export default function Example({ products11, products22 }) {
 
       setProducts(reformattedProducts);
 
-      console.log("previousPage", previousPage);
+      // console.log("previousPage", previousPage);
     },
     [products]
   );
@@ -298,10 +298,12 @@ export default function Example({ products11, products22 }) {
       products22.first.collection.products.edges.length / 10
     );
 
-    console.log("totalPages1", totalPages);
+    return totalPages;
+
+    // console.log("totalPages1", totalPages);
   };
 
-  const handleMoveRight = () => {
+  const handleMoveRight = (e: React.MouseEvent<HTMLElement>) => {
     //on click of next button fetch next page
     fetchNextPageData(products22);
   };

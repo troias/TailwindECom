@@ -14,22 +14,25 @@ export default function CenterPagination({
   handleMoveLeft,
   handleMoveRight,
 }) {
+  console.log("totalPages", totalPages);
   const handlePageClick = (page) => {
     gotoPage(page);
   };
 
-  const handleNextClick = () => {
+  const handleNextClick = (e) => {
+    // e.preventDefault();
     handleMoveRight();
   };
 
-  const handlePreviousClick = () => {
+  const handlePreviousClick = (e) => {
+    // e.preventDefault();
     handleMoveLeft();
   };
 
   totalPages();
 
   // const [currentPage, setCurrentPage] = useState(1);
-  // const [totalPages, setTotalPages] = useState(10);
+
   // const [pageNeighbours, setPageNeighbours] = useState(2);
 
   // const LEFT_PAGE = 'LEFT';
@@ -106,13 +109,13 @@ export default function CenterPagination({
   //     gotoPage(currentPage + (pageNeighbours * 2) + 1);
   // }
 
-  const renderPageLinks = () => {
-    const totalPages = 10; // Total number of pages
+  const renderPageLinks = (totalPages: Int) => {
+    const totalPagesInternal = 10 || totalPages; // Total number of pages
 
     const pageLinks = [];
 
     // Add page links
-    for (let page = 1; page <= totalPages; page++) {
+    for (let page = 1; page <= totalPagesInternal; page++) {
       pageLinks.push(
         <a
           key={page}
@@ -140,7 +143,7 @@ export default function CenterPagination({
           <a
             href="#"
             className="inline-flex items-center border-t-2 border-transparent pr-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-            onClick={() => handlePreviousClick()}
+            onClick={(e) => handlePreviousClick(e)}
           >
             <ArrowLongLeftIcon
               className="mr-3 h-5 w-5 text-gray-400"
@@ -150,7 +153,7 @@ export default function CenterPagination({
           </a>
         </div>
         <div className="hidden md:-mt-px md:flex">
-          {renderPageLinks()}
+          {renderPageLinks(totalPages)}
           {/* Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" */}
           {/* <a
             href="#"
@@ -197,7 +200,7 @@ export default function CenterPagination({
           <a
             href="#"
             className="inline-flex items-center border-t-2 border-transparent pl-1 pt-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-            onClick={() => handleNextClick()}
+            onClick={(e) => handleNextClick(e)}
           >
             Next
             <ArrowLongRightIcon

@@ -971,15 +971,17 @@ export const getCollectionPageDataByHandle = async (
     after: collectionPageDataFirst.collection.products.edges[amount - 1].cursor,
   };
 
+  console.log("collection amount", amount - 1);
+
   const collectionPageDataNxt = await graphqlstorefront(
     collectionPageDataQueryNxt,
     collectionPageDataVarsNxt
   );
 
-  console.log(
-    "collectionPageDataNxt",
-    collectionPageDataFirst.collection.products.edges.length
-  );
+  // console.log(
+  //   "collectionPageDataNxt",
+  //   collectionPageDataFirst.collection.products.edges.length
+  // );
 
   const collectionPageDataQueryPrev = gql`
     query CollectionByHande($handle: String!, $amount: Int!, $before: String!) {
@@ -1024,10 +1026,10 @@ export const getCollectionPageDataByHandle = async (
     collectionPageDataVarsPrev
   );
 
-  console.log(
-    "collectionPageDataPrevBeforeVar",
-    collectionPageDataFirst.collection.products.edges
-  );
+  // console.log(
+  //   "collectionPageDataPrevBeforeVar",
+  //   collectionPageDataFirst.collection.products.edges
+  // );
 
   // const collectionPageDataReformatedFirst =
   //   collectionPageDataFirst.collection.products.edges.map((product: any) => {
