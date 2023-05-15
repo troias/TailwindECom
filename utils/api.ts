@@ -1026,94 +1026,96 @@ export const getCollectionPageDataByHandle = async (
     collectionPageDataVarsPrev
   );
 
-  // console.log(
-  //   "collectionPageDataPrevBeforeVar",
-  //   collectionPageDataFirst.collection.products.edges
-  // );
+  //Get specific page of products
 
-  // const collectionPageDataReformatedFirst =
-  //   collectionPageDataFirst.collection.products.edges.map((product: any) => {
-  //     const node = product.node;
-  //     return {
-  //       id: node.id,
-  //       name: node.title,
-  //       price: node.priceRange.maxVariantPrice.amount,
-  //       description: node.description,
-  //       imgSrc: node.images.edges[0].node.url,
-  //       imageAlt: node.title,
-  //     };
-  //   });
+  const getSpecificPage = async (
+    handle: string,
+    amount: number,
+    cursor: string
+  ) => {
+    const gql = String.raw;
 
-  //pagination
+    const collectionPageDataQuerySpecific = gql`
+      query CollectionByHande(
+        $handle: String!
+        $amount: Int!
+        $cursor: String!
+      ) {
+        collection(handle: $handle) {
+          products(first: $amount, after: $cursor) {
+            pageInfo {
+              hasNextPage
+              hasPreviousPage
+            }
+            edges {
+              cursor
+              node {
+                id
+                title
+                priceRange {
+                  maxVariantPrice {
+                    amount
+                  }
+                }
+                description
+                images(first: $amount) {
+                  edges {
+                    node {
+                      url
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
 
-  // const collectionPageDataQueryLast = gql`
-  //   query CollectionByHande($handle: String!, $amount: Int!, $cursor: String!) {
-  //     collection(handle: $handle) {
-  //       products(last: $amount, before: $cursor) {
-  //         pageInfo {
-  //           hasNextPage
-  //           hasPreviousPage
-  //         }
-  //         edges {
-  //           cursor
-  //           node {
-  //             id
-  //             title
-  //             priceRange {
-  //               maxVariantPrice {
-  //                 amount
-  //               }
-  //             }
-  //             description
-  //             images(first: $amount) {
-  //               edges {
-  //                 node {
-  //                   url
-  //                 }
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // `;
+    //   const getFirstPageCursor = () => {
+    //   if (cursor === null) {
+    //     return collectionPageDataFirst.collection.products.edges[0].cursor;
+    //   } else {
+    //     return cursor;
+    //   }
 
-  // const collectionPageDataVarsLast = {
-  //   handle: handle,
-  //   amount: amount,
-  //   cursor: collectionPageDataFirst.collection.products.edges[0].cursor,
-  // };
+    // };
 
-  // const collectionPageDataLast = await graphqlstorefront(
-  //   collectionPageDataQueryLast,
-  //   collectionPageDataVarsLast
-  // );
+    // const getSecondPageCursor = () => {
+    //   if (cursor === null) {
+    //     return collectionPageDataFirst.collection.products.edges[amount - 1].cursor;
+    //   } else {
+    //     return cursor;
+    //   }
+    // };
 
-  // console.log("collectionPageDataLast", collectionPageDataLast);
+    const collectionPageDataVarsSpecific = {
+      handle: handle,
+      amount: amount,
+      cursor: cursor,
+    };
 
-  // const collectionPageDataReformatedLast =
-  //   collectionPageDataLast.collection.products.edges.map((product: any) => {
-  //     const node = product.node;
-  //     return {
-  //       id: node.id,
-  //       name: node.title,
-  //       price: node.priceRange.maxVariantPrice.amount,
-  //       description: node.description,
-  //       imgSrc: node.images.edges[0].node.url,
-  //       imageAlt: node.title,
-  //     };
-  //   });
+    const collectionPageDataSpecific = await graphqlstorefront(
+      collectionPageDataQuerySpecific,
+      collectionPageDataVarsSpecific
+    );
 
-  // console.log(
-  //   "collectionPageDataReformatedLast",
-  //   collectionPageDataReformatedLast
-  // );
+    return collectionPageDataSpecific;
+  };
+
+  const collectionPageDataSpecific = await getSpecificPage(
+    handle,
+    amount,
+    collectionPageDataFirst.collection.products.edges[amount - 3].cursor
+  );
+
+  console.log("collectionPageDataSpecific", collectionPageDataSpecific);
 
   return {
     first: collectionPageDataFirst,
     next: collectionPageDataNxt,
     previous: collectionPageDataPrev,
     totalProductCount: totalProductCount,
+    specific: collectionPageDataSpecific,
   };
 };

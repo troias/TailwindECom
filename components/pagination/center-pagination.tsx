@@ -6,15 +6,13 @@ import {
 import { useState } from "react";
 
 export default function CenterPagination({
-  currentPage,
-  totalPages,
+  totalPages: totalPages = () => 10,
 
-  gotoPage,
+  gotoPage: gotoPage = (page) => {},
 
-  handleMoveLeft,
-  handleMoveRight,
+  handleMoveLeft = () => {},
+  handleMoveRight = () => {},
 }) {
-  console.log("totalPages", totalPages);
   const handlePageClick = (page) => {
     gotoPage(page);
   };
@@ -22,95 +20,31 @@ export default function CenterPagination({
   const handleNextClick = (e) => {
     // e.preventDefault();
     handleMoveRight();
+    setCurrentPage(() => {
+      if (currentPage < totalPages()) {
+        return currentPage + 1;
+      } else {
+        return currentPage;
+      }
+    });
   };
 
   const handlePreviousClick = (e) => {
     // e.preventDefault();
     handleMoveLeft();
+    setCurrentPage(() => {
+      if (currentPage > 1) {
+        return currentPage - 1;
+      } else {
+        return currentPage;
+      }
+    });
   };
 
-  totalPages();
+  const [currentPage, setCurrentPage] = useState(1);
 
-  // const [currentPage, setCurrentPage] = useState(1);
-
-  // const [pageNeighbours, setPageNeighbours] = useState(2);
-
-  // const LEFT_PAGE = 'LEFT';
-  // const RIGHT_PAGE = 'RIGHT';
-
-  // const range = (from: number, to: number, step = 1) => {
-  //     let i = from;
-  //     const range: number[] = [];
-
-  //     while (i <= to) {
-  //         range.push(i);
-  //         i += step;
-  //     }
-
-  //     return range;
-  // }
-
-  // const fetchPageNumbers = () => {
-  //     const totalNumbers = (pageNeighbours * 2) + 3;
-  //     const totalBlocks = totalNumbers + 2;
-
-  //     if (totalPages > totalBlocks) {
-  //         const startPage = Math.max(2, currentPage - pageNeighbours);
-  //         const endPage = Math.min(totalPages - 1, currentPage + pageNeighbours);
-
-  //         let pages: (number | string)[] = range(startPage, endPage);
-
-  //         const hasLeftSpill = startPage > 2;
-  //         const hasRightSpill = (totalPages - endPage) > 1;
-  //         const spillOffset = totalNumbers - (pages.length + 1);
-
-  //         switch (true) {
-  //             case (hasLeftSpill && !hasRightSpill): {
-  //                 const extraPages = range(startPage - spillOffset, startPage - 1);
-  //                 pages = [LEFT_PAGE, ...extraPages, ...pages];
-  //                 break;
-  //             }
-
-  //             case (!hasLeftSpill && hasRightSpill): {
-  //                 const extraPages = range(endPage + 1, endPage + spillOffset);
-  //                 pages = [...pages, ...extraPages, RIGHT_PAGE];
-  //                 break;
-  //             }
-
-  //             case (hasLeftSpill && hasRightSpill):
-  //             default: {
-  //                 pages = [LEFT_PAGE, ...pages, RIGHT_PAGE];
-  //                 break;
-  //             }
-  //         }
-
-  //         return [1, ...pages, totalPages];
-  //     }
-
-  //     return range(1, totalPages);
-  // }
-
-  // const pages = fetchPageNumbers();
-
-  // const gotoPage = (page: number) => {
-  //     const currentPage = Math.max(0, Math.min(page, totalPages));
-  //     setCurrentPage(currentPage);
-  // }
-
-  // const handleClick = (page: number | string) => {
-  //     gotoPage(Number(page));
-  // }
-
-  // const handleMoveLeft = () => {
-  //     gotoPage(currentPage - (pageNeighbours * 2) - 1);
-  // }
-
-  // const handleMoveRight = () => {
-  //     gotoPage(currentPage + (pageNeighbours * 2) + 1);
-  // }
-
-  const renderPageLinks = (totalPages: Int) => {
-    const totalPagesInternal = 10 || totalPages; // Total number of pages
+  const renderPageLinks = (totalPages: number) => {
+    const totalPagesInternal = totalPages || 10; // Total number of pages
 
     const pageLinks = [];
 
@@ -122,7 +56,7 @@ export default function CenterPagination({
           href="#"
           className={`inline-flex items-center border-t-2 ${
             currentPage === page
-              ? "border-transparent text-gray-500"
+              ? "border-indigo-500 text-indigo-600"
               : "border-gray-300 hover:border-gray-300 text-gray-500 hover:text-gray-700"
           } px-4 pt-4 text-sm font-medium`}
           onClick={() => handlePageClick(page)}
@@ -153,7 +87,7 @@ export default function CenterPagination({
           </a>
         </div>
         <div className="hidden md:-mt-px md:flex">
-          {renderPageLinks(totalPages)}
+          {renderPageLinks(totalPages())}
           {/* Current: "border-indigo-500 text-indigo-600", Default: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" */}
           {/* <a
             href="#"

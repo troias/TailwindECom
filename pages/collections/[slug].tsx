@@ -270,33 +270,14 @@ export default function Example({ products11, products22 }) {
     [products]
   );
 
-  // const productObjReformatted = products.map((product) => {
-  //   return {
-  //     id: product.node.id,
-  //     name: product.node.title,
-  //     href: "#",
-  //     price: product.node.priceRange.maxVariantPrice.amount,
-  //     description: product.node.description,
-  //     imageSrc: product.node.images.edges[0].node.url,
-  //   };
-  // });
-
-  //if product
-
-  // console.log("products22", productObjReformatted);
-
   //Pagination Logic
-
-  const currentPage = () => {};
 
   const totalPages = () => {
     extractPaginationDataShopifyStoreFrontApi(products22);
 
-    //totalPages: Math.ceil(data.first.collection.products.edges.length / 10),
+    // six items per page
 
-    const totalPages = Math.ceil(
-      products22.first.collection.products.edges.length / 10
-    );
+    const totalPages = Math.ceil(products22.totalProductCount / 6);
 
     return totalPages;
 
@@ -312,8 +293,14 @@ export default function Example({ products11, products22 }) {
     fetchPreviousPageData(products22);
   };
 
-  const gotoPage = () => {
-    console.log("gotoPage", gotoPage);
+  const gotoPage = async (page) => {
+    //Get the page number from the input field
+
+    const pageNumber = page;
+
+    console.log("pageNumber", pageNumber);
+
+    //fetch the page data
   };
 
   // console.log(
@@ -670,7 +657,6 @@ export default function Example({ products11, products22 }) {
         </div>
       </div>
       <CenterPagination
-        currentPage={currentPage}
         totalPages={totalPages}
         handleMoveLeft={handleMoveLeft}
         handleMoveRight={handleMoveRight}
