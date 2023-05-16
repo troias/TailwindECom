@@ -30,6 +30,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
+import { fetchCollectionPage } from "../../utils/api";
+
 const sortOptions = [
   { name: "Most Popular", href: "#" },
   { name: "Best Rating", href: "#" },
@@ -162,7 +164,13 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Example({ products11, products22 }) {
+export default function Example({
+  products11,
+  products22,
+  handle,
+  cursor,
+  amountPerPage,
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -298,10 +306,38 @@ export default function Example({ products11, products22 }) {
 
     const pageNumber = page;
 
-    console.log("pageNumber", pageNumber);
+    const fetchPage = async (page) => {
+      const pageData = await fetchCollectionPage(
+        handle,
+        amountPerPage,
+        page,
+        cursor
+      );
+      return pageData;
+    };
 
-    //fetch the page data
+    const pageData = await fetchPage(pageNumber);
+
+    const reformattedProducts = pageData.map((product) => {
+      return {
+        id: product.node.id,
+        name: product.node.title,
+        href: "#",
+        price: product.node.priceRange.maxVariantPrice.amount,
+        description: product.node.description,
+        imageSrc: product.node.images.edges[0].node.url,
+        imageAlt: "",
+      };
+    });
+
+    setProducts(reformattedProducts);
+
+    //
+
+    console.log("gotoPagepageData", reformattedProducts);
   };
+
+  //fetch the page data
 
   // console.log(
   //   "paginationData",
@@ -705,11 +741,17 @@ export const getStaticProps: GetStaticProps = async (
   console.log("slug", slug);
 
   const products = await getCollectionPageDataByHandle(slug && slug);
+  const cursor = products.first.collection.products.edges[0].cursor;
 
-  console.log("products", products);
+  const amountPerPage = 6;
+
+  console.log("cursor", cursor);
 
   return {
     props: {
+      handle: slug && slug,
+      cursor,
+      amountPerPage,
       navigation,
       products22: products,
     },

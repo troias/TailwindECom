@@ -954,16 +954,6 @@ export const getCollectionPageDataByHandle = async (
       }
     }
   `;
-  // const getAmount = () => {
-  //   if (totalProductCount > amount) {
-  //     return Number(totalProductCount);
-  //   } else {
-  //     return Number(amount);
-  //   }
-  // };
-
-  // const amountNxt = getAmount();
-  // console.log("amountNxt", amountNxt, amount);
 
   const collectionPageDataVarsNxt = {
     handle: handle,
@@ -978,10 +968,7 @@ export const getCollectionPageDataByHandle = async (
     collectionPageDataVarsNxt
   );
 
-  // console.log(
-  //   "collectionPageDataNxt",
-  //   collectionPageDataFirst.collection.products.edges.length
-  // );
+  //Get previous products if there are any for pagination
 
   const collectionPageDataQueryPrev = gql`
     query CollectionByHande($handle: String!, $amount: Int!, $before: String!) {
@@ -1026,43 +1013,44 @@ export const getCollectionPageDataByHandle = async (
     collectionPageDataVarsPrev
   );
 
-  //Get specific page of products
+  return {
+    first: collectionPageDataFirst,
+    next: collectionPageDataNxt,
+    previous: collectionPageDataPrev,
+    totalProductCount: totalProductCount,
+  };
+};
 
-  const getSpecificPage = async (
-    handle: string,
-    amount: number,
-    cursor: string
-  ) => {
-    const gql = String.raw;
+export async function fetchCollectionByHandle(handle, amount, cursor) {
+  const gql = String.raw;
 
-    const collectionPageDataQuerySpecific = gql`
-      query CollectionByHande(
-        $handle: String!
-        $amount: Int!
-        $cursor: String!
-      ) {
-        collection(handle: $handle) {
-          products(first: $amount, after: $cursor) {
-            pageInfo {
-              hasNextPage
-              hasPreviousPage
-            }
-            edges {
-              cursor
-              node {
-                id
-                title
-                priceRange {
-                  maxVariantPrice {
-                    amount
-                  }
+  const query = gql`
+    query CollectionByHandle(
+      $handle: String!
+      $amount: Int!
+      $cursor: String!
+    ) {
+      collection(handle: $handle) {
+        products(first: $amount, after: $cursor) {
+          pageInfo {
+            hasNextPage
+            hasPreviousPage
+          }
+          edges {
+            cursor
+            node {
+              id
+              title
+              priceRange {
+                maxVariantPrice {
+                  amount
                 }
-                description
-                images(first: $amount) {
-                  edges {
-                    node {
-                      url
-                    }
+              }
+              description
+              images(first: $amount) {
+                edges {
+                  node {
+                    url
                   }
                 }
               }
@@ -1070,52 +1058,51 @@ export const getCollectionPageDataByHandle = async (
           }
         }
       }
-    `;
+    }
+  `;
 
-    //   const getFirstPageCursor = () => {
-    //   if (cursor === null) {
-    //     return collectionPageDataFirst.collection.products.edges[0].cursor;
-    //   } else {
-    //     return cursor;
-    //   }
-
-    // };
-
-    // const getSecondPageCursor = () => {
-    //   if (cursor === null) {
-    //     return collectionPageDataFirst.collection.products.edges[amount - 1].cursor;
-    //   } else {
-    //     return cursor;
-    //   }
-    // };
-
-    const collectionPageDataVarsSpecific = {
-      handle: handle,
-      amount: amount,
-      cursor: cursor,
-    };
-
-    const collectionPageDataSpecific = await graphqlstorefront(
-      collectionPageDataQuerySpecific,
-      collectionPageDataVarsSpecific
-    );
-
-    return collectionPageDataSpecific;
-  };
-
-  const collectionPageDataSpecific = await getSpecificPage(
+  const variables = {
     handle,
     amount,
-    collectionPageDataFirst.collection.products.edges[amount - 3].cursor
-  );
-
-  console.log("collectionPageDataSpecific", collectionPageDataSpecific);
-
-  return {
-    first: collectionPageDataFirst,
-    next: collectionPageDataNxt,
-    previous: collectionPageDataPrev,
-    totalProductCount: totalProductCount,
-    specific: collectionPageDataSpecific,
+    cursor,
   };
+
+  const response = await graphqlstorefront(query, variables);
+
+  return response;
+}
+
+export const fetchCollectionPage = async (
+  handle,
+  pageSize,
+  targetPage,
+  cursor
+) => {
+  let currentPage = 1;
+  let allProducts = [];
+  let hasNextPage = true;
+  let afterCursor = cursor || null;
+
+  while (hasNextPage && currentPage <= targetPage) {
+    const response = await fetchCollectionByHandle(
+      handle,
+      pageSize,
+      afterCursor
+    );
+
+    const { edges, pageInfo } = response.collection.products;
+
+    if (currentPage === targetPage) {
+      allProducts = edges;
+      console.log("allProducts", allProducts);
+      break;
+    }
+
+    hasNextPage = pageInfo.hasNextPage;
+    afterCursor = edges[edges.length - 1].cursor;
+
+    currentPage++;
+  }
+
+  return allProducts;
 };

@@ -15,6 +15,7 @@ export default function CenterPagination({
 }) {
   const handlePageClick = (page) => {
     gotoPage(page);
+    setCurrentPage(page);
   };
 
   const handleNextClick = (e) => {
