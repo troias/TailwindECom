@@ -88,104 +88,70 @@ const filters = [
   },
 ];
 
-const products1 = [
-  {
-    id: 1,
-    name: "Focus Paper Refill",
-    href: "#",
-    price: "$13",
-    description: "3 sizes available",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-01-image-card-01.jpg",
-    imageAlt:
-      "Person using a pen to cross a task off a productivity paper card.",
-  },
-  {
-    id: 2,
-    name: "Focus Card Holder",
-    href: "#",
-    price: "$64",
-    description: "Walnut",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-01-image-card-02.jpg",
-    imageAlt: "Paper card sitting upright in walnut card holder on desk.",
-  },
-  {
-    id: 3,
-    name: "Focus Carry Pouch",
-    href: "#",
-    price: "$32",
-    description: "Heather Gray",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-01-image-card-03.jpg",
-    imageAlt:
-      "Textured gray felt pouch for paper cards with snap button flap and elastic pen holder loop.",
-  },
-  // More products...
-];
-const products2 = [
-  {
-    id: 7,
-    name: "Electric Kettle",
-    href: "#",
-    price: "$149",
-    description: "Black",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-01-image-card-07.jpg",
-    imageAlt:
-      "Close up of long kettle spout pouring boiling water into pour-over coffee mug with frothy coffee.",
-  },
-  {
-    id: 8,
-    name: "Leather Workspace Pad",
-    href: "#",
-    price: "$165",
-    description: "Black",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-01-image-card-08.jpg",
-    imageAlt:
-      "Extra large black leather workspace pad on desk with computer, wooden shelf, desk organizer, and computer peripherals.",
-  },
-  {
-    id: 9,
-    name: "Leather Long Wallet",
-    href: "#",
-    price: "$118",
-    description: "Natural",
-    imageSrc:
-      "https://tailwindui.com/img/ecommerce-images/category-page-01-image-card-09.jpg",
-    imageAlt:
-      "Leather long wallet held open with hand-stitched card dividers, full-length bill pocket, and simple tab closure.",
-  },
-  // More products...
-];
+type PaginationData = {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  edges: any[];
+  reformateedProducts: FormattedProduct[];
+  totalCount: number;
+};
 
-function classNames(...classes) {
+type FormattedProduct = {
+  id: string;
+  name: string;
+  href: string;
+  price: string;
+  description: string;
+  imageSrc: string;
+  imageAlt: string;
+};
+
+type UnformattedProduct = {
+  node: {
+    id: string;
+    name: string;
+    title: string;
+    priceRange: { maxVariantPrice: { amount: string } };
+    description: string;
+    images: { edges: { node: { url: string; altText: string } }[] };
+  };
+};
+
+function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+type Products22 = {
+  first: any;
+  next: any;
+  previous: any;
+  totalProductCount: any;
+};
+
 export default function Example({
-  products11,
   products22,
   handle,
   cursor,
   amountPerPage,
+}: {
+  products22: Products22;
+  handle: String;
+  cursor: String;
+  amountPerPage: Number;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const extractPaginationDataShopifyStoreFrontApi = (data) => {
+  const extractPaginationDataShopifyStoreFrontApi = (
+    data: any
+  ): PaginationData => {
     const hasNextPage = data.first.collection.products.pageInfo.hasNextPage;
     const hasPreviousPage =
       data.first.collection.products.pageInfo.hasPreviousPage;
-
     const edges = data.first.collection.products.edges;
-
     const totalCount = data.totalProductCount || 5;
 
-    // console.log("totalCount", totalCount);
-
-    const reformateedProducts = edges.map((product) => {
+    const reformateedProducts = edges.map((product: UnformattedProduct) => {
       return {
         id: product.node.id,
         name: product.node.title,
@@ -194,10 +160,8 @@ export default function Example({
         description: product.node.description,
         imageSrc: product.node.images.edges[0].node.url,
         imageAlt: product.node.images.edges[0].node.altText,
-      };
+      } as FormattedProduct;
     });
-
-    // reformatt products data
 
     return {
       hasNextPage,
@@ -214,14 +178,8 @@ export default function Example({
     productsData.reformateedProducts || []
   );
 
-  const [data, setData] = useState(null);
-
-  //extractPaginationDataShopifyStoreFrontApi(products22);
-
-  // console.log("products22data", products);
-
   const fetchNextPageData = useCallback(
-    async (data) => {
+    async (data: Products22) => {
       const fetchNextPage = async () => {
         const nextPage = await data.next;
         return nextPage;
@@ -230,7 +188,7 @@ export default function Example({
       const nextPage = await fetchNextPage();
 
       const reformattedProducts = nextPage.collection.products.edges.map(
-        (product) => {
+        (product: UnformattedProduct) => {
           return {
             id: product.node.id,
             name: product.node.title,
@@ -239,7 +197,7 @@ export default function Example({
             description: product.node.description,
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
-          };
+          } as FormattedProduct;
         }
       );
 
@@ -294,7 +252,7 @@ export default function Example({
 
   const handleMoveRight = (e: React.MouseEvent<HTMLElement>) => {
     //on click of next button fetch next page
-    fetchNextPageData(products22);
+    fetchNextPageData((products22: Products22) => products22.next);
   };
 
   const handleMoveLeft = () => {
@@ -331,6 +289,8 @@ export default function Example({
     });
 
     setProducts(reformattedProducts);
+
+    //setPage
 
     //
 
@@ -667,26 +627,7 @@ export default function Example({
                   More products
                 </h2>
 
-                <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                  {/* {products2.map((product) => (
-                    <a key={product.id} href={product.href} className="group">
-                      <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg sm:aspect-h-3 sm:aspect-w-2">
-                        <img
-                          src={product.imageSrc}
-                          alt={product.imageAlt}
-                          className="h-full w-full object-cover object-center group-hover:opacity-75"
-                        />
-                      </div>
-                      <div className="mt-4 flex items-center justify-between text-base font-medium text-gray-900">
-                        <h3>{product.name}</h3>
-                        <p>{product.price}</p>
-                      </div>
-                      <p className="mt-1 text-sm italic text-gray-500">
-                        {product.description}
-                      </p>
-                    </a>
-                  ))} */}
-                </div>
+                <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8"></div>
               </section>
             </div>
           </main>
