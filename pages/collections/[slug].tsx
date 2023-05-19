@@ -12,7 +12,7 @@ import {
 
 type Props = {};
 
-import { Fragment, useState, useCallback, useEffect } from "react";
+import { Fragment, useState, useCallback, useReducer } from "react";
 import {
   Dialog,
   Disclosure,
@@ -40,6 +40,16 @@ const sortOptions = [
   { name: "Price: High to Low", href: "#" },
 ];
 const filters = [
+  {
+    id: "amountPerPage",
+    name: "Amount Per Page",
+    options: [
+      { value: "6", label: "6" },
+      { value: "12", label: "12" },
+      { value: "24", label: "24" },
+      { value: "48", label: "48" },
+    ],
+  },
   {
     id: "category",
     name: "Category",
@@ -128,6 +138,48 @@ type Products22 = {
   totalProductCount: any;
 };
 
+//intial filterState
+
+const initialState = {
+  sort: null,
+  filters: filters.reduce((acc, filter) => {
+    acc[filter.id] = {
+      name: filter.name,
+      options: filter.options.reduce((acc, option) => {
+        acc[option.value] = option.label;
+        return acc;
+      }, {}),
+    };
+    return acc;
+  }, {}),
+};
+
+// Reducer function to handle state updates
+const reducer = (
+  state: { sort: any; filters: any },
+  action: { type: string; payload: { optionValue: any; filterName: any } }
+) => {
+  switch (action.type) {
+    case "SET_SORT":
+      return { ...state, sort: action.payload };
+    case "TOGGLE_FILTER":
+      const { filterName, optionValue } = action.payload;
+      const filters = { ...state.filters };
+      if (filters[filterName] && filters[filterName].includes(optionValue)) {
+        filters[filterName] = filters[filterName].filter(
+          (value) => value !== optionValue
+        );
+      } else {
+        filters[filterName] = filters[filterName]
+          ? [...filters[filterName], optionValue]
+          : [optionValue];
+      }
+      return { ...state, filters };
+    default:
+      return state;
+  }
+};
+
 export default function Example({
   products22,
   handle,
@@ -137,10 +189,15 @@ export default function Example({
   products22: Products22;
   handle: String;
   cursor: String;
-  amountPerPage: Number;
+  amountPerPage: number;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  console.log("state", state);
+  console.log("intialState", initialState);
 
   const extractPaginationDataShopifyStoreFrontApi = (
     data: any
@@ -207,7 +264,7 @@ export default function Example({
   );
 
   const fetchPreviousPageData = useCallback(
-    async (data) => {
+    async (data: Products22) => {
       const fetchPreviousPage = async () => {
         const previousPage = await data.previous;
         return previousPage;
@@ -216,7 +273,7 @@ export default function Example({
       const previousPage = await fetchPreviousPage();
 
       const reformattedProducts = previousPage.collection.products.edges.map(
-        (product) => {
+        (product: UnformattedProduct) => {
           return {
             id: product.node.id,
             name: product.node.title,
@@ -227,7 +284,7 @@ export default function Example({
             imageAlt: "",
           };
         }
-      );
+      ) as FormattedProduct[];
 
       setProducts(reformattedProducts);
 
@@ -246,25 +303,23 @@ export default function Example({
     const totalPages = Math.ceil(products22.totalProductCount / 6);
 
     return totalPages;
-
-    // console.log("totalPages1", totalPages);
   };
 
   const handleMoveRight = (e: React.MouseEvent<HTMLElement>) => {
     //on click of next button fetch next page
-    fetchNextPageData((products22: Products22) => products22.next);
+    fetchNextPageData(products22);
   };
 
   const handleMoveLeft = () => {
     fetchPreviousPageData(products22);
   };
 
-  const gotoPage = async (page) => {
+  const gotoPage = async (page: number) => {
     //Get the page number from the input field
 
     const pageNumber = page;
 
-    const fetchPage = async (page) => {
+    const fetchPage = async (page: number) => {
       const pageData = await fetchCollectionPage(
         handle,
         amountPerPage,
@@ -276,7 +331,7 @@ export default function Example({
 
     const pageData = await fetchPage(pageNumber);
 
-    const reformattedProducts = pageData.map((product) => {
+    const reformattedProducts = pageData.map((product: UnformattedProduct) => {
       return {
         id: product.node.id,
         name: product.node.title,
@@ -286,23 +341,34 @@ export default function Example({
         imageSrc: product.node.images.edges[0].node.url,
         imageAlt: "",
       };
-    });
+    }) as FormattedProduct[];
+
+    //set products for page
 
     setProducts(reformattedProducts);
-
-    //setPage
-
-    //
-
-    console.log("gotoPagepageData", reformattedProducts);
   };
 
-  //fetch the page data
+  //Filter Logic
 
-  // console.log(
-  //   "paginationData",
-  //   extractPaginationDataShopifyStoreFrontApi(products22)
-  // );
+  // Initial state for the filter options
+
+  // Handler for setting the sort option
+  const setSortOption = (option) => {
+    dispatch({ type: "SET_SORT", payload: option });
+  };
+
+  // Handler for toggling filter options
+  const toggleFilterOption = (optionValue, filterName) => {
+    dispatch({ type: "TOGGLE_FILTER", payload: { optionValue, filterName } });
+  };
+
+  // Filter handler function passed to the onClick event
+  const filterHandler = (optionValue, filterName) => (e) => {
+    e.preventDefault();
+    toggleFilterOption(optionValue, filterName);
+  };
+
+  // const { sort, filters } = state;
 
   return (
     <div className="bg-white">
@@ -437,6 +503,7 @@ export default function Example({
 
                 <div className="flex items-center justify-between">
                   <Menu as="div" className="relative inline-block text-left">
+                    {/* Sort Menu */}
                     <div>
                       <Menu.Button className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
                         Sort
@@ -446,7 +513,6 @@ export default function Example({
                         />
                       </Menu.Button>
                     </div>
-
                     <Transition
                       as={Fragment}
                       enter="transition ease-out duration-100"
@@ -478,6 +544,7 @@ export default function Example({
                     </Transition>
                   </Menu>
 
+                  {/* Filters Button */}
                   <button
                     type="button"
                     className="inline-block text-sm font-medium text-gray-700 hover:text-gray-900 sm:hidden"
@@ -487,6 +554,7 @@ export default function Example({
                   </button>
 
                   <Popover.Group className="hidden sm:flex sm:items-baseline sm:space-x-8">
+                    {/* Filter Popover Group */}
                     {filters.map((section, sectionIdx) => (
                       <Popover
                         as="div"
@@ -508,7 +576,6 @@ export default function Example({
                             />
                           </Popover.Button>
                         </div>
-
                         <Transition
                           as={Fragment}
                           enter="transition ease-out duration-100"
@@ -532,6 +599,10 @@ export default function Example({
                                     defaultChecked={option.checked}
                                     type="checkbox"
                                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    onClick={filterHandler(
+                                      option.value,
+                                      section.id
+                                    )}
                                   />
                                   <label
                                     htmlFor={`filter-${section.id}-${optionIdx}`}

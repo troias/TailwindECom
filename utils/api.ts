@@ -1,7 +1,7 @@
 type Query = string;
 
 type Variables = {
-  [key: string]: string | number | boolean | undefined;
+  [key: string]: any;
 };
 
 export const graphqlstorefront = async (
@@ -1021,7 +1021,11 @@ export const getCollectionPageDataByHandle = async (
   };
 };
 
-export async function fetchCollectionByHandle(handle, amount, cursor) {
+export async function fetchCollectionByHandle(
+  handle: String,
+  amount: Number,
+  cursor: String
+) {
   const gql = String.raw;
 
   const query = gql`
@@ -1073,10 +1077,10 @@ export async function fetchCollectionByHandle(handle, amount, cursor) {
 }
 
 export const fetchCollectionPage = async (
-  handle,
-  pageSize,
-  targetPage,
-  cursor
+  handle: String,
+  pageSize: number,
+  targetPage: number,
+  cursor: String
 ) => {
   let currentPage = 1;
   let allProducts = [];
