@@ -33,67 +33,67 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { fetchCollectionPage } from "../../utils/api";
 
 const sortOptions = [
-  { name: "Most Popular", href: "#" },
-  { name: "Best Rating", href: "#" },
-  { name: "Newest", href: "#" },
-  { name: "Price: Low to High", href: "#" },
-  { name: "Price: High to Low", href: "#" },
+  { name: "Most Popular", href: "#", checked: false },
+  { name: "Best Rating", href: "#", checked: false },
+  { name: "Newest", href: "#", checked: false },
+  { name: "Price: Low to High", href: "#", checked: false },
+  { name: "Price: High to Low", href: "#", checked: false },
 ];
 const filters = [
   {
     id: "amountPerPage",
     name: "Amount Per Page",
     options: [
-      { value: "6", label: "6" },
-      { value: "12", label: "12" },
-      { value: "24", label: "24" },
-      { value: "48", label: "48" },
+      { value: "6", label: "6", checked: false },
+      { value: "12", label: "12", checked: false },
+      { value: "24", label: "24", checked: false },
+      { value: "48", label: "48", checked: false },
     ],
   },
   {
     id: "category",
     name: "Category",
     options: [
-      { value: "tees", label: "Tees" },
-      { value: "crewnecks", label: "Crewnecks" },
-      { value: "hats", label: "Hats" },
-      { value: "bundles", label: "Bundles" },
-      { value: "carry", label: "Carry" },
-      { value: "objects", label: "Objects" },
+      { value: "tees", label: "Tees", checked: false },
+      { value: "crewnecks", label: "Crewnecks", checked: false },
+      { value: "hats", label: "Hats", checked: false },
+      { value: "bundles", label: "Bundles", checked: false },
+      { value: "carry", label: "Carry", checked: false },
+      { value: "objects", label: "Objects", checked: false },
     ],
   },
   {
     id: "brand",
     name: "Brand",
     options: [
-      { value: "clothing-company", label: "Clothing Company" },
-      { value: "fashion-inc", label: "Fashion Inc." },
-      { value: "shoes-n-more", label: "Shoes 'n More" },
-      { value: "supplies-n-stuff", label: "Supplies 'n Stuff" },
+      { value: "clothing-company", label: "Clothing Company", checked: false },
+      { value: "fashion-inc", label: "Fashion Inc.", checked: false },
+      { value: "shoes-n-more", label: "Shoes 'n More", checked: false },
+      { value: "supplies-n-stuff", label: "Supplies 'n Stuff", checked: false },
     ],
   },
   {
     id: "color",
     name: "Color",
     options: [
-      { value: "white", label: "White" },
-      { value: "black", label: "Black" },
-      { value: "grey", label: "Grey" },
-      { value: "blue", label: "Blue" },
-      { value: "olive", label: "Olive" },
-      { value: "tan", label: "Tan" },
+      { value: "white", label: "White", checked: false },
+      { value: "black", label: "Black", checked: false },
+      { value: "grey", label: "Grey", checked: false },
+      { value: "blue", label: "Blue", checked: false },
+      { value: "olive", label: "Olive", checked: false },
+      { value: "tan", label: "Tan", checked: false },
     ],
   },
   {
     id: "sizes",
     name: "Sizes",
     options: [
-      { value: "xs", label: "XS" },
-      { value: "s", label: "S" },
-      { value: "m", label: "M" },
-      { value: "l", label: "L" },
-      { value: "xl", label: "XL" },
-      { value: "2xl", label: "2XL" },
+      { value: "xs", label: "XS", checked: false },
+      { value: "s", label: "S", checked: false },
+      { value: "m", label: "M", checked: false },
+      { value: "l", label: "L", checked: false },
+      { value: "xl", label: "XL", checked: false },
+      { value: "2xl", label: "2XL", checked: false },
     ],
   },
 ];
@@ -138,43 +138,60 @@ type Products22 = {
   totalProductCount: any;
 };
 
-//intial filterState
-
+// Initial filterState
 const initialState = {
-  sort: null,
-  filters: filters.reduce((acc, filter) => {
-    acc[filter.id] = {
-      name: filter.name,
-      options: filter.options.reduce((acc, option) => {
-        acc[option.value] = option.label;
-        return acc;
-      }, {}),
-    };
-    return acc;
-  }, {}),
+  sort: sortOptions.map((option) => ({
+    name: option.name,
+    href: option.href,
+    current: false,
+  })),
+  filters: filters.map((filter) => ({
+    id: filter.id,
+    name: filter.name,
+    options: filter.options.map((option) => ({
+      value: option.value,
+      label: option.label,
+      checked: false,
+    })),
+  })),
 };
 
 // Reducer function to handle state updates
 const reducer = (
-  state: { sort: any; filters: any },
+  state = initialState,
   action: { type: string; payload: { optionValue: any; filterName: any } }
 ) => {
   switch (action.type) {
     case "SET_SORT":
-      return { ...state, sort: action.payload };
+      const { optionValue: sortOptionValue, filterName: sortFilterName } =
+        action.payload;
+      const updatedSort = state.sort.map((option) => {
+        if (option.name === sortOptionValue) {
+          return { ...option, current: true };
+        } else {
+          return { ...option, current: false };
+        }
+      });
+      return { ...state, sort: updatedSort };
+
     case "TOGGLE_FILTER":
       const { filterName, optionValue } = action.payload;
-      const filters = { ...state.filters };
-      if (filters[filterName] && filters[filterName].includes(optionValue)) {
-        filters[filterName] = filters[filterName].filter(
-          (value) => value !== optionValue
-        );
-      } else {
-        filters[filterName] = filters[filterName]
-          ? [...filters[filterName], optionValue]
-          : [optionValue];
-      }
-      return { ...state, filters };
+      const updatedFiltersArr = state.filters.map((filter) => {
+        if (filter.id === filterName) {
+          const updatedOptions = filter.options.map((option) => {
+            if (option.value === optionValue) {
+              return { ...option, checked: !option.checked };
+            } else {
+              return option;
+            }
+          });
+          return { ...filter, options: updatedOptions };
+        } else {
+          return filter;
+        }
+      });
+      return { ...state, filters: updatedFiltersArr };
+
     default:
       return state;
   }
@@ -555,7 +572,7 @@ export default function Example({
 
                   <Popover.Group className="hidden sm:flex sm:items-baseline sm:space-x-8">
                     {/* Filter Popover Group */}
-                    {filters.map((section, sectionIdx) => (
+                    {state.filters.map((section, sectionIdx) => (
                       <Popover
                         as="div"
                         key={section.name}
@@ -596,13 +613,18 @@ export default function Example({
                                     id={`filter-${section.id}-${optionIdx}`}
                                     name={`${section.id}[]`}
                                     defaultValue={option.value}
-                                    defaultChecked={option.checked}
+                                    checked={option.checked}
                                     type="checkbox"
                                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    onClick={filterHandler(
-                                      option.value,
-                                      section.id
-                                    )}
+                                    onClick={() =>
+                                      dispatch({
+                                        type: "TOGGLE_FILTER",
+                                        payload: {
+                                          optionValue: option.value,
+                                          filterName: section.id,
+                                        },
+                                      })
+                                    }
                                   />
                                   <label
                                     htmlFor={`filter-${section.id}-${optionIdx}`}
@@ -649,7 +671,7 @@ export default function Example({
                 </div>
               </section>
 
-              <section
+              {/* <section
                 aria-labelledby="featured-heading"
                 className="relative mt-16 overflow-hidden rounded-lg lg:h-96"
               >
@@ -688,7 +710,7 @@ export default function Example({
                     View the collection
                   </a>
                 </div>
-              </section>
+              </section> */}
 
               <section
                 aria-labelledby="more-products-heading"

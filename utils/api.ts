@@ -1098,7 +1098,7 @@ export const fetchCollectionPage = async (
 
     if (currentPage === targetPage) {
       allProducts = edges;
-      console.log("allProducts", allProducts);
+      // console.log("allProducts", allProducts);
       break;
     }
 
@@ -1110,3 +1110,20 @@ export const fetchCollectionPage = async (
 
   return allProducts;
 };
+
+//collection filter logic
+
+type Filters = [
+  {
+    id: string;
+    name: string;
+    options: [{ value: string; label: string; type: string }];
+  }
+];
+
+type SortOptions = [
+  {
+    name: string;
+    href: string;
+  }
+];
