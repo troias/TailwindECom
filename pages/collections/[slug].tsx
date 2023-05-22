@@ -12,7 +12,14 @@ import {
 
 type Props = {};
 
-import { Fragment, useState, useCallback, useReducer } from "react";
+import {
+  Fragment,
+  useState,
+  useCallback,
+  useReducer,
+  use,
+  useEffect,
+} from "react";
 import {
   Dialog,
   Disclosure,
@@ -179,10 +186,20 @@ const reducer = (
       const updatedFiltersArr = state.filters.map((filter) => {
         if (filter.id === filterName) {
           const updatedOptions = filter.options.map((option) => {
-            if (option.value === optionValue) {
-              return { ...option, checked: !option.checked };
+            if (filter.id === "amountPerPage") {
+              // Only allow one option to be checked
+              if (option.value === optionValue) {
+                return { ...option, checked: true };
+              } else {
+                return { ...option, checked: false };
+              }
             } else {
-              return option;
+              // Keep the same behavior for other filters
+              if (option.value === optionValue) {
+                return { ...option, checked: !option.checked };
+              } else {
+                return option;
+              }
             }
           });
           return { ...filter, options: updatedOptions };
@@ -191,7 +208,6 @@ const reducer = (
         }
       });
       return { ...state, filters: updatedFiltersArr };
-
     default:
       return state;
   }
@@ -210,11 +226,56 @@ export default function Example({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  console.log("state", state);
-  console.log("intialState", initialState);
+  const amountPerPageOptions = state.filters[0].options.filter(
+    (option) => option.checked
+  );
+  const amountPerPagee =
+    amountPerPageOptions.length > 0 ? amountPerPageOptions[0].value : 6;
+
+  // if amount per page changes, update pageState
+
+  useEffect(() => {
+    const updateProuctsOnAmountPerPageChange = async () => {
+      const pageNumber = page;
+
+      console.log("page", pageNumber);
+
+      // const fetchPage = async (page: number) => {
+      //   const pageData = await fetchCollectionPage(
+      //     handle,
+      //     amountPerPage,
+      //     page,
+      //     cursor
+      //   );
+
+      //   return pageData;
+      // };
+
+      // const pageData = await fetchPage(pageNumber);
+
+      // const reformattedProducts = pageData.map(
+      //   (product: UnformattedProduct) => {
+      //     return {
+      //       id: product.node.id,
+      //       name: product.node.title,
+      //       href: "#",
+      //       price: product.node.priceRange.maxVariantPrice.amount,
+      //       description: product.node.description,
+      //       imageSrc: product.node.images.edges[0].node.url,
+      //       imageAlt: "",
+      //     };
+      //   }
+      // ) as FormattedProduct[];
+
+      // setProducts(reformattedProducts);
+    };
+
+    updateProuctsOnAmountPerPageChange();
+  }, [state.filters[0].options[0].checked]);
 
   const extractPaginationDataShopifyStoreFrontApi = (
     data: any
@@ -336,6 +397,8 @@ export default function Example({
 
     const pageNumber = page;
 
+    console.log("page", pageNumber);
+
     const fetchPage = async (page: number) => {
       const pageData = await fetchCollectionPage(
         handle,
@@ -361,8 +424,10 @@ export default function Example({
     }) as FormattedProduct[];
 
     //set products for page
-
     setProducts(reformattedProducts);
+
+    //set page number
+    setPage(pageNumber);
   };
 
   //Filter Logic
@@ -778,8 +843,6 @@ export const getStaticProps: GetStaticProps = async (
   const cursor = products.first.collection.products.edges[0].cursor;
 
   const amountPerPage = 6;
-
-  console.log("cursor", cursor);
 
   return {
     props: {
