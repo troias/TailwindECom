@@ -237,30 +237,41 @@ export default function Example({
   const amountPerPagee =
     amountPerPageOptions.length > 0
       ? amountPerPageOptions[0].value
-      : amountPerPage;
-
-  console.log("amountPerPagee", amountPerPagee);
+      : (amountPerPage as number);
 
   // if amount per page changes, update pageState
 
   useEffect(() => {
-    const updateProuctsOnAmountPerPageChange = async () => {
+    const updateProductsOnAmountPerPageChange = async () => {
       const pageNumber = page;
+      let currentAmountPerPage = amountPerPagee;
 
-      console.log("page", pageNumber);
+      console.log("page", currentAmountPerPage);
 
-      const fetchPage = async (page: number) => {
-        const pageData = await fetchCollectionPage(
-          handle,
-          amountPerPage,
-          page,
-          cursor
-        );
+      const fetchPage = async (page: number, amountPerPage: number) => {
+        try {
+          const pageData = await fetchCollectionPage(
+            handle,
+            currentAmountPerPage,
+            page,
+            cursor
+          );
+          return pageData;
+        } catch (error) {
+          // Handle the fetch error
 
-        return pageData;
+          // Decrement currentAmountPerPage by 1
+          currentAmountPerPage--;
+
+          if (currentAmountPerPage > 0) {
+            return fetchPage(page, currentAmountPerPage);
+          } else {
+            throw new Error("Fetch failed continuously."); // Throw an error if fetch fails continuously
+          }
+        }
       };
 
-      const pageData = await fetchPage(pageNumber);
+      const pageData = await fetchPage(pageNumber, currentAmountPerPage);
 
       const reformattedProducts = pageData.map(
         (product: UnformattedProduct) => {
@@ -275,12 +286,13 @@ export default function Example({
           };
         }
       ) as FormattedProduct[];
+
       console.log("reformattedProducts", reformattedProducts);
 
       setProducts(reformattedProducts);
     };
 
-    updateProuctsOnAmountPerPageChange();
+    updateProductsOnAmountPerPageChange();
   }, [amountPerPagee]);
 
   const extractPaginationDataShopifyStoreFrontApi = (
@@ -384,7 +396,9 @@ export default function Example({
 
     // six items per page
 
-    const totalPages = Math.ceil(products22.totalProductCount / 6);
+    const totalPages = Math.ceil(products22.totalProductCount / amountPerPagee);
+
+    console.log("totalPages", totalPages);
 
     return totalPages;
   };
