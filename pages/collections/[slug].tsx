@@ -227,6 +227,7 @@ export default function Example({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(amountPerPage);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -234,7 +235,11 @@ export default function Example({
     (option) => option.checked
   );
   const amountPerPagee =
-    amountPerPageOptions.length > 0 ? amountPerPageOptions[0].value : 6;
+    amountPerPageOptions.length > 0
+      ? amountPerPageOptions[0].value
+      : amountPerPage;
+
+  console.log("amountPerPagee", amountPerPagee);
 
   // if amount per page changes, update pageState
 
@@ -244,38 +249,39 @@ export default function Example({
 
       console.log("page", pageNumber);
 
-      // const fetchPage = async (page: number) => {
-      //   const pageData = await fetchCollectionPage(
-      //     handle,
-      //     amountPerPage,
-      //     page,
-      //     cursor
-      //   );
+      const fetchPage = async (page: number) => {
+        const pageData = await fetchCollectionPage(
+          handle,
+          amountPerPage,
+          page,
+          cursor
+        );
 
-      //   return pageData;
-      // };
+        return pageData;
+      };
 
-      // const pageData = await fetchPage(pageNumber);
+      const pageData = await fetchPage(pageNumber);
 
-      // const reformattedProducts = pageData.map(
-      //   (product: UnformattedProduct) => {
-      //     return {
-      //       id: product.node.id,
-      //       name: product.node.title,
-      //       href: "#",
-      //       price: product.node.priceRange.maxVariantPrice.amount,
-      //       description: product.node.description,
-      //       imageSrc: product.node.images.edges[0].node.url,
-      //       imageAlt: "",
-      //     };
-      //   }
-      // ) as FormattedProduct[];
+      const reformattedProducts = pageData.map(
+        (product: UnformattedProduct) => {
+          return {
+            id: product.node.id,
+            name: product.node.title,
+            href: "#",
+            price: product.node.priceRange.maxVariantPrice.amount,
+            description: product.node.description,
+            imageSrc: product.node.images.edges[0].node.url,
+            imageAlt: "",
+          };
+        }
+      ) as FormattedProduct[];
+      console.log("reformattedProducts", reformattedProducts);
 
-      // setProducts(reformattedProducts);
+      setProducts(reformattedProducts);
     };
 
     updateProuctsOnAmountPerPageChange();
-  }, [state.filters[0].options[0].checked]);
+  }, [amountPerPagee]);
 
   const extractPaginationDataShopifyStoreFrontApi = (
     data: any
