@@ -844,6 +844,7 @@ export const getCollectionPageDataByHandle = async (
                   }
                 }
                 description
+
                 images(first: 1) {
                   edges {
                     node {
@@ -896,6 +897,17 @@ export const getCollectionPageDataByHandle = async (
                 }
               }
               description
+              vendor
+              variants(first: 5) {
+                edges {
+                  node {
+                    selectedOptions {
+                      name
+                      value
+                    }
+                  }
+                }
+              }
               images(first: $amount) {
                 edges {
                   node {
@@ -1013,11 +1025,156 @@ export const getCollectionPageDataByHandle = async (
     collectionPageDataVarsPrev
   );
 
+  console.log(
+    "collectionPageDataFirst",
+    collectionPageDataFirst.collection.products.edges
+  );
+
+  // FilterLogic for brands/vendor
+
+  const brands = collectionPageDataFirst.collection.products.edges.map(
+    (brand) => {
+      //create set to remove duplicates
+
+      const brandName = brand.node.vendor;
+
+      return brandName;
+
+      //loop through each product
+    }
+  );
+
+  const brandsSet = new Set(brands);
+  const setToArray = Array.from(brandsSet);
+
+  //FilterLogic for variants
+
+  //structure for eventual filter object
+
+  //     id: "color",
+  //     name: "Color",
+  //     options: [
+  //       { value: "white", label: "White", checked: false },
+  //       { value: "black", label: "Black", checked: false },
+  //       { value: "grey", label: "Grey", checked: false },
+  //       { value: "blue", label: "Blue", checked: false },
+  //       { value: "olive", label: "Olive", checked: false },
+  //       { value: "tan", label: "Tan", checked: false },
+  //     ],
+  //   },
+
+  //get Array of Arrays and construct the options for each unique variant
+
+  const variants = collectionPageDataFirst.collection.products.edges.flatMap(
+    (product) => {
+      const productVariants = product.node.variants.edges.map((variant) => {
+        return variant.node.selectedOptions.map((option) => {
+          return option.name;
+        });
+
+        //loop through each variant
+      });
+
+      //create set to remove duplicates
+      const flattendedArr = productVariants.flat();
+
+      return flattendedArr;
+    }
+  );
+
+  // const variantSet = new Set(variants);
+  // const variantsToArray = Array.from(variantSet);
+
+  // creating the options array for each variant
+
+  // function gets the unique values from an array then goes over each product gets the variant value and adds it to the options array for that variant
+
+  // const filterVariantCreator = (variant) => {};
+
+  // const optionsArray = variantsToArray.map((variant) => {
+  //   return filterVariantCreator(variant);
+  // });
+
+  // console.log("optionsArray", optionsArray[0].options);
+
+  const arrWithSet = [...new Set(variants)];
+
+  // build option array for each variant
+
+  const options = collectionPageDataFirst.collection.products.edges.flatMap(
+    (product) => {
+      const productOptions = product.node.variants.edges.map((variant) => {
+        return variant.node.selectedOptions.map((option) => {
+          return option;
+        });
+      });
+
+      const flattendedArr = productOptions.flat();
+
+      return flattendedArr;
+    }
+  );
+
+  // const useuniqueVariantNameTobuildOptionArrayToGOInsideVariant = (
+  //   variant
+  // ) => {};
+
+  console.log("options", options);
+  const getVariantOptionThenBuildArrayToHouse = (
+    variant: [string],
+    options: [
+      {
+        name: string;
+        value: string;
+      }
+    ]
+  ) => {
+    //go over variant array if variant name matches the option name then add the option to the options array
+
+    const newVariantArr = variant.map((variant) => {
+      //only get the options that match the variant name
+
+      const optionsArray = options.filter((option) => {
+        return option.name === variant;
+      });
+
+      // go over array and remove any duplicate values
+
+      const uniqueOptionsArray = optionsArray.filter((option, index, self) => {
+        return (
+          index ===
+          self.findIndex(
+            (t) => t.value === option.value && t.name === option.name
+          )
+        );
+      });
+
+      return {
+        id: variant,
+        name: variant,
+        options: uniqueOptionsArray,
+        checked: false,
+      };
+    });
+
+    return newVariantArr;
+  };
+
+  const newArr = getVariantOptionThenBuildArrayToHouse(arrWithSet, options);
+
+  console.log("newArr", newArr);
+
+  console.log("variantssss", newArr);
+
+  // console.log("optionsArray", optionsArray);
+
   return {
     first: collectionPageDataFirst,
     next: collectionPageDataNxt,
     previous: collectionPageDataPrev,
     totalProductCount: totalProductCount,
+    brands: setToArray,
+    variants: newArr,
   };
 };
 
@@ -1051,6 +1208,14 @@ export async function fetchCollectionByHandle(
                 }
               }
               description
+              vendor
+              variants(first: 5) {
+                edges {
+                  node {
+                    title
+                  }
+                }
+              }
               images(first: $amount) {
                 edges {
                   node {

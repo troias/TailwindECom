@@ -58,18 +58,6 @@ const filters = [
     ],
   },
   {
-    id: "category",
-    name: "Category",
-    options: [
-      { value: "tees", label: "Tees", checked: false },
-      { value: "crewnecks", label: "Crewnecks", checked: false },
-      { value: "hats", label: "Hats", checked: false },
-      { value: "bundles", label: "Bundles", checked: false },
-      { value: "carry", label: "Carry", checked: false },
-      { value: "objects", label: "Objects", checked: false },
-    ],
-  },
-  {
     id: "brand",
     name: "Brand",
     options: [
@@ -181,6 +169,8 @@ const reducer = (
       });
       return { ...state, sort: updatedSort };
 
+    //same as intial state but with variants from fetched data
+
     case "TOGGLE_FILTER":
       const { filterName, optionValue } = action.payload;
       const updatedFiltersArr = state.filters.map((filter) => {
@@ -218,18 +208,31 @@ export default function Example({
   handle,
   cursor,
   amountPerPage,
+  variants,
+  brands,
 }: {
   products22: Products22;
   handle: String;
   cursor: String;
   amountPerPage: number;
 }) {
+  console.log("variants", variants, "brands", brands);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(amountPerPage);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+
+  //on first render, update variants with the variants from fetched variant data
+
+  // useEffect(() => {
+  //   const updateVariants = async () => {
+  //     variants && dispatch({ type: "SET_VARIANTS", payload: variants });
+  //   };
+
+  //   updateVariants();
+  // }, [variants]);
 
   const amountPerPageOptions = state.filters[0].options.filter(
     (option) => option.checked
@@ -244,7 +247,7 @@ export default function Example({
   useEffect(() => {
     const updateProductsOnAmountPerPageChange = async () => {
       const pageNumber = page;
-      let currentAmountPerPage = amountPerPagee;
+      let currentAmountPerPage = Number(amountPerPagee);
 
       console.log("page", currentAmountPerPage);
 
@@ -330,6 +333,65 @@ export default function Example({
   const [products, setProducts] = useState(
     productsData.reformateedProducts || []
   );
+
+  //Filter Logic
+
+  //update products when filters change
+
+  const filteredValues = state.filters.map((filter) => {
+    const checkedValues = filter.options
+      .filter((option) => option.checked)
+      .map((option) => option.value);
+    return { [filter.id]: checkedValues };
+  });
+
+  console.log("filteredValues", filteredValues);
+
+  // function that filters products based on the filters selected
+
+  const filterProducts = (products: any, filters: any) => {
+    const filterKeys = Object.values(filters);
+
+    //brand = vendor
+
+    interface Variant {
+      node: {
+        selectedOptions: {
+          name: string;
+          value: string;
+        }[];
+      };
+    }
+
+    interface VariantData {
+      variants: {
+        edges: Variant[];
+      };
+    }
+
+    //Variant is structured same as interface above but with different name
+
+    //category = product type
+
+    //function that uses switch to detemine which filter to apply
+
+    // return products.filter((product) => {
+    //   return filterKeys.every((key) => {
+    //     if (!filters[key].length) return true;
+    //     return filters[key].includes(product[key]);
+    //   });
+    // });
+  };
+
+  useEffect(() => {
+    //console log result of filter after poructs have been intialised and filters have been updated
+
+    const logFilter = async () => {
+      console.log("filterProducts", filterProducts(products, filteredValues));
+    };
+
+    logFilter();
+  }, [products, filteredValues]);
 
   const fetchNextPageData = useCallback(
     async (data: Products22) => {
@@ -860,6 +922,13 @@ export const getStaticProps: GetStaticProps = async (
   console.log("slug", slug);
 
   const products = await getCollectionPageDataByHandle(slug && slug);
+
+  console.log("products", products);
+
+  //brand = vendor
+  //color = variant option 1
+  //size = variant option 2
+
   const cursor = products.first.collection.products.edges[0].cursor;
 
   const amountPerPage = 6;
@@ -871,6 +940,55 @@ export const getStaticProps: GetStaticProps = async (
       amountPerPage,
       navigation,
       products22: products,
+      variants: products.variants,
+      brands: products.brands,
     },
   };
 };
+
+// const filters = [
+//   {
+//     id: "amountPerPage",
+//     name: "Amount Per Page",
+//     options: [
+//       { value: "6", label: "6", checked: false },
+//       { value: "12", label: "12", checked: false },
+//       { value: "24", label: "24", checked: false },
+//       { value: "48", label: "48", checked: false },
+//     ],
+//   },
+//   {
+//     id: "brand",
+//     name: "Brand",
+//     options: [
+//       { value: "clothing-company", label: "Clothing Company", checked: false },
+//       { value: "fashion-inc", label: "Fashion Inc.", checked: false },
+//       { value: "shoes-n-more", label: "Shoes 'n More", checked: false },
+//       { value: "supplies-n-stuff", label: "Supplies 'n Stuff", checked: false },
+//     ],
+//   },
+//   {
+//     id: "color",
+//     name: "Color",
+//     options: [
+//       { value: "white", label: "White", checked: false },
+//       { value: "black", label: "Black", checked: false },
+//       { value: "grey", label: "Grey", checked: false },
+//       { value: "blue", label: "Blue", checked: false },
+//       { value: "olive", label: "Olive", checked: false },
+//       { value: "tan", label: "Tan", checked: false },
+//     ],
+//   },
+//   {
+//     id: "sizes",
+//     name: "Sizes",
+//     options: [
+//       { value: "xs", label: "XS", checked: false },
+//       { value: "s", label: "S", checked: false },
+//       { value: "m", label: "M", checked: false },
+//       { value: "l", label: "L", checked: false },
+//       { value: "xl", label: "XL", checked: false },
+//       { value: "2xl", label: "2XL", checked: false },
+//     ],
+//   },
+// ];
