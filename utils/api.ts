@@ -949,6 +949,17 @@ export const getCollectionPageDataByHandle = async (
                 }
               }
               description
+              vendor
+              variants(first: 5) {
+                edges {
+                  node {
+                    selectedOptions {
+                      name
+                      value
+                    }
+                  }
+                }
+              }
               images(first: $amount) {
                 edges {
                   node {
@@ -995,6 +1006,17 @@ export const getCollectionPageDataByHandle = async (
                 }
               }
               description
+              vendor
+              variants(first: 5) {
+                edges {
+                  node {
+                    selectedOptions {
+                      name
+                      value
+                    }
+                  }
+                }
+              }
               images(first: $amount) {
                 edges {
                   node {
@@ -1190,7 +1212,10 @@ export const getCollectionPageDataByHandle = async (
 
   const newArr = getVariantOptionThenBuildArrayToHouse(arrWithSet, options);
 
-  // console.log("optionsArray", optionsArray);
+  // console.log(
+  //   "optionsArray",
+  //   collectionPageDataFirst.collection.products.edges
+  // );
 
   return {
     first: collectionPageDataFirst,
@@ -1236,7 +1261,10 @@ export async function fetchCollectionByHandle(
               variants(first: 5) {
                 edges {
                   node {
-                    title
+                    selectedOptions {
+                      name
+                      value
+                    }
                   }
                 }
               }

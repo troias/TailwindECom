@@ -38,6 +38,8 @@ import {
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 import { fetchCollectionPage } from "../../utils/api";
+import { getVariantOptions } from "../../utils/dataReformatting";
+import { de } from "date-fns/locale";
 
 const sortOptions = [
   { name: "Most Popular", href: "#", checked: false },
@@ -118,6 +120,10 @@ type UnformattedProduct = {
     title: string;
     priceRange: { maxVariantPrice: { amount: string } };
     description: string;
+    vendor: string;
+    variants: {
+      edges: { node: { selectedOptions: { name: string; value: string } } }[];
+    };
     images: { edges: { node: { url: string; altText: string } }[] };
   };
 };
@@ -230,11 +236,7 @@ export default function Example({
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  //log curr state
-
   console.log("state", state);
-
-  // on first render fetch filter then add values to filter state
 
   useEffect(() => {
     const fetchFilters = async () => {
@@ -308,12 +310,15 @@ export default function Example({
 
       const reformattedProducts = pageData.map(
         (product: UnformattedProduct) => {
+          const variantOptions = getVariantOptions(product.node);
           return {
             id: product.node.id,
             name: product.node.title,
             href: "#",
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
+            vendor: product.node.vendor,
+
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
           };
@@ -335,17 +340,44 @@ export default function Example({
     const edges = data.first.collection.products.edges;
     const totalCount = data.totalProductCount || 5;
 
+    console.log("edges", edges);
+
     const reformateedProducts = edges.map((product: UnformattedProduct) => {
+      type Variant = {
+        value: string;
+        label: string;
+      };
+
+      type VariantsResponse = {
+        variants: {
+          edges: {
+            node: {
+              selectedOptions: {
+                name: string;
+                value: string;
+              }[];
+            };
+          }[];
+        };
+      };
+
+      const variantOptions = getVariantOptions(product.node);
+
       return {
         id: product.node.id,
         name: product.node.title,
         href: "#",
         price: product.node.priceRange.maxVariantPrice.amount,
         description: product.node.description,
+        vendor: product.node.vendor,
+        variants: variantOptions,
+
         imageSrc: product.node.images.edges[0].node.url,
         imageAlt: product.node.images.edges[0].node.altText,
       } as FormattedProduct;
     });
+
+    console.log("reformateedProducts", reformateedProducts);
 
     return {
       hasNextPage,
@@ -361,6 +393,155 @@ export default function Example({
   const [products, setProducts] = useState(
     productsData.reformateedProducts || []
   );
+
+  //useEffect/callback to update products based on check filters
+
+  const filterProductsBySelectedVendor = useCallback(
+    (products: any, selectedVendor: string[]) => {
+      const filteredProducts = products.filter((product: any) =>
+        //if selectedVendor is empty, return all products
+        selectedVendor.length === 0
+          ? true
+          : selectedVendor.includes(product.vendor)
+      );
+
+      return filteredProducts;
+    },
+    []
+  );
+
+  useEffect(() => {
+    const getFilters = () => {
+      const checkedOptions = state.filters.map((filter) => {
+        return {
+          id: filter.id,
+          name: filter.name,
+          options: filter.options.filter((option) => option.checked),
+        };
+      });
+
+      const checkedFilters = checkedOptions.filter(
+        (filter) => filter.options.length > 0
+      );
+
+      const filters = checkedFilters.map((filter) => {
+        return {
+          [filter.id]: filter.options.map((option) => option.value),
+        };
+      });
+
+      return filters;
+    };
+
+    //get Checked filters
+
+    const filters = getFilters();
+
+    //get checked Brands
+
+    //brand = vendor
+
+    const brand = filters.find((filter) => filter.brand)?.brand;
+
+    //Get Checked Variants
+
+    //variants = rest of filters // assume that variants are the rest of filters
+
+    const variants = filters.filter((filter) => filter.id !== "brand");
+
+    //variantName example = color: [red, blue] use name to query variants
+
+    //add arrofSelected Varants to correct Variant name to query
+
+    const arrayOfSelectedVariants = variants.map((variant) => {
+      const variantName = Object.keys(variant)[0];
+      const variantValues = Object.values(variant)[0];
+      return { [variantName]: variantValues };
+    });
+
+    type VariantOption = {
+      [key: string]: string[];
+    };
+
+    type VariantOptionsArray = [VariantOption, ...VariantOption[]];
+
+    //get array of variant options and use to switch statement to decide which query to use
+
+    console.log("arrayOfSelectedVariants", arrayOfSelectedVariants);
+
+    const filterProductData = (
+      products: any,
+      variantOptions: VariantOptionsArray
+    ) => {
+      const variantNames = variantOptions.flatMap((variant) =>
+        Object.keys(variant)
+      );
+
+      //use switch statement to decide which query to use
+      //if === brand filter vendor else filter variants
+
+      variantNames.forEach((variantName) => {
+        switch (variantName) {
+          case "brand":
+            //getValues from array @arrayOfSelectedVariants and filter all products that match the brand and filter products
+
+            const selectedVendor = arrayOfSelectedVariants.find(
+              (variant) => Object.keys(variant)[0] === "brand"
+            )?.brand;
+
+            console.log("selectedVendor", selectedVendor);
+
+            // get seletd vendor arr  the go gover products array and return products that match the vendor in venror arra
+
+            const filteredProducts = filterProductsBySelectedVendor(
+              products,
+              selectedVendor
+            );
+
+            // update products
+
+            console.log("filteredProducts update products", filteredProducts);
+
+            setProducts(filteredProducts);
+
+            // console.log(
+            //   "filteredProductsfilteredProducts",
+            //   filterProductsBySelectedVendoer
+            // );
+
+            break;
+          default:
+            console.log("variant selected", variantName);
+            break;
+        }
+      });
+
+      //
+
+      return variantNames;
+    };
+
+    console.log(
+      "filterProductData",
+      filterProductData(products, arrayOfSelectedVariants)
+    );
+
+    //swithc statement to decide which query to use
+
+    //double switch statement to decide which query to use
+
+    //get checked variants
+
+    console.log("variantName", arrayOfSelectedVariants);
+
+    //return products that match the filters brand and variants
+
+    //use brand to filter products
+
+    //rest of options = variants
+
+    console.log("filters", filters);
+  }, [state.filters]);
 
   //Filter Logic
 
@@ -430,10 +611,15 @@ export default function Example({
 
       const reformattedProducts = nextPage.collection.products.edges.map(
         (product: UnformattedProduct) => {
+          const variantOptions = getVariantOptions(product.node);
+
           return {
             id: product.node.id,
             name: product.node.title,
             href: "#",
+            vendor: product.node.vendor,
+            variants: variantOptions,
+
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
             imageSrc: product.node.images.edges[0].node.url,
@@ -458,12 +644,16 @@ export default function Example({
 
       const reformattedProducts = previousPage.collection.products.edges.map(
         (product: UnformattedProduct) => {
+          const variantOptions = getVariantOptions(product.node);
           return {
             id: product.node.id,
             name: product.node.title,
             href: "#",
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
+            vendor: product.node.vendor,
+            variants: variantOptions,
+
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
           };
@@ -515,12 +705,16 @@ export default function Example({
     const pageData = await fetchPage(pageNumber);
 
     const reformattedProducts = pageData.map((product: UnformattedProduct) => {
+      const variantOptions = getVariantOptions(product.node);
+
       return {
         id: product.node.id,
         name: product.node.title,
         href: "#",
         price: product.node.priceRange.maxVariantPrice.amount,
         description: product.node.description,
+        vendor: product.node.vendor,
+        variants: variantOptions,
         imageSrc: product.node.images.edges[0].node.url,
         imageAlt: "",
       };
