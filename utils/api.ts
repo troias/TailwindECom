@@ -1173,10 +1173,14 @@ export const getCollectionPageDataByHandle = async (
         );
       });
 
+      const reformatToFinalShape = uniqueOptionsArray.map((option) => {
+        return { value: option.value, label: option.value, checked: false };
+      });
+
       return {
         id: variant,
         name: variant,
-        options: uniqueOptionsArray,
+        options: reformatToFinalShape,
         checked: false,
       };
     });

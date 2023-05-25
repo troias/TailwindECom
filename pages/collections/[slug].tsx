@@ -171,6 +171,14 @@ const reducer = (
 
     //same as intial state but with variants from fetched data
 
+    case "SET_FILTERS":
+      //same as intial state but with variants from fetched data
+      const filters = action.payload;
+      console.log("innerFilter", filters);
+      return { ...state, filters: filters };
+
+    //check if strucutre is the same as initial state
+
     case "TOGGLE_FILTER":
       const { filterName, optionValue } = action.payload;
       const updatedFiltersArr = state.filters.map((filter) => {
@@ -222,6 +230,10 @@ export default function Example({
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  //log curr state
+
+  console.log("state", state);
+
   // on first render fetch filter then add values to filter state
 
   useEffect(() => {
@@ -230,14 +242,15 @@ export default function Example({
 
       const filterOptions = [
         ...filters.filter((filter) => filter.id === "amountPerPage"),
-        ...filters,
+
+        ...filter,
       ];
 
       //dispatch and update filter state
 
       dispatch({
         type: "SET_FILTERS",
-        payload: { filterOptions },
+        payload: filterOptions,
       });
 
       console.log("filterOptions", filterOptions);
@@ -248,7 +261,14 @@ export default function Example({
 
   const amountPerPageOptions = state.filters[0].options.filter(
     (option) => option.checked
-  );
+  ) || [
+    {
+      value: amountPerPage,
+      label: amountPerPage.toString(),
+      checked: true,
+    },
+  ];
+
   const amountPerPagee =
     amountPerPageOptions.length > 0
       ? amountPerPageOptions[0].value
