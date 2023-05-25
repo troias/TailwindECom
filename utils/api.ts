@@ -809,8 +809,6 @@ export const getAllPages = async () => {
 
   const allPages = await graphqlstorefront(allPagesQuery);
 
-  console.log("getPageDataByHanle", allPages);
-
   return allPages;
 };
 
@@ -875,8 +873,6 @@ export const getCollectionPageDataByHandle = async (
   };
 
   const totalProductCount = await getTotalProductCount(handle);
-
-  console.log("totalProductCount", totalProductCount);
 
   const collectionPageDataQueryFirst = gql`
     query CollectionByHande($handle: String!, $amount: Int!) {
@@ -973,8 +969,6 @@ export const getCollectionPageDataByHandle = async (
     after: collectionPageDataFirst.collection.products.edges[amount - 1].cursor,
   };
 
-  console.log("collection amount", amount - 1);
-
   const collectionPageDataNxt = await graphqlstorefront(
     collectionPageDataQueryNxt,
     collectionPageDataVarsNxt
@@ -1025,11 +1019,6 @@ export const getCollectionPageDataByHandle = async (
     collectionPageDataVarsPrev
   );
 
-  console.log(
-    "collectionPageDataFirst",
-    collectionPageDataFirst.collection.products.edges
-  );
-
   // FilterLogic for brands/vendor
 
   const brands = collectionPageDataFirst.collection.products.edges.map(
@@ -1046,6 +1035,42 @@ export const getCollectionPageDataByHandle = async (
 
   const brandsSet = new Set(brands);
   const setToArray = Array.from(brandsSet);
+
+  const getBrandOptionThenBuildArrayToHouse = (brand: [string]) => {
+    //go over variant array if variant name matches the option name then add the option to the options array
+
+    // end structure
+
+    // [  {
+    //     id: "brand",
+    //     name: "Brand",
+    //     options: [
+    //       { value: "clothing-company", label: "Clothing Company", checked: false },
+    //       { value: "fashion-inc", label: "Fashion Inc.", checked: false },
+    //       { value: "shoes-n-more", label: "Shoes 'n More", checked: false },
+    //       { value: "supplies-n-stuff", label: "Supplies 'n Stuff", checked: false },
+    //     ],
+    //   },]
+
+    // get Brand Array and build options array that includes only unique vales
+
+    const optionsReformatted = brand.map((brand) => {
+      return { value: brand, label: brand, checked: false };
+    });
+
+    const brandFilter = [
+      {
+        id: "brand",
+        name: "Brand",
+        options: optionsReformatted,
+        checked: false,
+      },
+    ];
+
+    return brandFilter;
+  };
+
+  const brandOptions = getBrandOptionThenBuildArrayToHouse(setToArray);
 
   //FilterLogic for variants
 
@@ -1119,7 +1144,6 @@ export const getCollectionPageDataByHandle = async (
   //   variant
   // ) => {};
 
-  console.log("options", options);
   const getVariantOptionThenBuildArrayToHouse = (
     variant: [string],
     options: [
@@ -1162,10 +1186,6 @@ export const getCollectionPageDataByHandle = async (
 
   const newArr = getVariantOptionThenBuildArrayToHouse(arrWithSet, options);
 
-  console.log("newArr", newArr);
-
-  console.log("variantssss", newArr);
-
   // console.log("optionsArray", optionsArray);
 
   return {
@@ -1173,7 +1193,7 @@ export const getCollectionPageDataByHandle = async (
     next: collectionPageDataNxt,
     previous: collectionPageDataPrev,
     totalProductCount: totalProductCount,
-    brands: setToArray,
+    brands: brandOptions,
     variants: newArr,
   };
 };

@@ -208,15 +208,13 @@ export default function Example({
   handle,
   cursor,
   amountPerPage,
-  variants,
-  brands,
+  filter,
 }: {
   products22: Products22;
   handle: String;
   cursor: String;
   amountPerPage: number;
 }) {
-  console.log("variants", variants, "brands", brands);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -224,15 +222,29 @@ export default function Example({
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  //on first render, update variants with the variants from fetched variant data
+  // on first render fetch filter then add values to filter state
 
-  // useEffect(() => {
-  //   const updateVariants = async () => {
-  //     variants && dispatch({ type: "SET_VARIANTS", payload: variants });
-  //   };
+  useEffect(() => {
+    const fetchFilters = async () => {
+      //filter from fetched data //filters from initial state
 
-  //   updateVariants();
-  // }, [variants]);
+      const filterOptions = [
+        ...filters.filter((filter) => filter.id === "amountPerPage"),
+        ...filters,
+      ];
+
+      //dispatch and update filter state
+
+      dispatch({
+        type: "SET_FILTERS",
+        payload: { filterOptions },
+      });
+
+      console.log("filterOptions", filterOptions);
+    };
+
+    fetchFilters();
+  }, []);
 
   const amountPerPageOptions = state.filters[0].options.filter(
     (option) => option.checked
@@ -248,8 +260,6 @@ export default function Example({
     const updateProductsOnAmountPerPageChange = async () => {
       const pageNumber = page;
       let currentAmountPerPage = Number(amountPerPagee);
-
-      console.log("page", currentAmountPerPage);
 
       const fetchPage = async (page: number, amountPerPage: number) => {
         try {
@@ -289,8 +299,6 @@ export default function Example({
           };
         }
       ) as FormattedProduct[];
-
-      console.log("reformattedProducts", reformattedProducts);
 
       setProducts(reformattedProducts);
     };
@@ -345,8 +353,6 @@ export default function Example({
     return { [filter.id]: checkedValues };
   });
 
-  console.log("filteredValues", filteredValues);
-
   // function that filters products based on the filters selected
 
   const filterProducts = (products: any, filters: any) => {
@@ -387,7 +393,7 @@ export default function Example({
     //console log result of filter after poructs have been intialised and filters have been updated
 
     const logFilter = async () => {
-      console.log("filterProducts", filterProducts(products, filteredValues));
+      // console.log("filterProducts", filterProducts(products, filteredValues));
     };
 
     logFilter();
@@ -460,8 +466,6 @@ export default function Example({
 
     const totalPages = Math.ceil(products22.totalProductCount / amountPerPagee);
 
-    console.log("totalPages", totalPages);
-
     return totalPages;
   };
 
@@ -478,9 +482,6 @@ export default function Example({
     //Get the page number from the input field
 
     const pageNumber = page;
-
-    console.log("page", pageNumber);
-
     const fetchPage = async (page: number) => {
       const pageData = await fetchCollectionPage(
         handle,
@@ -919,11 +920,16 @@ export const getStaticProps: GetStaticProps = async (
 
   const slug = context.params.slug;
 
-  console.log("slug", slug);
+  // console.log("slug", slug);
 
   const products = await getCollectionPageDataByHandle(slug && slug);
 
-  console.log("products", products);
+  // console.log("variants", products.variants);
+  // console.log("brands", products.brands);
+
+  const filter = [...products.variants, ...products.brands];
+
+  console.log("filter", filter);
 
   //brand = vendor
   //color = variant option 1
@@ -940,8 +946,7 @@ export const getStaticProps: GetStaticProps = async (
       amountPerPage,
       navigation,
       products22: products,
-      variants: products.variants,
-      brands: products.brands,
+      filter,
     },
   };
 };
