@@ -242,8 +242,6 @@ export default function Example({
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  console.log("state", state);
-
   useEffect(() => {
     const fetchFilters = async () => {
       //filter from fetched data //filters from initial state
@@ -383,8 +381,6 @@ export default function Example({
       };
     }) as FormattedProduct[];
 
-    console.log("reformateedProducts", reformateedProducts);
-
     return {
       hasNextPage,
       hasPreviousPage,
@@ -400,8 +396,6 @@ export default function Example({
     productsData.reformateedProducts || []
   );
 
-  console.log("productsData", products);
-
   // Filter Logic
 
   const getListOfCheckBrandsInFilterOptions = useCallback(() => {
@@ -415,7 +409,7 @@ export default function Example({
   const checkedBrands = getListOfCheckBrandsInFilterOptions();
 
   const getListOfCheckedVariantOptions = useCallback(() => {
-    console.log("state.filters", state.filters);
+    // get all variant options
 
     const variantOptions = state.filters.filter((filter) => {
       //everything that is not "amountPerPage" or "brand"
@@ -425,7 +419,6 @@ export default function Example({
     // go over variant options and return an array of checked options objects
 
     const checkedVariantOptions = variantOptions.map((variantOption) => {
-      console.log("variantOption", variantOption);
       const checkedOptions = variantOption.options.filter(
         (option) => option.checked
       );
@@ -446,16 +439,157 @@ export default function Example({
 
   const checkedVariantOptions = getListOfCheckedVariantOptions();
 
-  console.log("products", products);
-  console.log("checkedVariantOptions", checkedVariantOptions);
+  //  get brand options and format them
 
-  useEffect(() => {}, []);
+  // const getBrandOptions = useCallback(() => {
+  //   const brands = state.filters.filter((filter) => filter.id === "brand");
+
+  //   const checkBrandOptions = brands.map((brand) => {
+  //     const checkedOptions = brand.options.filter((option) => option.checked);
+  //     const checkedOptionsObject = {
+  //       id: brand.id,
+  //       name: brand.name,
+  //       options: checkedOptions,
+  //     };
+  //     return checkedOptionsObject;
+  //   });
+
+  //   return checkBrandOptions;
+  // }, [state.filters]);
+
+  // const checkedBrandOptions = getBrandOptions();
+
+  // const filterProducts = useCallback(
+  //   (brandOptions, checkedVariantOptions) => {
+  //     // Filter by brand
+
+  //     if (!brandOptions.length) {
+  //       return products; // No brand options, return all products
+  //     }
+
+  //     const brand = brandOptions[0];
+  //     const brandOptionsList = brand.options;
+
+  //     if (!brandOptionsList || !brandOptionsList.length) {
+  //       return products; // No brand options, return all products
+  //     }
+
+  //     const filteredProducts = products.filter((product) => {
+  //       const productBrand = product.vendor;
+  //       const brandOption = brandOptionsList.find(
+  //         (option) => option.value === productBrand
+  //       );
+  //       // Return products that match the brand option
+  //       return brandOption;
+  //     });
+
+  //     return filteredProducts;
+  //   },
+  //   [products]
+  // );
+
+  // const filterProductsObj = useCallback(() => {
+  //   const filteredProducts = filterProducts(
+  //     checkedBrandOptions,
+  //     checkedVariantOptions
+  //   );
+  //   console.log("filteredProducts", filteredProducts);
+
+  //   // set products using functional form
+  //   setProducts((prevProducts) => {
+  //     // update products based on filteredProducts
+  //     return filteredProducts;
+  //   });
+  // }, [checkedBrandOptions, checkedVariantOptions]);
+
+  // useEffect(() => {
+  //   filterProductsObj();
+  // }, []);
 
   //Filter Logic
 
   //update products when filters change
 
   // function that filters products based on the filters selected
+
+  const updateFilteredProducts = useCallback(
+    (brandOptions, checkedVariantOptions = []) => {
+      const filterProducts = (brandOptionsList) => {
+        if (!brandOptionsList || !brandOptionsList.length) {
+          return products; // No brand options, return all products
+        }
+
+        const brand = brandOptionsList.shift();
+
+        const brandOptions = brand.options;
+
+        if (!brandOptions || !brandOptions.length) {
+          return products; // No brand options, return all products
+        }
+
+        //filter products by brandOption
+        const filteredProducts = products.filter((product) => {
+          const productBrand = product.vendor;
+          const brandOption = brandOptions.find(
+            (option) => option.value === productBrand
+          );
+          // Return products that match the brand option
+          return brandOption;
+        });
+        return filteredProducts;
+      };
+
+      const filteredProducts = filterProducts(brandOptions);
+
+      setProducts(filteredProducts);
+    },
+    [products]
+  );
+
+  const getBrandOptions = useCallback(() => {
+    const brands = state.filters.filter((filter) => filter.id === "brand");
+    const checkBrandOptions = brands.map((brand) => {
+      const options = brand.options;
+      //get checked options
+      const checkedOptions = options.filter((option) => option.checked);
+      const checkedOptionsObject = {
+        id: brand.id,
+        name: brand.name,
+        options: checkedOptions,
+      };
+
+      return checkedOptionsObject;
+    });
+
+    console.log("checkBrandOptions", checkBrandOptions);
+
+    const brandOptions = checkBrandOptions; // Create a shallow copy of checkBrandOptions
+
+    console.log("brandOptions", brandOptions);
+    return brandOptions;
+  }, [state.filters]);
+
+  const filterProductsObj = useCallback(() => {
+    const checkedBrandOptions = getBrandOptions();
+
+    // const checkedVariantOptions =
+
+    const filteredProducts = updateFilteredProducts(checkedBrandOptions);
+
+    // set products using functional form
+    // setProducts((prevProducts) => {
+    //   // update products based on filteredProducts
+    //   return filteredProducts;
+    // });
+  }, [getBrandOptions, updateFilteredProducts]);
+
+  useEffect(() => {
+    filterProductsObj();
+  }, [filterProductsObj]);
+
+  useEffect(() => {
+    updateFilteredProducts(checkedBrands, checkedVariantOptions);
+  }, [checkedBrands, checkedVariantOptions, updateFilteredProducts]);
 
   const fetchNextPageData = useCallback(
     async (data: Products22) => {
