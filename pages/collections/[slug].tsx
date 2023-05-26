@@ -109,6 +109,12 @@ type FormattedProduct = {
   href: string;
   price: string;
   description: string;
+  vendor: string;
+  variants: {
+    id: string;
+    options: { value: string; label: string }[];
+  };
+
   imageSrc: string;
   imageAlt: string;
 };
@@ -180,7 +186,7 @@ const reducer = (
     case "SET_FILTERS":
       //same as intial state but with variants from fetched data
       const filters = action.payload;
-      console.log("innerFilter", filters);
+      // console.log("innerFilter", filters);
       return { ...state, filters: filters };
 
     //check if strucutre is the same as initial state
@@ -255,7 +261,7 @@ export default function Example({
         payload: filterOptions,
       });
 
-      console.log("filterOptions", filterOptions);
+      // console.log("filterOptions", filterOptions);
     };
 
     fetchFilters();
@@ -340,7 +346,7 @@ export default function Example({
     const edges = data.first.collection.products.edges;
     const totalCount = data.totalProductCount || 5;
 
-    console.log("edges", edges);
+    // console.log("edges", edges);
 
     const reformateedProducts = edges.map((product: UnformattedProduct) => {
       type Variant = {
@@ -362,6 +368,7 @@ export default function Example({
       };
 
       const variantOptions = getVariantOptions(product.node);
+      // console.log("variantOptionsInnerOptions", variantOptions);
 
       return {
         id: product.node.id,
@@ -371,11 +378,10 @@ export default function Example({
         description: product.node.description,
         vendor: product.node.vendor,
         variants: variantOptions,
-
         imageSrc: product.node.images.edges[0].node.url,
         imageAlt: product.node.images.edges[0].node.altText,
-      } as FormattedProduct;
-    });
+      };
+    }) as FormattedProduct[];
 
     console.log("reformateedProducts", reformateedProducts);
 
@@ -394,211 +400,62 @@ export default function Example({
     productsData.reformateedProducts || []
   );
 
-  //useEffect/callback to update products based on check filters
+  console.log("productsData", products);
 
-  const filterProductsBySelectedVendor = useCallback(
-    (products: any, selectedVendor: string[]) => {
-      const filteredProducts = products.filter((product: any) =>
-        //if selectedVendor is empty, return all products
-        selectedVendor.length === 0
-          ? true
-          : selectedVendor.includes(product.vendor)
-      );
+  // Filter Logic
 
-      return filteredProducts;
-    },
-    []
-  );
+  const getListOfCheckBrandsInFilterOptions = useCallback(() => {
+    const brands = state.filters.filter((filter) => filter.id === "brand");
 
-  useEffect(() => {
-    const getFilters = () => {
-      const checkedOptions = state.filters.map((filter) => {
-        return {
-          id: filter.id,
-          name: filter.name,
-          options: filter.options.filter((option) => option.checked),
-        };
-      });
+    const checkedBrands = brands[0].options.filter((option) => option.checked);
 
-      const checkedFilters = checkedOptions.filter(
-        (filter) => filter.options.length > 0
-      );
+    return checkedBrands;
+  }, [state.filters]);
 
-      const filters = checkedFilters.map((filter) => {
-        return {
-          [filter.id]: filter.options.map((option) => option.value),
-        };
-      });
+  const checkedBrands = getListOfCheckBrandsInFilterOptions();
 
-      return filters;
-    };
+  const getListOfCheckedVariantOptions = useCallback(() => {
+    console.log("state.filters", state.filters);
 
-    //get Checked filters
-
-    const filters = getFilters();
-
-    //get checked Brands
-
-    //brand = vendor
-
-    const brand = filters.find((filter) => filter.brand)?.brand;
-
-    //Get Checked Variants
-
-    //variants = rest of filters // assume that variants are the rest of filters
-
-    const variants = filters.filter((filter) => filter.id !== "brand");
-
-    //variantName example = color: [red, blue] use name to query variants
-
-    //add arrofSelected Varants to correct Variant name to query
-
-    const arrayOfSelectedVariants = variants.map((variant) => {
-      const variantName = Object.keys(variant)[0];
-      const variantValues = Object.values(variant)[0];
-      return { [variantName]: variantValues };
+    const variantOptions = state.filters.filter((filter) => {
+      //everything that is not "amountPerPage" or "brand"
+      return filter.id !== "amountPerPage" && filter.id !== "brand";
     });
 
-    type VariantOption = {
-      [key: string]: string[];
-    };
+    // go over variant options and return an array of checked options objects
 
-    type VariantOptionsArray = [VariantOption, ...VariantOption[]];
-
-    //get array of variant options and use to switch statement to decide which query to use
-
-    console.log("arrayOfSelectedVariants", arrayOfSelectedVariants);
-
-    const filterProductData = (
-      products: any,
-      variantOptions: VariantOptionsArray
-    ) => {
-      const variantNames = variantOptions.flatMap((variant) =>
-        Object.keys(variant)
+    const checkedVariantOptions = variantOptions.map((variantOption) => {
+      console.log("variantOption", variantOption);
+      const checkedOptions = variantOption.options.filter(
+        (option) => option.checked
       );
 
-      //use switch statement to decide which query to use
-      //if === brand filter vendor else filter variants
+      const checkedOptionsObject = {
+        id: variantOption.id,
+        name: variantOption.name,
+        options: checkedOptions,
+      };
 
-      variantNames.forEach((variantName) => {
-        switch (variantName) {
-          case "brand":
-            //getValues from array @arrayOfSelectedVariants and filter all products that match the brand and filter products
+      //return array filled with objects
 
-            const selectedVendor = arrayOfSelectedVariants.find(
-              (variant) => Object.keys(variant)[0] === "brand"
-            )?.brand;
+      return checkedOptionsObject;
+    }, []);
 
-            console.log("selectedVendor", selectedVendor);
-
-            // get seletd vendor arr  the go gover products array and return products that match the vendor in venror arra
-
-            const filteredProducts = filterProductsBySelectedVendor(
-              products,
-              selectedVendor
-            );
-
-            // update products
-
-            console.log("filteredProducts update products", filteredProducts);
-
-            setProducts(filteredProducts);
-
-            // console.log(
-            //   "filteredProductsfilteredProducts",
-            //   filterProductsBySelectedVendoer
-            // );
-
-            break;
-          default:
-            console.log("variant selected", variantName);
-            break;
-        }
-      });
-
-      //
-
-      return variantNames;
-    };
-
-    console.log(
-      "filterProductData",
-      filterProductData(products, arrayOfSelectedVariants)
-    );
-
-    //swithc statement to decide which query to use
-
-    //double switch statement to decide which query to use
-
-    //get checked variants
-
-    console.log("variantName", arrayOfSelectedVariants);
-
-    //return products that match the filters brand and variants
-
-    //use brand to filter products
-
-    //rest of options = variants
-
-    console.log("filters", filters);
+    return checkedVariantOptions;
   }, [state.filters]);
+
+  const checkedVariantOptions = getListOfCheckedVariantOptions();
+
+  console.log("products", products);
+  console.log("checkedVariantOptions", checkedVariantOptions);
+
+  useEffect(() => {}, []);
 
   //Filter Logic
 
   //update products when filters change
 
-  const filteredValues = state.filters.map((filter) => {
-    const checkedValues = filter.options
-      .filter((option) => option.checked)
-      .map((option) => option.value);
-    return { [filter.id]: checkedValues };
-  });
-
   // function that filters products based on the filters selected
-
-  const filterProducts = (products: any, filters: any) => {
-    const filterKeys = Object.values(filters);
-
-    //brand = vendor
-
-    interface Variant {
-      node: {
-        selectedOptions: {
-          name: string;
-          value: string;
-        }[];
-      };
-    }
-
-    interface VariantData {
-      variants: {
-        edges: Variant[];
-      };
-    }
-
-    //Variant is structured same as interface above but with different name
-
-    //category = product type
-
-    //function that uses switch to detemine which filter to apply
-
-    // return products.filter((product) => {
-    //   return filterKeys.every((key) => {
-    //     if (!filters[key].length) return true;
-    //     return filters[key].includes(product[key]);
-    //   });
-    // });
-  };
-
-  useEffect(() => {
-    //console log result of filter after poructs have been intialised and filters have been updated
-
-    const logFilter = async () => {
-      // console.log("filterProducts", filterProducts(products, filteredValues));
-    };
-
-    logFilter();
-  }, [products, filteredValues]);
 
   const fetchNextPageData = useCallback(
     async (data: Products22) => {
@@ -1143,7 +1000,7 @@ export const getStaticProps: GetStaticProps = async (
 
   const filter = [...products.variants, ...products.brands];
 
-  console.log("filter", filter);
+  // console.log("filter", filter);
 
   //brand = vendor
   //color = variant option 1

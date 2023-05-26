@@ -19,6 +19,8 @@ export const getVariantOptions = (
   });
 
   return Object.entries(variantsMap).map(([name, options]) => ({
-    [name]: options,
+    id: name,
+    [name]: name,
+    options,
   }));
 };
