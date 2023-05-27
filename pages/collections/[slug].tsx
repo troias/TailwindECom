@@ -40,6 +40,7 @@ import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { fetchCollectionPage } from "../../utils/api";
 import { getVariantOptions } from "../../utils/dataReformatting";
 import { de } from "date-fns/locale";
+import { set } from "date-fns";
 
 const sortOptions = [
   { name: "Most Popular", href: "#", checked: false },
@@ -398,15 +399,15 @@ export default function Example({
 
   // Filter Logic
 
-  const getListOfCheckBrandsInFilterOptions = useCallback(() => {
-    const brands = state.filters.filter((filter) => filter.id === "brand");
+  // const getListOfCheckBrandsInFilterOptions = useCallback(() => {
+  //   const brands = state.filters.filter((filter) => filter.id === "brand");
 
-    const checkedBrands = brands[0].options.filter((option) => option.checked);
+  //   const checkedBrands = brands[0].options.filter((option) => option.checked);
 
-    return checkedBrands;
-  }, [state.filters]);
+  //   return checkedBrands;
+  // }, [state.filters]);
 
-  const checkedBrands = getListOfCheckBrandsInFilterOptions();
+  // const checkedBrands = getListOfCheckBrandsInFilterOptions();
 
   const getListOfCheckedVariantOptions = useCallback(() => {
     // get all variant options
@@ -437,159 +438,85 @@ export default function Example({
     return checkedVariantOptions;
   }, [state.filters]);
 
-  const checkedVariantOptions = getListOfCheckedVariantOptions();
+  // const checkedVariantOptions = getListOfCheckedVariantOptions();
 
-  //  get brand options and format them
+  // Filter Brand Logic
+  const [filteredBrandOptions, setFilteredBrandOptions] = useState([]);
 
-  // const getBrandOptions = useCallback(() => {
-  //   const brands = state.filters.filter((filter) => filter.id === "brand");
+  //filter brand options
 
-  //   const checkBrandOptions = brands.map((brand) => {
-  //     const checkedOptions = brand.options.filter((option) => option.checked);
-  //     const checkedOptionsObject = {
-  //       id: brand.id,
-  //       name: brand.name,
-  //       options: checkedOptions,
-  //     };
-  //     return checkedOptionsObject;
-  //   });
+  const filterProducts = (brandOptions) => {
+    const filteredProducts = products.filter((product) => {
+      const productBrand = product.vendor;
+      if (!brandOptions.options) {
+        return products; // No brand options, return all products
+      }
 
-  //   return checkBrandOptions;
-  // }, [state.filters]);
+      const brandOption = brandOptions.options.find(
+        (option) => option.value === productBrand
+      );
+      return brandOption;
+    });
 
-  // const checkedBrandOptions = getBrandOptions();
-
-  // const filterProducts = useCallback(
-  //   (brandOptions, checkedVariantOptions) => {
-  //     // Filter by brand
-
-  //     if (!brandOptions.length) {
-  //       return products; // No brand options, return all products
-  //     }
-
-  //     const brand = brandOptions[0];
-  //     const brandOptionsList = brand.options;
-
-  //     if (!brandOptionsList || !brandOptionsList.length) {
-  //       return products; // No brand options, return all products
-  //     }
-
-  //     const filteredProducts = products.filter((product) => {
-  //       const productBrand = product.vendor;
-  //       const brandOption = brandOptionsList.find(
-  //         (option) => option.value === productBrand
-  //       );
-  //       // Return products that match the brand option
-  //       return brandOption;
-  //     });
-
-  //     return filteredProducts;
-  //   },
-  //   [products]
-  // );
-
-  // const filterProductsObj = useCallback(() => {
-  //   const filteredProducts = filterProducts(
-  //     checkedBrandOptions,
-  //     checkedVariantOptions
-  //   );
-  //   console.log("filteredProducts", filteredProducts);
-
-  //   // set products using functional form
-  //   setProducts((prevProducts) => {
-  //     // update products based on filteredProducts
-  //     return filteredProducts;
-  //   });
-  // }, [checkedBrandOptions, checkedVariantOptions]);
-
-  // useEffect(() => {
-  //   filterProductsObj();
-  // }, []);
-
-  //Filter Logic
-
-  //update products when filters change
-
-  // function that filters products based on the filters selected
+    return filteredProducts;
+  };
 
   const updateFilteredProducts = useCallback(
     (brandOptions, checkedVariantOptions = []) => {
-      const filterProducts = (brandOptionsList) => {
-        if (!brandOptionsList || !brandOptionsList.length) {
-          return products; // No brand options, return all products
-        }
-
-        const brand = brandOptionsList.shift();
-
-        const brandOptions = brand.options;
-
-        if (!brandOptions || !brandOptions.length) {
-          return products; // No brand options, return all products
-        }
-
-        //filter products by brandOption
-        const filteredProducts = products.filter((product) => {
-          const productBrand = product.vendor;
-          const brandOption = brandOptions.find(
-            (option) => option.value === productBrand
-          );
-          // Return products that match the brand option
-          return brandOption;
-        });
-        return filteredProducts;
-      };
-
       const filteredProducts = filterProducts(brandOptions);
 
-      setProducts(filteredProducts);
+      return filteredProducts;
     },
-    [products]
+    [products, filterProducts]
   );
 
-  const getBrandOptions = useCallback(() => {
-    const brands = state.filters.filter((filter) => filter.id === "brand");
-    const checkBrandOptions = brands.map((brand) => {
-      const options = brand.options;
-      //get checked options
-      const checkedOptions = options.filter((option) => option.checked);
-      const checkedOptionsObject = {
-        id: brand.id,
-        name: brand.name,
-        options: checkedOptions,
-      };
+  const getCheckedOptions = useCallback(() => {
+    const brandFilter = state.filters.find((filter) => filter.id === "brand");
 
-      return checkedOptionsObject;
-    });
+    if (!brandFilter) {
+      return []; // Return an empty array if the brand filter is not found
+    }
 
-    console.log("checkBrandOptions", checkBrandOptions);
-
-    const brandOptions = checkBrandOptions; // Create a shallow copy of checkBrandOptions
-
-    console.log("brandOptions", brandOptions);
-    return brandOptions;
+    return brandFilter.options.filter((option) => option.checked);
   }, [state.filters]);
 
+  const getBrandOptions = useCallback(() => {
+    const checkedOptions = getCheckedOptions();
+
+    const brandFilter = state.filters.find((filter) => filter.id === "brand");
+
+    if (!brandFilter) {
+      return []; // Return an empty array if the brand filter is not found
+    }
+
+    return {
+      id: brandFilter.id,
+      name: brandFilter.name,
+      options: checkedOptions,
+    };
+  }, [state.filters, getCheckedOptions]);
+
   const filterProductsObj = useCallback(() => {
-    const checkedBrandOptions = getBrandOptions();
+    const filteredProducts = updateFilteredProducts(filteredBrandOptions);
+    console.log("filterProductsObj-filteredBrandOptions", filteredProducts);
 
-    // const checkedVariantOptions =
+    // set products if filteredProducts change (if brand filter is changed)
 
-    const filteredProducts = updateFilteredProducts(checkedBrandOptions);
+    // setProducts(filteredProducts);
+  }, [filteredBrandOptions, updateFilteredProducts, setProducts]);
 
-    // set products using functional form
-    // setProducts((prevProducts) => {
-    //   // update products based on filteredProducts
-    //   return filteredProducts;
-    // });
-  }, [getBrandOptions, updateFilteredProducts]);
+  useEffect(() => {
+    const brandOptions = getBrandOptions();
+    // console.log("brandOptions123", brandOptions);
+
+    setFilteredBrandOptions(brandOptions);
+  }, [state.filters, getBrandOptions]);
 
   useEffect(() => {
     filterProductsObj();
-  }, [filterProductsObj]);
+  }, [filteredBrandOptions, filterProductsObj]);
 
-  useEffect(() => {
-    updateFilteredProducts(checkedBrands, checkedVariantOptions);
-  }, [checkedBrands, checkedVariantOptions, updateFilteredProducts]);
+  /// Pagination Logic
 
   const fetchNextPageData = useCallback(
     async (data: Products22) => {
