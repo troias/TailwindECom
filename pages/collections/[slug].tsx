@@ -442,14 +442,16 @@ export default function Example({
 
   // Filter Brand Logic
   const [filteredBrandOptions, setFilteredBrandOptions] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
 
-  //filter brand options
+  console.log("filteredProducts", filteredProducts);
 
-  const filterProducts = (brandOptions) => {
+  // Filter brand options
+  const filterProducts = useCallback((brandOptions) => {
     const filteredProducts = products.filter((product) => {
       const productBrand = product.vendor;
       if (!brandOptions.options) {
-        return products; // No brand options, return all products
+        return true; // No brand options, return all products
       }
 
       const brandOption = brandOptions.options.find(
@@ -459,7 +461,7 @@ export default function Example({
     });
 
     return filteredProducts;
-  };
+  }, []);
 
   const updateFilteredProducts = useCallback(
     (brandOptions, checkedVariantOptions = []) => {
@@ -467,7 +469,7 @@ export default function Example({
 
       return filteredProducts;
     },
-    [products, filterProducts]
+    [filterProducts]
   );
 
   const getCheckedOptions = useCallback(() => {
@@ -496,25 +498,21 @@ export default function Example({
     };
   }, [state.filters, getCheckedOptions]);
 
-  const filterProductsObj = useCallback(() => {
-    const filteredProducts = updateFilteredProducts(filteredBrandOptions);
-    console.log("filterProductsObj-filteredBrandOptions", filteredProducts);
-
-    // set products if filteredProducts change (if brand filter is changed)
-
-    // setProducts(filteredProducts);
-  }, [filteredBrandOptions, updateFilteredProducts, setProducts]);
-
   useEffect(() => {
     const brandOptions = getBrandOptions();
-    // console.log("brandOptions123", brandOptions);
-
     setFilteredBrandOptions(brandOptions);
   }, [state.filters, getBrandOptions]);
 
   useEffect(() => {
-    filterProductsObj();
-  }, [filteredBrandOptions, filterProductsObj]);
+    const filteredProducts = updateFilteredProducts(filteredBrandOptions);
+    setFilteredProducts(filteredProducts);
+  }, [filteredBrandOptions, updateFilteredProducts]);
+
+  useEffect(() => {
+    setProducts(filteredProducts);
+  }, [filteredProducts]);
+
+  // Use the filteredProducts state in your component
 
   /// Pagination Logic
 
