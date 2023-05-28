@@ -438,46 +438,48 @@ export default function Example({
     return checkedVariantOptions;
   }, [state.filters]);
 
-  // const checkedVariantOptions = getListOfCheckedVariantOptions();
-
-  // Filter Brand Logic
-  // const [filteredBrandOptions, setFilteredBrandOptions] = useState([]);
-  // const [filteredProducts, setFilteredProducts] = useState([]);
-
-  // console.log("filteredProducts", filteredProducts);
-
   // Filter brand options
+
   const filterProducts = useCallback(
     (brandOptions) => {
-      const filteredProducts = state.products.filter((product) => {
-        const productBrand = product.vendor;
-        if (!brandOptions.options) {
-          return true;
-        }
+      let checkedBrandOptions = [];
+      try {
+        checkedBrandOptions = brandOptions.options.filter(
+          (option) => option.checked
+        );
+      } catch (error) {
+        console.error("Error in brandOptions.options:", error);
+        return []; // Return an empty array if brandOptions.options throws an error
+      }
 
-        const productBrandOption = brandOptions.options.find(
+      console.log("checkedBrandOptions", checkedBrandOptions);
+
+      // If no brand options are checked, return all products
+      const filteredProducts = products.filter((product) => {
+        const productBrand = product.vendor;
+        const productBrandMatches = checkedBrandOptions.find(
           (option) => option.value === productBrand
         );
-
-        if (!productBrandOption) {
-          return false;
-        }
-
-        return productBrandOption;
+        return productBrandMatches;
       });
 
+      // console.log("filteredProducts", filteredProducts);
       return filteredProducts;
     },
-    [state.products]
+    [state.filteredBrandOptions, products]
   );
 
   const updateFilteredProducts = useCallback(
     (brandOptions) => {
       const filteredProducts = filterProducts(brandOptions);
-      dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
+      // console.log("updateFilteredProducts-filteredProducts", filteredProducts);
+      return filteredProducts;
+      // dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
     },
     [filterProducts]
   );
+
+  console.log(" state.filteredProducts", state.filteredProducts);
 
   const getCheckedOptions = useCallback(() => {
     const brandFilter = state.filters.find((filter) => filter.id === "brand");
@@ -503,22 +505,21 @@ export default function Example({
       name: brandFilter.name,
       options: checkedOptions,
     };
-  }, [state.filters, getCheckedOptions]);
+  }, [getCheckedOptions]);
 
   useEffect(() => {
     const brandOptions = getBrandOptions;
+    // console.log("brandOptions", brandOptions);
     dispatch({ type: "SET_FILTERED_BRAND_OPTIONS", payload: brandOptions });
   }, [getBrandOptions]);
 
-  console.log("state.filteredBrandOptions", state.filteredBrandOptions);
+  useEffect(() => {
+    const filteredProducts = updateFilteredProducts(state.filteredBrandOptions);
+    console.log("filteredProducts", filteredProducts);
+    dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
 
-  // useEffect(() => {
-  //   updateFilteredProducts(state.filteredBrandOptions);
-  // }, [state.filteredBrandOptions, updateFilteredProducts]);
-
-  // useEffect(() => {
-  //   dispatch({ type: "SET_PRODUCTS", payload: state.filteredProducts });
-  // }, [state.filteredProducts]);
+    console.log("state.filteredProducts", state);
+  }, [state.filteredBrandOptions, updateFilteredProducts]);
 
   // Use the filteredProducts state in your component
 
@@ -672,6 +673,10 @@ export default function Example({
   };
 
   // const { sort, filters } = state;
+
+  const productsToRender = state.filteredProducts.length
+    ? state.filteredProducts
+    : products;
 
   return (
     <div className="bg-white">
@@ -936,7 +941,7 @@ export default function Example({
                 </h2>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                  {products.map((product) => (
+                  {productsToRender.map((product) => (
                     <a key={product.id} href={product.href} className="group">
                       <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg sm:aspect-h-3 sm:aspect-w-2">
                         <img
