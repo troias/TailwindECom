@@ -17,7 +17,7 @@ import {
   useState,
   useCallback,
   useReducer,
-  use,
+  useMemo,
   useEffect,
 } from "react";
 import {
@@ -147,6 +147,7 @@ type Products22 = {
 };
 
 // Initial filterState
+
 const initialState = {
   sort: sortOptions.map((option) => ({
     name: option.name,
@@ -162,6 +163,9 @@ const initialState = {
       checked: false,
     })),
   })),
+  filteredBrandOptions: [],
+  filteredProducts: [],
+  products: [],
 };
 
 // Reducer function to handle state updates
@@ -219,6 +223,12 @@ const reducer = (
         }
       });
       return { ...state, filters: updatedFiltersArr };
+    case "SET_FILTERED_BRAND_OPTIONS":
+      return { ...state, filteredBrandOptions: action.payload };
+    case "SET_FILTERED_PRODUCTS":
+      return { ...state, filteredProducts: action.payload };
+    case "SET_PRODUCTS":
+      return { ...state, products: action.payload };
     default:
       return state;
   }
@@ -399,16 +409,6 @@ export default function Example({
 
   // Filter Logic
 
-  // const getListOfCheckBrandsInFilterOptions = useCallback(() => {
-  //   const brands = state.filters.filter((filter) => filter.id === "brand");
-
-  //   const checkedBrands = brands[0].options.filter((option) => option.checked);
-
-  //   return checkedBrands;
-  // }, [state.filters]);
-
-  // const checkedBrands = getListOfCheckBrandsInFilterOptions();
-
   const getListOfCheckedVariantOptions = useCallback(() => {
     // get all variant options
 
@@ -441,33 +441,40 @@ export default function Example({
   // const checkedVariantOptions = getListOfCheckedVariantOptions();
 
   // Filter Brand Logic
-  const [filteredBrandOptions, setFilteredBrandOptions] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  // const [filteredBrandOptions, setFilteredBrandOptions] = useState([]);
+  // const [filteredProducts, setFilteredProducts] = useState([]);
 
-  console.log("filteredProducts", filteredProducts);
+  // console.log("filteredProducts", filteredProducts);
 
   // Filter brand options
-  const filterProducts = useCallback((brandOptions) => {
-    const filteredProducts = products.filter((product) => {
-      const productBrand = product.vendor;
-      if (!brandOptions.options) {
-        return true; // No brand options, return all products
-      }
+  const filterProducts = useCallback(
+    (brandOptions) => {
+      const filteredProducts = state.products.filter((product) => {
+        const productBrand = product.vendor;
+        if (!brandOptions.options) {
+          return true;
+        }
 
-      const brandOption = brandOptions.options.find(
-        (option) => option.value === productBrand
-      );
-      return brandOption;
-    });
+        const productBrandOption = brandOptions.options.find(
+          (option) => option.value === productBrand
+        );
 
-    return filteredProducts;
-  }, []);
+        if (!productBrandOption) {
+          return false;
+        }
 
-  const updateFilteredProducts = useCallback(
-    (brandOptions, checkedVariantOptions = []) => {
-      const filteredProducts = filterProducts(brandOptions);
+        return productBrandOption;
+      });
 
       return filteredProducts;
+    },
+    [state.products]
+  );
+
+  const updateFilteredProducts = useCallback(
+    (brandOptions) => {
+      const filteredProducts = filterProducts(brandOptions);
+      dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
     },
     [filterProducts]
   );
@@ -476,19 +483,19 @@ export default function Example({
     const brandFilter = state.filters.find((filter) => filter.id === "brand");
 
     if (!brandFilter) {
-      return []; // Return an empty array if the brand filter is not found
+      return [];
     }
 
     return brandFilter.options.filter((option) => option.checked);
   }, [state.filters]);
 
-  const getBrandOptions = useCallback(() => {
+  const getBrandOptions = useMemo(() => {
     const checkedOptions = getCheckedOptions();
 
     const brandFilter = state.filters.find((filter) => filter.id === "brand");
 
     if (!brandFilter) {
-      return []; // Return an empty array if the brand filter is not found
+      return [];
     }
 
     return {
@@ -499,18 +506,19 @@ export default function Example({
   }, [state.filters, getCheckedOptions]);
 
   useEffect(() => {
-    const brandOptions = getBrandOptions();
-    setFilteredBrandOptions(brandOptions);
-  }, [state.filters, getBrandOptions]);
+    const brandOptions = getBrandOptions;
+    dispatch({ type: "SET_FILTERED_BRAND_OPTIONS", payload: brandOptions });
+  }, [getBrandOptions]);
 
-  useEffect(() => {
-    const filteredProducts = updateFilteredProducts(filteredBrandOptions);
-    setFilteredProducts(filteredProducts);
-  }, [filteredBrandOptions, updateFilteredProducts]);
+  console.log("state.filteredBrandOptions", state.filteredBrandOptions);
 
-  useEffect(() => {
-    setProducts(filteredProducts);
-  }, [filteredProducts]);
+  // useEffect(() => {
+  //   updateFilteredProducts(state.filteredBrandOptions);
+  // }, [state.filteredBrandOptions, updateFilteredProducts]);
+
+  // useEffect(() => {
+  //   dispatch({ type: "SET_PRODUCTS", payload: state.filteredProducts });
+  // }, [state.filteredProducts]);
 
   // Use the filteredProducts state in your component
 
