@@ -674,9 +674,11 @@ export default function Example({
 
   // const { sort, filters } = state;
 
-  const productsToRender = state.filteredProducts.length
-    ? state.filteredProducts
-    : products;
+  // console.log("state", state);
+  const productsToRender =
+    (state.filteredBrandOptions.options || []).length > 0
+      ? state.filteredProducts
+      : products;
 
   return (
     <div className="bg-white">
