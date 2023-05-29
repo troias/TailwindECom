@@ -19,6 +19,7 @@ import {
   useReducer,
   useMemo,
   useEffect,
+  use,
 } from "react";
 import {
   Dialog,
@@ -170,10 +171,7 @@ const initialState = {
 };
 
 // Reducer function to handle state updates
-const reducer = (
-  state = initialState,
-  action: { type: string; payload: { optionValue: any; filterName: any } }
-) => {
+const reducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "SET_SORT":
       const { optionValue: sortOptionValue, filterName: sortFilterName } =
@@ -192,7 +190,7 @@ const reducer = (
     case "SET_FILTERS":
       //same as intial state but with variants from fetched data
       const filters = action.payload;
-      // console.log("innerFilter", filters);
+
       return { ...state, filters: filters };
 
     //check if strucutre is the same as initial state
@@ -229,7 +227,14 @@ const reducer = (
     case "SET_FILTERED_VARIANT_OPTIONS":
       return { ...state, filteredVariantOptions: action.payload };
     case "SET_FILTERED_PRODUCTS":
+      // create shallow copy of filtered products
+
       return { ...state, filteredProducts: action.payload };
+
+    case "SET_FILTERED_PRODUCTS_BY_VARIANT":
+      const filteredProductsByVariant = action.payload;
+
+      return { ...state, filteredProducts: filteredProductsByVariant };
     case "SET_PRODUCTS":
       return { ...state, products: action.payload };
     default:
@@ -455,44 +460,41 @@ export default function Example({
 
   // Filter Logic
 
-  const useFilteredProducts = useCallback((products, variantOptions) => {
-    const filteredProducts = [];
-    for (let i = 0; i < products.length; i++) {
-      const product = products[i];
-      let matchCount = 0;
+  //Variant Logic for filters
 
-      console.log("matchCount", matchCount);
+  const filterProductsByVariant = useCallback(
+    (variantOptions) => {
+      // Get checked variant options and their values
+      const checkedOptions = variantOptions.flatMap((variantOption) =>
+        variantOption.options
+          .filter((option) => option.checked)
+          .map((option) => option.value)
+      );
 
-      for (let j = 0; j < variantOptions.length; j++) {
-        const variantOption = variantOptions[j];
+      // Filter products and return only products that match any of the checked options and values
+      const filteredProducts = products.filter((product) => {
+        const productVariants = product.variants;
 
-        console.log("variantOption", variantOption);
+        // Check if any product variant matches any of the checked options and values
+        const hasMatch = productVariants.some((variant) =>
+          checkedOptions.some((checkedValue) =>
+            variant.options.some(
+              (variantOption) => variantOption.value === checkedValue
+            )
+          )
+        );
 
-        const variant = product.variants.find((variant) => {
-          console.log("variantss", variant);
-        });
+        return hasMatch;
+      });
 
-        console.log("variant", variant);
-      }
-
-      if (
-        matchCount === variantOptions.filter((option) => option.checked).length
-      ) {
-        filteredProducts.push(product);
-      }
-    }
-    console.log("filteredProducts", filteredProducts);
-    return filteredProducts;
-  }, []);
-
-  const filteredProductsVariants = useFilteredProducts(
-    products,
-    state.filteredVariantOptions
+      return filteredProducts;
+    },
+    [state.filteredVariantOptions, products]
   );
 
-  console.log("filteredProductsVariants", filteredProductsVariants);
-
-  // Filter brand options
+  useEffect(() => {
+    console.log("state.filteredProducts", state);
+  }, [state.filteredProducts]);
 
   const filterProducts = useCallback(
     (brandOptions) => {
@@ -515,7 +517,6 @@ export default function Example({
         return productBrandMatches;
       });
 
-      // console.log("filteredProducts", filteredProducts);
       return filteredProducts;
     },
     [state.filteredBrandOptions, products]
@@ -558,9 +559,11 @@ export default function Example({
 
   useEffect(() => {
     const brandOptions = getBrandOptions;
-    // console.log("brandOptions", brandOptions);
+
     dispatch({ type: "SET_FILTERED_BRAND_OPTIONS", payload: brandOptions });
   }, [getBrandOptions]);
+
+  // Set filtered products with brand options
 
   useEffect(() => {
     const filteredProducts = updateFilteredProducts(state.filteredBrandOptions);
@@ -569,6 +572,15 @@ export default function Example({
 
     // console.log("state.filteredProducts", state);
   }, [state.filteredBrandOptions, updateFilteredProducts]);
+
+  // Set filtered products with variant options
+
+  useEffect(() => {
+    const filteredProducts = filterProductsByVariant(
+      state.filteredVariantOptions
+    );
+    dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
+  }, [state.filteredVariantOptions, filterProductsByVariant]);
 
   // Use the filteredProducts state in your component
 
@@ -635,8 +647,6 @@ export default function Example({
       ) as FormattedProduct[];
 
       setProducts(reformattedProducts);
-
-      // console.log("previousPage", previousPage);
     },
     [products]
   );
@@ -723,9 +733,9 @@ export default function Example({
 
   // const { sort, filters } = state;
 
-  // console.log("state", state);
   const productsToRender =
-    (state.filteredBrandOptions.options || []).length > 0
+    (state.filteredBrandOptions.options || []).length > 0 ||
+    state.filteredVariantOptions.some((option) => option.options.length > 0)
       ? state.filteredProducts
       : products;
 
@@ -1114,22 +1124,21 @@ export const getStaticProps: GetStaticProps = async (
 
   const slug = context.params.slug;
 
-  // console.log("slug", slug);
-
   const products = await getCollectionPageDataByHandle(slug && slug);
 
-  // console.log("variants", products.variants);
-  // console.log("brands", products.brands);
-
   const filter = [...products.variants, ...products.brands];
-
-  // console.log("filter", filter);
 
   //brand = vendor
   //color = variant option 1
   //size = variant option 2
 
   const cursor = products.first.collection.products.edges[0].cursor;
+
+  //remove variants that are not in product arra
+
+  console.log("filteredVariants", products);
+
+  //remove variant options that are not in product array
 
   const amountPerPage = 6;
 
