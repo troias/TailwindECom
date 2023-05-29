@@ -164,6 +164,7 @@ const initialState = {
     })),
   })),
   filteredBrandOptions: [],
+  filteredVariantOptions: [],
   filteredProducts: [],
   products: [],
 };
@@ -225,6 +226,8 @@ const reducer = (
       return { ...state, filters: updatedFiltersArr };
     case "SET_FILTERED_BRAND_OPTIONS":
       return { ...state, filteredBrandOptions: action.payload };
+    case "SET_FILTERED_VARIANT_OPTIONS":
+      return { ...state, filteredVariantOptions: action.payload };
     case "SET_FILTERED_PRODUCTS":
       return { ...state, filteredProducts: action.payload };
     case "SET_PRODUCTS":
@@ -333,6 +336,7 @@ export default function Example({
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
             vendor: product.node.vendor,
+            variants: variantOptions,
 
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
@@ -409,6 +413,8 @@ export default function Example({
 
   // Filter Logic
 
+  //Variant Logic for filters
+
   const getListOfCheckedVariantOptions = useCallback(() => {
     // get all variant options
 
@@ -438,6 +444,54 @@ export default function Example({
     return checkedVariantOptions;
   }, [state.filters]);
 
+  useEffect(() => {
+    const checkedVariantOptions = getListOfCheckedVariantOptions();
+
+    dispatch({
+      type: "SET_FILTERED_VARIANT_OPTIONS",
+      payload: checkedVariantOptions,
+    });
+  }, [getListOfCheckedVariantOptions]);
+
+  // Filter Logic
+
+  const useFilteredProducts = useCallback((products, variantOptions) => {
+    const filteredProducts = [];
+    for (let i = 0; i < products.length; i++) {
+      const product = products[i];
+      let matchCount = 0;
+
+      console.log("matchCount", matchCount);
+
+      for (let j = 0; j < variantOptions.length; j++) {
+        const variantOption = variantOptions[j];
+
+        console.log("variantOption", variantOption);
+
+        const variant = product.variants.find((variant) => {
+          console.log("variantss", variant);
+        });
+
+        console.log("variant", variant);
+      }
+
+      if (
+        matchCount === variantOptions.filter((option) => option.checked).length
+      ) {
+        filteredProducts.push(product);
+      }
+    }
+    console.log("filteredProducts", filteredProducts);
+    return filteredProducts;
+  }, []);
+
+  const filteredProductsVariants = useFilteredProducts(
+    products,
+    state.filteredVariantOptions
+  );
+
+  console.log("filteredProductsVariants", filteredProductsVariants);
+
   // Filter brand options
 
   const filterProducts = useCallback(
@@ -451,8 +505,6 @@ export default function Example({
         console.error("Error in brandOptions.options:", error);
         return []; // Return an empty array if brandOptions.options throws an error
       }
-
-      console.log("checkedBrandOptions", checkedBrandOptions);
 
       // If no brand options are checked, return all products
       const filteredProducts = products.filter((product) => {
@@ -472,14 +524,11 @@ export default function Example({
   const updateFilteredProducts = useCallback(
     (brandOptions) => {
       const filteredProducts = filterProducts(brandOptions);
-      // console.log("updateFilteredProducts-filteredProducts", filteredProducts);
+
       return filteredProducts;
-      // dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
     },
     [filterProducts]
   );
-
-  console.log(" state.filteredProducts", state.filteredProducts);
 
   const getCheckedOptions = useCallback(() => {
     const brandFilter = state.filters.find((filter) => filter.id === "brand");
@@ -515,10 +564,10 @@ export default function Example({
 
   useEffect(() => {
     const filteredProducts = updateFilteredProducts(state.filteredBrandOptions);
-    console.log("filteredProducts", filteredProducts);
+    // console.log("filteredProducts", filteredProducts);
     dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
 
-    console.log("state.filteredProducts", state);
+    // console.log("state.filteredProducts", state);
   }, [state.filteredBrandOptions, updateFilteredProducts]);
 
   // Use the filteredProducts state in your component
@@ -549,9 +598,9 @@ export default function Example({
             description: product.node.description,
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
-          } as FormattedProduct;
+          };
         }
-      );
+      ) as FormattedProduct;
 
       setProducts(reformattedProducts);
     },
