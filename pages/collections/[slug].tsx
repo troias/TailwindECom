@@ -189,6 +189,11 @@ const reducer = (state = initialState, action: any) => {
 
     case "SET_FILTERS":
       //same as intial state but with variants from fetched data
+
+      return { ...state, filters: action.payload };
+
+    case "UPDATE_FILTERERS_BASED_ON_PRODUCTS_FETCHED":
+      //same as intial state but with variants from fetched data
       const filters = action.payload;
 
       return { ...state, filters: filters };
@@ -229,6 +234,8 @@ const reducer = (state = initialState, action: any) => {
     case "SET_FILTERED_PRODUCTS":
       // create shallow copy of filtered products
 
+      console.log("SET_FILTERED_PRODUCTS", action.payload);
+
       return { ...state, filteredProducts: action.payload };
 
     case "SET_FILTERED_PRODUCTS_BY_VARIANT":
@@ -261,28 +268,194 @@ export default function Example({
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const extractPaginationDataShopifyStoreFrontApi = (
+    data: any
+  ): PaginationData => {
+    const hasNextPage = data.first.collection.products.pageInfo.hasNextPage;
+    const hasPreviousPage =
+      data.first.collection.products.pageInfo.hasPreviousPage;
+    const edges = data.first.collection.products.edges;
+    const totalCount = data.totalProductCount || 5;
+
+    // console.log("edges", edges);
+
+    const reformateedProducts = edges.map((product: UnformattedProduct) => {
+      type Variant = {
+        value: string;
+        label: string;
+      };
+
+      type VariantsResponse = {
+        variants: {
+          edges: {
+            node: {
+              selectedOptions: {
+                name: string;
+                value: string;
+              }[];
+            };
+          }[];
+        };
+      };
+
+      const variantOptions = getVariantOptions(product.node);
+      // console.log("variantOptionsInnerOptions", variantOptions);
+
+      return {
+        id: product.node.id,
+        name: product.node.title,
+        href: "#",
+        price: product.node.priceRange.maxVariantPrice.amount,
+        description: product.node.description,
+        vendor: product.node.vendor,
+        variants: variantOptions,
+        imageSrc: product.node.images.edges[0].node.url,
+        imageAlt: product.node.images.edges[0].node.altText,
+      };
+    }) as FormattedProduct[];
+
+    return {
+      hasNextPage,
+      hasPreviousPage,
+      edges,
+      reformateedProducts,
+      totalCount,
+    };
+  };
+
+  const productsData = extractPaginationDataShopifyStoreFrontApi(products22);
+
+  const [products, setProducts] = useState(
+    productsData.reformateedProducts || []
+  );
+
   useEffect(() => {
     const fetchFilters = async () => {
-      //filter from fetched data //filters from initial state
-
+      // Filter from fetched data or filters from initial state
       const filterOptions = [
         ...filters.filter((filter) => filter.id === "amountPerPage"),
-
         ...filter,
       ];
 
-      //dispatch and update filter state
-
-      dispatch({
-        type: "SET_FILTERS",
-        payload: filterOptions,
-      });
-
-      // console.log("filterOptions", filterOptions);
+      return filterOptions;
     };
 
-    fetchFilters();
+    const adjustFiltersBasedOnProductsFetched = async () => {
+      const updatedFilters = await fetchFilters();
+
+      if (updatedFilters.length > 0) {
+        // Filter options based on available products
+        const availableOptions = updatedFilters.map((filter) => {
+          if (filter.id === "amountPerPage") {
+            // Update "Amount Per Page" options from filters
+            return {
+              ...filter,
+            };
+          }
+          if (filter.id === "brand") {
+            // Add "Brand" options from products
+            const brands = products.map((product) => product.vendor);
+            const uniqueBrands = [...new Set(brands)];
+            const filteredBrandOptions = filter.options.filter((option) =>
+              uniqueBrands.includes(option.value)
+            );
+            return {
+              ...filter,
+              options: filteredBrandOptions.map((option) => ({
+                ...option,
+                checked: option.checked === false ? false : option.checked,
+              })),
+            };
+          }
+          if (filter.options) {
+            const filteredOptions = filter.options.filter((option) =>
+              products.some((product) =>
+                product.variants.some((variant) =>
+                  variant.options.some(
+                    (variantOption) => variantOption.value === option.value
+                  )
+                )
+              )
+            );
+            return { ...filter, options: filteredOptions };
+          }
+          return filter;
+        });
+
+        console.log("availableOptions", availableOptions);
+        // Dispatch updated filters
+
+        dispatch({
+          type: "UPDATE_FILTERERS_BASED_ON_PRODUCTS_FETCHED",
+          payload: availableOptions,
+        });
+      }
+    };
+
+    adjustFiltersBasedOnProductsFetched();
   }, []);
+
+  console.log("filtedProducts", state);
+
+  // useEffect(() => {
+  //   const adjustFiltersBasedOnProductsFetched = async () => {
+  //     if (filters.length > 0) {
+  //       // Filter options based on available products
+  //       const availableOptions = filters.map((filter) => {
+  //         if (filter.id === "amountPerPage") {
+  //           // Update "Amount Per Page" options from filters
+  //           return {
+  //             ...filter,
+  //             options: filter.options.map((option) => ({
+  //               ...option,
+  //               checked: false,
+  //             })),
+  //           };
+  //         }
+  //         if (filter.id === "brand") {
+  //           // Add "Brand" options from products
+  //           const brands = products.map((product) => product.vendor);
+  //           const uniqueBrands = [...new Set(brands)];
+  //           const filteredBrandOptions = filter.options.filter((option) =>
+  //             uniqueBrands.includes(option.value)
+  //           );
+  //           return {
+  //             ...filter,
+  //             options: filteredBrandOptions.map((option) => ({
+  //               ...option,
+  //               checked: option.checked === false ? false : option.checked,
+  //             })),
+  //           };
+  //         }
+  //         if (filter.options) {
+  //           const filteredOptions = filter.options.filter((option) =>
+  //             products.some((product) =>
+  //               product.variants.some((variant) =>
+  //                 variant.options.some(
+  //                   (variantOption) => variantOption.value === option.value
+  //                 )
+  //               )
+  //             )
+  //           );
+  //           return { ...filter, options: filteredOptions };
+  //         }
+  //         return filter;
+  //       });
+
+  //       // Update the filters state with the available options
+  //       return availableOptions;
+  //     }
+  //   };
+
+  // if (filters.length > 0 && products.length > 0) {
+  //   adjustFiltersBasedOnProductsFetched().then((updatedFilters) => {
+  //     dispatch({
+  //       type: "UPDATE_FILTERERS_BASED_ON_PRODUCTS_FETCHED",
+  //       payload: updatedFilters,
+  //     });
+  //   });
+  // }
+  // }, [filters, products]);
 
   const amountPerPageOptions = state.filters[0].options.filter(
     (option) => option.checked
@@ -354,67 +527,6 @@ export default function Example({
 
     updateProductsOnAmountPerPageChange();
   }, [amountPerPagee]);
-
-  const extractPaginationDataShopifyStoreFrontApi = (
-    data: any
-  ): PaginationData => {
-    const hasNextPage = data.first.collection.products.pageInfo.hasNextPage;
-    const hasPreviousPage =
-      data.first.collection.products.pageInfo.hasPreviousPage;
-    const edges = data.first.collection.products.edges;
-    const totalCount = data.totalProductCount || 5;
-
-    // console.log("edges", edges);
-
-    const reformateedProducts = edges.map((product: UnformattedProduct) => {
-      type Variant = {
-        value: string;
-        label: string;
-      };
-
-      type VariantsResponse = {
-        variants: {
-          edges: {
-            node: {
-              selectedOptions: {
-                name: string;
-                value: string;
-              }[];
-            };
-          }[];
-        };
-      };
-
-      const variantOptions = getVariantOptions(product.node);
-      // console.log("variantOptionsInnerOptions", variantOptions);
-
-      return {
-        id: product.node.id,
-        name: product.node.title,
-        href: "#",
-        price: product.node.priceRange.maxVariantPrice.amount,
-        description: product.node.description,
-        vendor: product.node.vendor,
-        variants: variantOptions,
-        imageSrc: product.node.images.edges[0].node.url,
-        imageAlt: product.node.images.edges[0].node.altText,
-      };
-    }) as FormattedProduct[];
-
-    return {
-      hasNextPage,
-      hasPreviousPage,
-      edges,
-      reformateedProducts,
-      totalCount,
-    };
-  };
-
-  const productsData = extractPaginationDataShopifyStoreFrontApi(products22);
-
-  const [products, setProducts] = useState(
-    productsData.reformateedProducts || []
-  );
 
   // Filter Logic
 
@@ -493,12 +605,14 @@ export default function Example({
   );
 
   useEffect(() => {
-    console.log("state.filteredProducts", state);
+    // console.log("state.filteredProducts", state);
   }, [state.filteredProducts]);
 
   const filterProducts = useCallback(
     (brandOptions) => {
       let checkedBrandOptions = [];
+
+      console.log("brandOptions", brandOptions);
       try {
         checkedBrandOptions = brandOptions.options.filter(
           (option) => option.checked
@@ -517,6 +631,8 @@ export default function Example({
         return productBrandMatches;
       });
 
+      console.log("filteredProducts", filteredProducts);
+
       return filteredProducts;
     },
     [state.filteredBrandOptions, products]
@@ -525,6 +641,8 @@ export default function Example({
   const updateFilteredProducts = useCallback(
     (brandOptions) => {
       const filteredProducts = filterProducts(brandOptions);
+
+      console.log("updateFilteredProducts-filteredProducts", filteredProducts);
 
       return filteredProducts;
     },
@@ -567,7 +685,7 @@ export default function Example({
 
   useEffect(() => {
     const filteredProducts = updateFilteredProducts(state.filteredBrandOptions);
-    // console.log("filteredProducts", filteredProducts);
+    console.log("useEffect-filteredProducts", filteredProducts);
     dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
 
     // console.log("state.filteredProducts", state);
@@ -1136,7 +1254,7 @@ export const getStaticProps: GetStaticProps = async (
 
   //remove variants that are not in product arra
 
-  console.log("filteredVariants", products);
+  // console.log("filteredVariants", products);
 
   //remove variant options that are not in product array
 
