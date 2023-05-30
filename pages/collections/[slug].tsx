@@ -684,6 +684,8 @@ export default function Example({
 
       const nextPage = await fetchNextPage();
 
+      console.log("nextPage:", nextPage);
+
       const reformattedProducts = nextPage.collection.products.edges.map(
         (product: UnformattedProduct) => {
           const variantOptions = getVariantOptions(product.node);

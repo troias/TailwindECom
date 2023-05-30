@@ -923,6 +923,11 @@ export const getCollectionPageDataByHandle = async (
     amount: amount,
   };
 
+  console.log(
+    "collectionPageDataVarsFirst",
+    collectionPageDataVarsFirst.handle
+  );
+
   const collectionPageDataFirst = await graphqlstorefront(
     collectionPageDataQueryFirst,
     collectionPageDataVarsFirst
