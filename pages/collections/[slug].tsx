@@ -280,8 +280,6 @@ export default function Example({
     const edges = data.first.collection.products.edges;
     const totalCount = data.totalProductCount || 5;
 
-    // console.log("edges", edges);
-
     const reformateedProducts = edges.map((product: UnformattedProduct) => {
       type Variant = {
         value: string;
@@ -302,7 +300,6 @@ export default function Example({
       };
 
       const variantOptions = getVariantOptions(product.node);
-      // console.log("variantOptionsInnerOptions", variantOptions);
 
       return {
         id: product.node.id,
@@ -342,16 +339,13 @@ export default function Example({
 
       return filterOptions;
     };
-    console.log("filterset");
+
     fetchFilters().then((filters) => {
       dispatch({ type: "SET_FILTERS", payload: filters });
     });
 
     const adjustFiltersBasedOnProductsFetched = async () => {
-      console.log("entered");
       const updatedFilters = await fetchFilters();
-
-      console.log("updatedFilters", updatedFilters);
 
       if (updatedFilters.length > 0) {
         // Filter options based on available products
@@ -394,15 +388,12 @@ export default function Example({
           return filter;
         });
 
-        console.log("availableOptions", availableOptions);
-
         return availableOptions;
       }
     };
 
     const getFilters = async () => {
       const filteredFilter = await adjustFiltersBasedOnProductsFetched();
-      console.log("getFilters-filteredFilter", filteredFilter);
 
       dispatch({
         type: "UPDATE_FILTERERS_BASED_ON_PRODUCTS_FETCHED",
@@ -412,8 +403,6 @@ export default function Example({
 
     getFilters();
   }, [products]);
-
-  // console.log("state", state.filters);
 
   const amountPerPageOptions = state.filters[0].options.filter(
     (option) => option.checked
@@ -640,7 +629,7 @@ export default function Example({
     const filteredProductsByBrand = updateFilteredProducts(
       state.filteredBrandOptions
     );
-    console.log("useEffect-filteredProducts", filteredProductsByBrand);
+
     dispatch({
       type: "SET_FILTERED_PRODUCTS_BY_BRAND",
       payload: filteredProductsByBrand,
@@ -666,16 +655,12 @@ export default function Example({
       filteredProductsByBrand
     );
 
-    console.log("mergedProducts", mergedProducts);
-
     //remove duplicates
 
     const uniqueMergedProducts = mergedProducts.filter(
       (product, index, self) =>
         index === self.findIndex((p) => p.id === product.id)
     );
-
-    console.log("uniqueMergedProducts", uniqueMergedProducts);
 
     dispatch({
       type: "SET_FILTERED_PRODUCTS",
@@ -1239,8 +1224,6 @@ export const getStaticProps: GetStaticProps = async (
   const cursor = products.first.collection.products.edges[0].cursor;
 
   //remove variants that are not in product arra
-
-  // console.log("filteredVariants", products);
 
   //remove variant options that are not in product array
 
