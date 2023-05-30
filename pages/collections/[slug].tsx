@@ -234,14 +234,17 @@ const reducer = (state = initialState, action: any) => {
     case "SET_FILTERED_PRODUCTS":
       // create shallow copy of filtered products
 
-      console.log("SET_FILTERED_PRODUCTS", action.payload);
-
       return { ...state, filteredProducts: action.payload };
 
     case "SET_FILTERED_PRODUCTS_BY_VARIANT":
       const filteredProductsByVariant = action.payload;
 
       return { ...state, filteredProducts: filteredProductsByVariant };
+
+    case "SET_FILTERED_PRODUCTS_BY_BRAND":
+      const filteredProductsByBrand = action.payload;
+      return { ...state, filteredProducts: filteredProductsByBrand };
+
     case "SET_PRODUCTS":
       return { ...state, products: action.payload };
     default:
@@ -339,17 +342,25 @@ export default function Example({
 
       return filterOptions;
     };
+    console.log("filterset");
+    fetchFilters().then((filters) => {
+      dispatch({ type: "SET_FILTERS", payload: filters });
+    });
 
     const adjustFiltersBasedOnProductsFetched = async () => {
+      console.log("entered");
       const updatedFilters = await fetchFilters();
+
+      console.log("updatedFilters", updatedFilters);
 
       if (updatedFilters.length > 0) {
         // Filter options based on available products
         const availableOptions = updatedFilters.map((filter) => {
           if (filter.id === "amountPerPage") {
-            // Update "Amount Per Page" options from filters
+            //do nothing keep same structure as state
             return {
               ...filter,
+              options: state.filters[0].options,
             };
           }
           if (filter.id === "brand") {
@@ -379,83 +390,30 @@ export default function Example({
             );
             return { ...filter, options: filteredOptions };
           }
+
           return filter;
         });
 
         console.log("availableOptions", availableOptions);
-        // Dispatch updated filters
 
-        dispatch({
-          type: "UPDATE_FILTERERS_BASED_ON_PRODUCTS_FETCHED",
-          payload: availableOptions,
-        });
+        return availableOptions;
       }
     };
 
-    adjustFiltersBasedOnProductsFetched();
-  }, []);
+    const getFilters = async () => {
+      const filteredFilter = await adjustFiltersBasedOnProductsFetched();
+      console.log("getFilters-filteredFilter", filteredFilter);
 
-  console.log("filtedProducts", state);
+      dispatch({
+        type: "UPDATE_FILTERERS_BASED_ON_PRODUCTS_FETCHED",
+        payload: filteredFilter,
+      });
+    };
 
-  // useEffect(() => {
-  //   const adjustFiltersBasedOnProductsFetched = async () => {
-  //     if (filters.length > 0) {
-  //       // Filter options based on available products
-  //       const availableOptions = filters.map((filter) => {
-  //         if (filter.id === "amountPerPage") {
-  //           // Update "Amount Per Page" options from filters
-  //           return {
-  //             ...filter,
-  //             options: filter.options.map((option) => ({
-  //               ...option,
-  //               checked: false,
-  //             })),
-  //           };
-  //         }
-  //         if (filter.id === "brand") {
-  //           // Add "Brand" options from products
-  //           const brands = products.map((product) => product.vendor);
-  //           const uniqueBrands = [...new Set(brands)];
-  //           const filteredBrandOptions = filter.options.filter((option) =>
-  //             uniqueBrands.includes(option.value)
-  //           );
-  //           return {
-  //             ...filter,
-  //             options: filteredBrandOptions.map((option) => ({
-  //               ...option,
-  //               checked: option.checked === false ? false : option.checked,
-  //             })),
-  //           };
-  //         }
-  //         if (filter.options) {
-  //           const filteredOptions = filter.options.filter((option) =>
-  //             products.some((product) =>
-  //               product.variants.some((variant) =>
-  //                 variant.options.some(
-  //                   (variantOption) => variantOption.value === option.value
-  //                 )
-  //               )
-  //             )
-  //           );
-  //           return { ...filter, options: filteredOptions };
-  //         }
-  //         return filter;
-  //       });
+    getFilters();
+  }, [products]);
 
-  //       // Update the filters state with the available options
-  //       return availableOptions;
-  //     }
-  //   };
-
-  // if (filters.length > 0 && products.length > 0) {
-  //   adjustFiltersBasedOnProductsFetched().then((updatedFilters) => {
-  //     dispatch({
-  //       type: "UPDATE_FILTERERS_BASED_ON_PRODUCTS_FETCHED",
-  //       payload: updatedFilters,
-  //     });
-  //   });
-  // }
-  // }, [filters, products]);
+  // console.log("state", state.filters);
 
   const amountPerPageOptions = state.filters[0].options.filter(
     (option) => option.checked
@@ -604,15 +562,12 @@ export default function Example({
     [state.filteredVariantOptions, products]
   );
 
-  useEffect(() => {
-    // console.log("state.filteredProducts", state);
-  }, [state.filteredProducts]);
+  //Brand Filter Logic
 
   const filterProducts = useCallback(
     (brandOptions) => {
       let checkedBrandOptions = [];
 
-      console.log("brandOptions", brandOptions);
       try {
         checkedBrandOptions = brandOptions.options.filter(
           (option) => option.checked
@@ -631,8 +586,6 @@ export default function Example({
         return productBrandMatches;
       });
 
-      console.log("filteredProducts", filteredProducts);
-
       return filteredProducts;
     },
     [state.filteredBrandOptions, products]
@@ -641,8 +594,6 @@ export default function Example({
   const updateFilteredProducts = useCallback(
     (brandOptions) => {
       const filteredProducts = filterProducts(brandOptions);
-
-      console.log("updateFilteredProducts-filteredProducts", filteredProducts);
 
       return filteredProducts;
     },
@@ -681,26 +632,61 @@ export default function Example({
     dispatch({ type: "SET_FILTERED_BRAND_OPTIONS", payload: brandOptions });
   }, [getBrandOptions]);
 
-  // Set filtered products with brand options
-
   useEffect(() => {
-    const filteredProducts = updateFilteredProducts(state.filteredBrandOptions);
-    console.log("useEffect-filteredProducts", filteredProducts);
-    dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
-
-    // console.log("state.filteredProducts", state);
-  }, [state.filteredBrandOptions, updateFilteredProducts]);
-
-  // Set filtered products with variant options
-
-  useEffect(() => {
-    const filteredProducts = filterProductsByVariant(
+    const filteredProductsByVariant = filterProductsByVariant(
       state.filteredVariantOptions
     );
-    dispatch({ type: "SET_FILTERED_PRODUCTS", payload: filteredProducts });
-  }, [state.filteredVariantOptions, filterProductsByVariant]);
 
-  // Use the filteredProducts state in your component
+    const filteredProductsByBrand = updateFilteredProducts(
+      state.filteredBrandOptions
+    );
+    console.log("useEffect-filteredProducts", filteredProductsByBrand);
+    dispatch({
+      type: "SET_FILTERED_PRODUCTS_BY_BRAND",
+      payload: filteredProductsByBrand,
+    });
+
+    function mergeFilteredProducts(
+      filteredProductsByVariant,
+      filteredProductsByBrand
+    ) {
+      // Perform the merging logic here
+      // For example, you can concatenate the two arrays
+      const mergedProducts = [
+        ...filteredProductsByVariant,
+        ...filteredProductsByBrand,
+      ];
+
+      // Return the merged array
+      return mergedProducts;
+    }
+
+    const mergedProducts = mergeFilteredProducts(
+      filteredProductsByVariant,
+      filteredProductsByBrand
+    );
+
+    console.log("mergedProducts", mergedProducts);
+
+    //remove duplicates
+
+    const uniqueMergedProducts = mergedProducts.filter(
+      (product, index, self) =>
+        index === self.findIndex((p) => p.id === product.id)
+    );
+
+    console.log("uniqueMergedProducts", uniqueMergedProducts);
+
+    dispatch({
+      type: "SET_FILTERED_PRODUCTS",
+      payload: uniqueMergedProducts,
+    });
+  }, [
+    state.filteredVariantOptions,
+    state.filteredBrandOptions,
+    filterProductsByVariant,
+    updateFilteredProducts,
+  ]);
 
   /// Pagination Logic
 
