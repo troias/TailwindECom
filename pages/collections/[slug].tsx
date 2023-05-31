@@ -260,10 +260,11 @@ export default function Example({
   filter,
 }: {
   products22: Products22;
-  handle: String;
-  cursor: String;
+  handle: string;
+  cursor: string;
   amountPerPage: number;
 }) {
+  console.log("cursor:", cursor);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -329,6 +330,13 @@ export default function Example({
     productsData.reformateedProducts || []
   );
 
+  //if intialProducts change update products
+  useEffect(() => {
+    const productsData = extractPaginationDataShopifyStoreFrontApi(products22);
+    setProducts(productsData.reformateedProducts);
+  }, [products22]);
+
+  console.log("products:", products);
   useEffect(() => {
     const fetchFilters = async () => {
       // Filter from fetched data or filters from initial state
@@ -419,7 +427,7 @@ export default function Example({
       ? amountPerPageOptions[0].value
       : (amountPerPage as number);
 
-  // if amount per page changes, update pageState
+  // // if amount per page changes, update pageState
 
   useEffect(() => {
     const updateProductsOnAmountPerPageChange = async () => {
@@ -444,40 +452,48 @@ export default function Example({
           if (currentAmountPerPage > 0) {
             return fetchPage(page, currentAmountPerPage);
           } else {
-            throw new Error("Fetch failed continuously."); // Throw an error if fetch fails continuously
+            return [];
           }
         }
       };
 
-      const pageData = await fetchPage(pageNumber, currentAmountPerPage);
+      try {
+        const pageData = await fetchPage(pageNumber, currentAmountPerPage);
 
-      const reformattedProducts = pageData.map(
-        (product: UnformattedProduct) => {
-          const variantOptions = getVariantOptions(product.node);
-          return {
-            id: product.node.id,
-            name: product.node.title,
-            href: "#",
-            price: product.node.priceRange.maxVariantPrice.amount,
-            description: product.node.description,
-            vendor: product.node.vendor,
-            variants: variantOptions,
+        const reformattedProducts = pageData.map(
+          (product: UnformattedProduct) => {
+            const variantOptions = getVariantOptions(product.node);
+            return {
+              id: product.node.id,
+              name: product.node.title,
+              href: "#",
+              price: product.node.priceRange.maxVariantPrice.amount,
+              description: product.node.description,
+              vendor: product.node.vendor,
+              variants: variantOptions,
+              imageSrc: product.node.images.edges[0].node.url,
+              imageAlt: "",
+            };
+          }
+        ) as FormattedProduct[];
 
-            imageSrc: product.node.images.edges[0].node.url,
-            imageAlt: "",
-          };
-        }
-      ) as FormattedProduct[];
-
-      setProducts(reformattedProducts);
+        setProducts(reformattedProducts);
+      } catch (error) {
+        // Handle the error here
+        console.error(
+          "An error occurred while updating products on amount per page change:",
+          error
+        );
+        // You can choose to display an error message to the user or perform any other error handling logic
+      }
     };
 
     updateProductsOnAmountPerPageChange();
   }, [amountPerPagee]);
 
-  // Filter Logic
+  // // Filter Logic
 
-  //Variant Logic for filters
+  // //Variant Logic for filters
 
   const getListOfCheckedVariantOptions = useCallback(() => {
     // get all variant options
@@ -551,7 +567,7 @@ export default function Example({
     [state.filteredVariantOptions, products]
   );
 
-  //Brand Filter Logic
+  // //Brand Filter Logic
 
   const filterProducts = useCallback(
     (brandOptions) => {
@@ -673,7 +689,7 @@ export default function Example({
     updateFilteredProducts,
   ]);
 
-  /// Pagination Logic
+  // /// Pagination Logic
 
   const fetchNextPageData = useCallback(
     async (data: Products22) => {
@@ -742,14 +758,20 @@ export default function Example({
     [products]
   );
 
-  //Pagination Logic
+  // //Pagination Logic
 
   const totalPages = () => {
     extractPaginationDataShopifyStoreFrontApi(products22);
 
     // six items per page
 
-    const totalPages = Math.ceil(products22.totalProductCount / amountPerPagee);
+    let totalPages = Math.ceil(products22.totalProductCount / amountPerPagee);
+
+    if (totalPages === 0) {
+      return (totalPages = 1);
+    }
+
+    console.log("totalPages:", products22.totalProductCount);
 
     return totalPages;
   };
@@ -764,42 +786,54 @@ export default function Example({
   };
 
   const gotoPage = async (page: number) => {
-    //Get the page number from the input field
+    try {
+      //Get the page number from the input field
+      const pageNumber = page;
 
-    const pageNumber = page;
-    const fetchPage = async (page: number) => {
-      const pageData = await fetchCollectionPage(
-        handle,
-        amountPerPage,
-        page,
-        cursor
-      );
-      return pageData;
-    };
-
-    const pageData = await fetchPage(pageNumber);
-
-    const reformattedProducts = pageData.map((product: UnformattedProduct) => {
-      const variantOptions = getVariantOptions(product.node);
-
-      return {
-        id: product.node.id,
-        name: product.node.title,
-        href: "#",
-        price: product.node.priceRange.maxVariantPrice.amount,
-        description: product.node.description,
-        vendor: product.node.vendor,
-        variants: variantOptions,
-        imageSrc: product.node.images.edges[0].node.url,
-        imageAlt: "",
+      const fetchPage = async (page: number) => {
+        const pageData = await fetchCollectionPage(
+          handle,
+          amountPerPage,
+          page,
+          cursor
+        );
+        return pageData;
       };
-    }) as FormattedProduct[];
 
-    //set products for page
-    setProducts(reformattedProducts);
+      const pageData = await fetchPage(pageNumber);
 
-    //set page number
-    setPage(pageNumber);
+      const reformattedProducts = pageData.map(
+        (product: UnformattedProduct) => {
+          const variantOptions = getVariantOptions(product.node);
+
+          return {
+            id: product.node.id,
+            name: product.node.title,
+            href: "#",
+            price: product.node.priceRange.maxVariantPrice.amount,
+            description: product.node.description,
+            vendor: product.node.vendor,
+            variants: variantOptions,
+            imageSrc: product.node.images.edges[0].node.url,
+            imageAlt: "",
+          };
+        }
+      ) as FormattedProduct[];
+
+      //set products for page
+      setProducts(reformattedProducts);
+
+      //set page number
+      setPage(pageNumber);
+    } catch (error) {
+      // Handle the error here
+      console.error(
+        "An error occurred while fetching and formatting the page data:",
+        error
+      );
+      return []; // Return an empty array if the page data fetch fails
+      // You can choose to display an error message to the user or perform any other error handling logic
+    }
   };
 
   //Filter Logic
@@ -1219,17 +1253,32 @@ export const getStaticProps: GetStaticProps = async (
 
   const filter = [...products.variants, ...products.brands];
 
+  console.log("slug", slug);
+
   //brand = vendor
   //color = variant option 1
   //size = variant option 2
 
-  const cursor = products.first.collection.products.edges[0].cursor;
+  //Cursor for first product on page -> used for pagination -> empty if collection empty
+
+  let cursor = "";
+  try {
+    cursor = products.first.collection.products.edges[0].cursor || "";
+  } catch (error) {
+    console.log("error:", error);
+  }
 
   //remove variants that are not in product arra
 
   //remove variant options that are not in product array
 
   const amountPerPage = 6;
+
+  // console.log("products:", products.first);
+
+  // console.log("products:", products.first.collection.products.edges);
+
+  console.log("products", products);
 
   return {
     props: {
@@ -1240,52 +1289,6 @@ export const getStaticProps: GetStaticProps = async (
       products22: products,
       filter,
     },
+    revalidate: 1,
   };
 };
-
-// const filters = [
-//   {
-//     id: "amountPerPage",
-//     name: "Amount Per Page",
-//     options: [
-//       { value: "6", label: "6", checked: false },
-//       { value: "12", label: "12", checked: false },
-//       { value: "24", label: "24", checked: false },
-//       { value: "48", label: "48", checked: false },
-//     ],
-//   },
-//   {
-//     id: "brand",
-//     name: "Brand",
-//     options: [
-//       { value: "clothing-company", label: "Clothing Company", checked: false },
-//       { value: "fashion-inc", label: "Fashion Inc.", checked: false },
-//       { value: "shoes-n-more", label: "Shoes 'n More", checked: false },
-//       { value: "supplies-n-stuff", label: "Supplies 'n Stuff", checked: false },
-//     ],
-//   },
-//   {
-//     id: "color",
-//     name: "Color",
-//     options: [
-//       { value: "white", label: "White", checked: false },
-//       { value: "black", label: "Black", checked: false },
-//       { value: "grey", label: "Grey", checked: false },
-//       { value: "blue", label: "Blue", checked: false },
-//       { value: "olive", label: "Olive", checked: false },
-//       { value: "tan", label: "Tan", checked: false },
-//     ],
-//   },
-//   {
-//     id: "sizes",
-//     name: "Sizes",
-//     options: [
-//       { value: "xs", label: "XS", checked: false },
-//       { value: "s", label: "S", checked: false },
-//       { value: "m", label: "M", checked: false },
-//       { value: "l", label: "L", checked: false },
-//       { value: "xl", label: "XL", checked: false },
-//       { value: "2xl", label: "2XL", checked: false },
-//     ],
-//   },
-// ];

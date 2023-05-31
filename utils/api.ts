@@ -923,11 +923,6 @@ export const getCollectionPageDataByHandle = async (
     amount: amount,
   };
 
-  console.log(
-    "collectionPageDataVarsFirst",
-    collectionPageDataVarsFirst.handle
-  );
-
   const collectionPageDataFirst = await graphqlstorefront(
     collectionPageDataQueryFirst,
     collectionPageDataVarsFirst
@@ -979,10 +974,35 @@ export const getCollectionPageDataByHandle = async (
     }
   `;
 
+  function getValidIndex(collectionData, amount) {
+    let index = amount - 1;
+    const edges = collectionData.collection.products.edges;
+    while (index >= edges.length && index >= 0) {
+      index--;
+    }
+    return index;
+  }
+
+  // console.log("getValidIndex", getValidIndex(collectionPageDataFirst, amount));
+  // console.log("defaultAmount", amount);
+  // console.log(
+  //   "amountOfProducts",
+  //   collectionPageDataFirst.collection.products.edges.length
+  // );
+  // console.log("collection handle", handle);
+
+  // Usage example
+
+  const edgeIndex = getValidIndex(collectionPageDataFirst, amount);
+  const cursor =
+    edgeIndex >= 0
+      ? collectionPageDataFirst.collection.products.edges[edgeIndex].cursor
+      : "";
+
   const collectionPageDataVarsNxt = {
     handle: handle,
     amount: amount,
-    after: collectionPageDataFirst.collection.products.edges[amount - 1].cursor,
+    after: cursor,
   };
 
   const collectionPageDataNxt = await graphqlstorefront(
@@ -1035,16 +1055,43 @@ export const getCollectionPageDataByHandle = async (
       }
     }
   `;
+  const beforeCursor =
+    collectionPageDataNxt &&
+    collectionPageDataNxt.collection &&
+    collectionPageDataNxt.collection.products &&
+    collectionPageDataNxt.collection.products.edges &&
+    collectionPageDataNxt.collection.products.edges.length > 0
+      ? collectionPageDataNxt.collection.products.edges[0].cursor
+      : "";
+
   const collectionPageDataVarsPrev = {
     handle: handle,
     amount: amount,
-    before: collectionPageDataNxt.collection.products.edges[0].cursor || null,
+    before: beforeCursor,
   };
 
   const collectionPageDataPrev = await graphqlstorefront(
     collectionPageDataQueryPrev,
     collectionPageDataVarsPrev
   );
+
+  // console.log(
+  //   " collectionPageDataNxt.collection.products",
+  //   collectionPageDataNxt.collection.products
+  // );
+
+  // console.log(" collectionPageDataVarsPrev", collectionPageDataVarsPrev);
+
+  // console.log(" collectionPageDataPrev", collectionPageDataPrev);
+  // console.log(
+  //   "collectionPageDataNxt",
+  //   collectionPageDataNxt.collection.products.edges
+  // );
+
+  // console.log(
+  //   "collectionPageDataFirst",
+  //   collectionPageDataFirst.collection.products.edges
+  // );
 
   // FilterLogic for brands/vendor
 
@@ -1216,11 +1263,6 @@ export const getCollectionPageDataByHandle = async (
   };
 
   const newArr = getVariantOptionThenBuildArrayToHouse(arrWithSet, options);
-
-  // console.log(
-  //   "optionsArray",
-  //   collectionPageDataFirst.collection.products.edges
-  // );
 
   return {
     first: collectionPageDataFirst,
