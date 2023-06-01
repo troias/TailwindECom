@@ -12,8 +12,6 @@ import {
 
 import { formatDate } from "../../utils/dataReformatting";
 
-type Props = {};
-
 import {
   Fragment,
   useState,
@@ -21,7 +19,6 @@ import {
   useReducer,
   useMemo,
   useEffect,
-  use,
 } from "react";
 import {
   Dialog,
@@ -31,20 +28,13 @@ import {
   Tab,
   Transition,
 } from "@headlessui/react";
-import {
-  Bars3Icon,
-  MagnifyingGlassIcon,
-  QuestionMarkCircleIcon,
-  ShoppingBagIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 import { fetchCollectionPage } from "../../utils/api";
 import { getVariantOptions } from "../../utils/dataReformatting";
-import { de } from "date-fns/locale";
-import { set } from "date-fns";
-import { stat } from "fs";
+
+//SortOptions used to populate sort state in reducer
 
 const sortOptions = [
   { name: "Most Popular", href: "#", checked: false },
@@ -53,6 +43,11 @@ const sortOptions = [
   { name: "Price: Low to High", href: "#", checked: false },
   { name: "Price: High to Low", href: "#", checked: false },
 ];
+
+// filters used to populate amountPerPage and filters state in reducer -< filters then replaced by filters from fetched data
+// In Fetched data brands are vendors on products from shopify
+// Color and sizes are variants on products from shopify
+
 const filters = [
   {
     id: "amountPerPage",
@@ -150,11 +145,21 @@ function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+// Get the data for the collection page using the handle on first
+// Next uses the first to calculate the total number of pages and to get the first page of products using cursor
+// Next uses the cursor to get the next page of products
+// Next uses the cursor to get the previous page of products
+// ToalProductCount is used to calculate the total number of pages
+// Brands are used to populate the brand filter
+// Variants are used to populate the variant filter
+
 type Products22 = {
   first: any;
   next: any;
   previous: any;
   totalProductCount: any;
+  brands: any;
+  variants: any;
 };
 
 // Initial filterState
@@ -186,7 +191,7 @@ const reducer = (state = initialState, action: any) => {
     case "SET_SORT":
       return { ...state, sort: action.payload };
 
-    //same as intial state but with variants from fetched data
+    //same as intial state but with variants S
 
     case "SET_FILTERS":
       //same as intial state but with variants from fetched data
@@ -234,23 +239,26 @@ const reducer = (state = initialState, action: any) => {
       return { ...state, filteredVariantOptions: action.payload };
     case "SET_FILTERED_PRODUCTS":
       // create shallow copy of filtered products
-
       return { ...state, filteredProducts: action.payload };
-
     case "SET_FILTERED_PRODUCTS_BY_VARIANT":
       const filteredProductsByVariant = action.payload;
-
       return { ...state, filteredProducts: filteredProductsByVariant };
-
     case "SET_FILTERED_PRODUCTS_BY_BRAND":
       const filteredProductsByBrand = action.payload;
       return { ...state, filteredProducts: filteredProductsByBrand };
-
     case "SET_PRODUCTS":
       return { ...state, products: action.payload };
     default:
       return state;
   }
+};
+
+type Props = {
+  products22: Products22;
+  handle: string;
+  cursor: string;
+  amountPerPage: number;
+  filter: any;
 };
 
 export default function Example({
@@ -259,17 +267,10 @@ export default function Example({
   cursor,
   amountPerPage,
   filter,
-}: {
-  products22: Products22;
-  handle: string;
-  cursor: string;
-  amountPerPage: number;
-}) {
-  // console.log("cursor:", cursor);
+}: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
-  // const [pageSize, setPageSize] = useState(amountPerPage);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -867,10 +868,9 @@ export default function Example({
     // change clicked option to true and all others to false
 
     // Change clicked option to true and all others to false
-
     const updatedSort = state.sort.map((option) => ({
       ...option,
-      current: option.name === optionName,
+      current: option.name === optionName ? !option.current : false,
     }));
 
     dispatch({ type: "SET_SORT", payload: updatedSort });
@@ -898,46 +898,49 @@ export default function Example({
   //useEffect that runs when sort state changes
 
   const sortProducts = (sortOptionName, products) => {
-    let sortedProducts = [];
+    try {
+      let sortedProducts = [];
 
-    console.log("sortOptionName", sortOptionName);
+      switch (sortOptionName) {
+        case "Most Popular":
+          sortedProducts = products.sort((a, b) => {
+            return b.rating - a.rating;
+          });
+          break;
+        case "Best Rating":
+          sortedProducts = products.sort((a, b) => {
+            return b.rating - a.rating;
+          });
+          break;
+        case "Newest":
+          // sort by date
 
-    switch (sortOptionName) {
-      case "Most Popular":
-        sortedProducts = products.sort((a, b) => {
-          return b.rating - a.rating;
-        });
-        break;
-      case "Best Rating":
-        sortedProducts = products.sort((a, b) => {
-          return b.rating - a.rating;
-        });
-        break;
-      case "Newest":
-        //sort by date
+          sortedProducts = products.sort((a, b) => {
+            return new Date(b.createdAt) - new Date(a.createdAt);
+          });
+          break;
 
-        sortedProducts = products.sort((a, b) => {
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
-        break;
+        case "Price: Low to High":
+          sortedProducts = products.sort((a, b) => {
+            return Number(a.price) - Number(b.price);
+          });
+          break;
+        case "Price: High to Low":
+          // sort by price
 
-      case "Price: Low to High":
-        sortedProducts = products.sort((a, b) => {
-          return Number(a.price) - Number(b.price);
-        });
-        break;
-      case "Price: High to Low":
-        //sort by price
+          sortedProducts = products.sort((a, b) => {
+            return Number(b.price) - Number(a.price);
+          });
+          break;
+        default:
+          sortedProducts = products;
+      }
 
-        sortedProducts = products.sort((a, b) => {
-          return Number(b.price) - Number(a.price);
-        });
-        break;
-      default:
-        sortedProducts = products;
+      return sortedProducts;
+    } catch (error) {
+      console.error("Error sorting products:", error);
+      return [];
     }
-
-    return sortedProducts;
   };
 
   useEffect(() => {
@@ -953,10 +956,6 @@ export default function Example({
     state.filteredVariantOptions.some((option) => option.options.length > 0)
       ? state.filteredProducts
       : products;
-
-  console.log("productsToRender", productsToRender);
-  console.log("state.sort", state.sort);
-  console.log("products", products);
 
   return (
     <div className="bg-white">
@@ -1115,18 +1114,22 @@ export default function Example({
                           {state.sort.map((option) => (
                             <Menu.Item key={option.name}>
                               {({ active }) => (
-                                <a
-                                  href={option.href}
+                                <label
                                   className={classNames(
                                     active ? "bg-gray-100" : "",
-                                    "block px-4 py-2 text-sm font-medium text-gray-900"
+                                    "flex justify-between items-center px-4 py-2 text-sm font-medium text-gray-900"
                                   )}
-                                  onClick={() =>
-                                    handleSortOptionClick(option.name)
-                                  }
                                 >
-                                  {option.name}
-                                </a>
+                                  <span>{option.name}</span>
+                                  <input
+                                    type="checkbox"
+                                    className="ml-2 h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    checked={option.current}
+                                    onChange={() =>
+                                      handleSortOptionClick(option.name)
+                                    }
+                                  />
+                                </label>
                               )}
                             </Menu.Item>
                           ))}
@@ -1367,12 +1370,6 @@ export const getStaticProps: GetStaticProps = async (
   //remove variant options that are not in product array
 
   const amountPerPage = 6;
-
-  // console.log("products:", products.first);
-
-  // console.log("products:", products.first.collection.products.edges);
-
-  // console.log("products", products);
 
   return {
     props: {
