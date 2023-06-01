@@ -10,6 +10,8 @@ import {
   GetStaticPropsContext,
 } from "next/types";
 
+import { formatDate } from "../../utils/dataReformatting";
+
 type Props = {};
 
 import {
@@ -42,6 +44,7 @@ import { fetchCollectionPage } from "../../utils/api";
 import { getVariantOptions } from "../../utils/dataReformatting";
 import { de } from "date-fns/locale";
 import { set } from "date-fns";
+import { stat } from "fs";
 
 const sortOptions = [
   { name: "Most Popular", href: "#", checked: false },
@@ -116,6 +119,8 @@ type FormattedProduct = {
     id: string;
     options: { value: string; label: string }[];
   };
+  createdAt: string;
+  rating: number;
 
   imageSrc: string;
   imageAlt: string;
@@ -131,6 +136,11 @@ type UnformattedProduct = {
     vendor: string;
     variants: {
       edges: { node: { selectedOptions: { name: string; value: string } } }[];
+    };
+    createdAt: string;
+    metafield: {
+      namespace: string;
+      value: string;
     };
     images: { edges: { node: { url: string; altText: string } }[] };
   };
@@ -174,16 +184,7 @@ const initialState = {
 const reducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "SET_SORT":
-      const { optionValue: sortOptionValue, filterName: sortFilterName } =
-        action.payload;
-      const updatedSort = state.sort.map((option) => {
-        if (option.name === sortOptionValue) {
-          return { ...option, current: true };
-        } else {
-          return { ...option, current: false };
-        }
-      });
-      return { ...state, sort: updatedSort };
+      return { ...state, sort: action.payload };
 
     //same as intial state but with variants from fetched data
 
@@ -264,43 +265,30 @@ export default function Example({
   cursor: string;
   amountPerPage: number;
 }) {
-  console.log("cursor:", cursor);
+  // console.log("cursor:", cursor);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(amountPerPage);
+  // const [pageSize, setPageSize] = useState(amountPerPage);
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const extractPaginationDataShopifyStoreFrontApi = (
     data: any
   ): PaginationData => {
-    const hasNextPage = data.first.collection.products.pageInfo.hasNextPage;
+    const hasNextPage = data?.first?.collection?.products.pageInfo.hasNextPage;
     const hasPreviousPage =
-      data.first.collection.products.pageInfo.hasPreviousPage;
-    const edges = data.first.collection.products.edges;
+      data?.first?.collection?.products?.pageInfo?.hasPreviousPage;
+    const edges = data?.first?.collection?.products?.edges;
     const totalCount = data.totalProductCount || 5;
 
-    const reformateedProducts = edges.map((product: UnformattedProduct) => {
-      type Variant = {
-        value: string;
-        label: string;
-      };
-
-      type VariantsResponse = {
-        variants: {
-          edges: {
-            node: {
-              selectedOptions: {
-                name: string;
-                value: string;
-              }[];
-            };
-          }[];
-        };
-      };
-
+    const reformateedProducts = edges?.map((product: UnformattedProduct) => {
       const variantOptions = getVariantOptions(product.node);
+
+      const date = new Date(product.node.createdAt);
+
+      // Get the month, day, and year from the date object
+      const formattedDate = formatDate(date);
 
       return {
         id: product.node.id,
@@ -310,6 +298,7 @@ export default function Example({
         description: product.node.description,
         vendor: product.node.vendor,
         variants: variantOptions,
+        createdAt: formattedDate,
         imageSrc: product.node.images.edges[0].node.url,
         imageAlt: product.node.images.edges[0].node.altText,
       };
@@ -336,7 +325,6 @@ export default function Example({
     setProducts(productsData.reformateedProducts);
   }, [products22]);
 
-  console.log("products:", products);
   useEffect(() => {
     const fetchFilters = async () => {
       // Filter from fetched data or filters from initial state
@@ -367,7 +355,7 @@ export default function Example({
           }
           if (filter.id === "brand") {
             // Add "Brand" options from products
-            const brands = products.map((product) => product.vendor);
+            const brands = products?.map((product) => product.vendor);
             const uniqueBrands = [...new Set(brands)];
             const filteredBrandOptions = filter.options.filter((option) =>
               uniqueBrands.includes(option.value)
@@ -463,6 +451,10 @@ export default function Example({
         const reformattedProducts = pageData.map(
           (product: UnformattedProduct) => {
             const variantOptions = getVariantOptions(product.node);
+            const date = new Date(product.node.createdAt);
+
+            // Get the month, day, and year from the date object
+            const formattedDate = formatDate(date);
             return {
               id: product.node.id,
               name: product.node.title,
@@ -471,6 +463,7 @@ export default function Example({
               description: product.node.description,
               vendor: product.node.vendor,
               variants: variantOptions,
+              createdAt: formattedDate,
               imageSrc: product.node.images.edges[0].node.url,
               imageAlt: "",
             };
@@ -547,7 +540,7 @@ export default function Example({
       );
 
       // Filter products and return only products that match any of the checked options and values
-      const filteredProducts = products.filter((product) => {
+      const filteredProducts = products?.filter((product) => {
         const productVariants = product.variants;
 
         // Check if any product variant matches any of the checked options and values
@@ -583,7 +576,7 @@ export default function Example({
       }
 
       // If no brand options are checked, return all products
-      const filteredProducts = products.filter((product) => {
+      const filteredProducts = products?.filter((product) => {
         const productBrand = product.vendor;
         const productBrandMatches = checkedBrandOptions.find(
           (option) => option.value === productBrand
@@ -652,8 +645,8 @@ export default function Example({
     });
 
     function mergeFilteredProducts(
-      filteredProductsByVariant,
-      filteredProductsByBrand
+      filteredProductsByVariant = [],
+      filteredProductsByBrand = []
     ) {
       // Perform the merging logic here
       // For example, you can concatenate the two arrays
@@ -700,11 +693,13 @@ export default function Example({
 
       const nextPage = await fetchNextPage();
 
-      console.log("nextPage:", nextPage);
-
       const reformattedProducts = nextPage.collection.products.edges.map(
         (product: UnformattedProduct) => {
           const variantOptions = getVariantOptions(product.node);
+          const date = new Date(product.node.createdAt);
+
+          // Get the month, day, and year from the date object
+          const formattedDate = formatDate(date);
 
           return {
             id: product.node.id,
@@ -712,6 +707,7 @@ export default function Example({
             href: "#",
             vendor: product.node.vendor,
             variants: variantOptions,
+            createdAt: formattedDate,
 
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
@@ -738,6 +734,10 @@ export default function Example({
       const reformattedProducts = previousPage.collection.products.edges.map(
         (product: UnformattedProduct) => {
           const variantOptions = getVariantOptions(product.node);
+          const date = new Date(product.node.createdAt);
+
+          // Get the month, day, and year from the date object
+          const formattedDate = formatDate(date);
           return {
             id: product.node.id,
             name: product.node.title,
@@ -746,6 +746,7 @@ export default function Example({
             description: product.node.description,
             vendor: product.node.vendor,
             variants: variantOptions,
+            createdAt: formattedDate,
 
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
@@ -770,8 +771,6 @@ export default function Example({
     if (totalPages === 0) {
       return (totalPages = 1);
     }
-
-    console.log("totalPages:", products22.totalProductCount);
 
     return totalPages;
   };
@@ -805,6 +804,10 @@ export default function Example({
       const reformattedProducts = pageData.map(
         (product: UnformattedProduct) => {
           const variantOptions = getVariantOptions(product.node);
+          const date = new Date(product.node.createdAt);
+
+          // Get the month, day, and year from the date object
+          const formattedDate = formatDate(date);
 
           return {
             id: product.node.id,
@@ -814,6 +817,7 @@ export default function Example({
             description: product.node.description,
             vendor: product.node.vendor,
             variants: variantOptions,
+            createdAt: formattedDate,
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
           };
@@ -857,6 +861,83 @@ export default function Example({
   };
 
   // const { sort, filters } = state;
+
+  // Sort Logic
+  const handleSortOptionClick = (optionName) => {
+    // change clicked option to true and all others to false
+
+    // Change clicked option to true and all others to false
+
+    const updatedSort = state.sort.map((option) => ({
+      ...option,
+      current: option.name === optionName,
+    }));
+
+    dispatch({ type: "SET_SORT", payload: updatedSort });
+
+    // console.log("updatedSort:", updatedSort);
+
+    // dispatch({ type: "SET_SORT", payload: { optionValue: updatedSort } });
+
+    // console.log("stateproducts", products);
+    // console.log("statefilteredproducts", state.filteredProducts);
+
+    // Sort the products based on the selected sort option
+    let sortedProducts = [];
+    // if (optionName === "Most Popular") {
+    //   sortedProducts = [...state.filteredProducts]; // Sort filteredProducts if it's populated
+    //   if (sortedProducts.length === 0) {
+    //     sortedProducts = [...state.products]; // Sort products if filteredProducts is empty
+    //   }
+    // } else if (optionName === "Best Rating") {
+    //   sortedProducts = [...state.filteredProducts].sort(
+    //     (a, b) => b.rating - a.rating
+    //   );
+    //   if (sortedProducts.length === 0) {
+    //     sortedProducts = [...state.products].sort(
+    //       (a, b) => b.rating - a.rating
+    //     );
+    //   }
+    // } else if (optionName === "Newest") {
+    //   sortedProducts = [...state.filteredProducts].sort(
+    //     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    //   );
+    //   if (sortedProducts.length === 0) {
+    //     sortedProducts = [...state.products].sort(
+    //       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    //     );
+    //   }
+    // } else if (optionName === "Price: Low to High") {
+    //   sortedProducts = [...state.filteredProducts].sort(
+    //     (a, b) => a.price - b.price
+    //   );
+    //   if (sortedProducts.length === 0) {
+    //     sortedProducts = [...state.products].sort((a, b) => a.price - b.price);
+    //   }
+    // } else if (optionName === "Price: High to Low") {
+    //   sortedProducts = [...state.filteredProducts].sort(
+    //     (a, b) => b.price - a.price
+    //   );
+    //   if (sortedProducts.length === 0) {
+    //     sortedProducts = [...state.products].sort((a, b) => b.price - a.price);
+    //   }
+    // }
+
+    // console.log("sortedProducts:", sortedProducts);
+
+    // Update the component state with the sorted products
+    // if (state.filteredProducts.length > 0) {
+    //   dispatch({ type: "SET_FILTERED_PRODUCTS", payload: sortedProducts });
+    // } else {
+    //   dispatch({ type: "SET_PRODUCTS", payload: sortedProducts });
+    // }
+  };
+
+  //if sort state changes, console.log sort state
+
+  useEffect(() => {
+    console.log("sortState:", state.sort);
+  }, [state.sort]);
 
   const productsToRender =
     (state.filteredBrandOptions.options || []).length > 0 ||
@@ -1018,8 +1099,8 @@ export default function Example({
                     >
                       <Menu.Items className="absolute left-0 z-10 mt-2 w-40 origin-top-left rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
                         <div className="py-1">
-                          {sortOptions.map((option) => (
-                            <Menu.Item key={option}>
+                          {state.sort.map((option) => (
+                            <Menu.Item key={option.name}>
                               {({ active }) => (
                                 <a
                                   href={option.href}
@@ -1027,6 +1108,9 @@ export default function Example({
                                     active ? "bg-gray-100" : "",
                                     "block px-4 py-2 text-sm font-medium text-gray-900"
                                   )}
+                                  onClick={() =>
+                                    handleSortOptionClick(option.name)
+                                  }
                                 >
                                   {option.name}
                                 </a>
@@ -1037,7 +1121,6 @@ export default function Example({
                       </Menu.Items>
                     </Transition>
                   </Menu>
-
                   {/* Filters Button */}
                   <button
                     type="button"
@@ -1127,7 +1210,7 @@ export default function Example({
                 </h2>
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-                  {productsToRender.map((product) => (
+                  {productsToRender?.map((product) => (
                     <a key={product.id} href={product.href} className="group">
                       <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg sm:aspect-h-3 sm:aspect-w-2">
                         <img
@@ -1253,8 +1336,6 @@ export const getStaticProps: GetStaticProps = async (
 
   const filter = [...products.variants, ...products.brands];
 
-  console.log("slug", slug);
-
   //brand = vendor
   //color = variant option 1
   //size = variant option 2
@@ -1278,7 +1359,7 @@ export const getStaticProps: GetStaticProps = async (
 
   // console.log("products:", products.first.collection.products.edges);
 
-  console.log("products", products);
+  // console.log("products", products);
 
   return {
     props: {

@@ -867,12 +867,14 @@ export const getCollectionPageDataByHandle = async (
     );
 
     const totalProductCount =
-      collectionPageDataTotal.collection.products.edges.length;
+      //if collection does not exist return 0
+      collectionPageDataTotal?.collection?.products?.edges?.length || 0;
 
     return totalProductCount;
   };
 
-  const totalProductCount = await getTotalProductCount(handle);
+  const totalProductCount = (await getTotalProductCount(handle)) || 0;
+  console.log("totalProductCount", totalProductCount);
 
   const collectionPageDataQueryFirst = gql`
     query CollectionByHande($handle: String!, $amount: Int!) {
@@ -894,6 +896,12 @@ export const getCollectionPageDataByHandle = async (
               }
               description
               vendor
+              createdAt
+              metafield(namespace: "ratings", key: "ratings") {
+                namespace
+
+                value
+              }
               variants(first: 5) {
                 edges {
                   node {
@@ -950,6 +958,12 @@ export const getCollectionPageDataByHandle = async (
               }
               description
               vendor
+              createdAt
+              metafield(namespace: "ratings", key: "ratings") {
+                namespace
+
+                value
+              }
               variants(first: 5) {
                 edges {
                   node {
@@ -976,8 +990,8 @@ export const getCollectionPageDataByHandle = async (
 
   function getValidIndex(collectionData, amount) {
     let index = amount - 1;
-    const edges = collectionData.collection.products.edges;
-    while (index >= edges.length && index >= 0) {
+    const edges = collectionData?.collection?.products?.edges;
+    while (index >= edges?.length && index >= 0) {
       index--;
     }
     return index;
@@ -996,13 +1010,13 @@ export const getCollectionPageDataByHandle = async (
   const edgeIndex = getValidIndex(collectionPageDataFirst, amount);
   const cursor =
     edgeIndex >= 0
-      ? collectionPageDataFirst.collection.products.edges[edgeIndex].cursor
+      ? collectionPageDataFirst?.collection?.products?.edges[edgeIndex].cursor
       : "";
 
   const collectionPageDataVarsNxt = {
     handle: handle,
     amount: amount,
-    after: cursor,
+    after: cursor || "",
   };
 
   const collectionPageDataNxt = await graphqlstorefront(
@@ -1032,6 +1046,12 @@ export const getCollectionPageDataByHandle = async (
               }
               description
               vendor
+              createdAt
+              metafield(namespace: "ratings", key: "ratings") {
+                namespace
+
+                value
+              }
               variants(first: 5) {
                 edges {
                   node {
@@ -1095,7 +1115,7 @@ export const getCollectionPageDataByHandle = async (
 
   // FilterLogic for brands/vendor
 
-  const brands = collectionPageDataFirst.collection.products.edges.map(
+  const brands = collectionPageDataFirst?.collection?.products?.edges.map(
     (brand) => {
       //create set to remove duplicates
 
@@ -1164,7 +1184,7 @@ export const getCollectionPageDataByHandle = async (
 
   //get Array of Arrays and construct the options for each unique variant
 
-  const variants = collectionPageDataFirst.collection.products.edges.flatMap(
+  const variants = collectionPageDataFirst?.collection?.products?.edges.flatMap(
     (product) => {
       const productVariants = product.node.variants.edges.map((variant) => {
         return variant.node.selectedOptions.map((option) => {
@@ -1200,7 +1220,7 @@ export const getCollectionPageDataByHandle = async (
 
   // build option array for each variant
 
-  const options = collectionPageDataFirst.collection.products.edges.flatMap(
+  const options = collectionPageDataFirst?.collection?.products?.edges.flatMap(
     (product) => {
       const productOptions = product.node.variants.edges.map((variant) => {
         return variant.node.selectedOptions.map((option) => {

@@ -24,3 +24,24 @@ export const getVariantOptions = (
     options,
   }));
 };
+
+export function formatDate(dateString) {
+  const date = new Date(dateString);
+
+  // Get the month, day, and year from the date object
+  const month = date.getMonth() + 1; // Months are zero-based, so adding 1
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  // Format the date as mm/dd/yyyy
+  const formattedDate = `${month.toString().padStart(2, "0")}/${day
+    .toString()
+    .padStart(2, "0")}/${year}`;
+
+  return formattedDate;
+}
+
+// Example usage:
+// const createdAt = product.node.createdAt;
+// const formattedDate = formatDate(createdAt);
+// console.log("date", formattedDate);
