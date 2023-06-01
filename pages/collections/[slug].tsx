@@ -874,76 +874,88 @@ export default function Example({
     }));
 
     dispatch({ type: "SET_SORT", payload: updatedSort });
-
-    // console.log("updatedSort:", updatedSort);
-
-    // dispatch({ type: "SET_SORT", payload: { optionValue: updatedSort } });
-
-    // console.log("stateproducts", products);
-    // console.log("statefilteredproducts", state.filteredProducts);
-
-    // Sort the products based on the selected sort option
-    let sortedProducts = [];
-    // if (optionName === "Most Popular") {
-    //   sortedProducts = [...state.filteredProducts]; // Sort filteredProducts if it's populated
-    //   if (sortedProducts.length === 0) {
-    //     sortedProducts = [...state.products]; // Sort products if filteredProducts is empty
-    //   }
-    // } else if (optionName === "Best Rating") {
-    //   sortedProducts = [...state.filteredProducts].sort(
-    //     (a, b) => b.rating - a.rating
-    //   );
-    //   if (sortedProducts.length === 0) {
-    //     sortedProducts = [...state.products].sort(
-    //       (a, b) => b.rating - a.rating
-    //     );
-    //   }
-    // } else if (optionName === "Newest") {
-    //   sortedProducts = [...state.filteredProducts].sort(
-    //     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    //   );
-    //   if (sortedProducts.length === 0) {
-    //     sortedProducts = [...state.products].sort(
-    //       (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    //     );
-    //   }
-    // } else if (optionName === "Price: Low to High") {
-    //   sortedProducts = [...state.filteredProducts].sort(
-    //     (a, b) => a.price - b.price
-    //   );
-    //   if (sortedProducts.length === 0) {
-    //     sortedProducts = [...state.products].sort((a, b) => a.price - b.price);
-    //   }
-    // } else if (optionName === "Price: High to Low") {
-    //   sortedProducts = [...state.filteredProducts].sort(
-    //     (a, b) => b.price - a.price
-    //   );
-    //   if (sortedProducts.length === 0) {
-    //     sortedProducts = [...state.products].sort((a, b) => b.price - a.price);
-    //   }
-    // }
-
-    // console.log("sortedProducts:", sortedProducts);
-
-    // Update the component state with the sorted products
-    // if (state.filteredProducts.length > 0) {
-    //   dispatch({ type: "SET_FILTERED_PRODUCTS", payload: sortedProducts });
-    // } else {
-    //   dispatch({ type: "SET_PRODUCTS", payload: sortedProducts });
-    // }
   };
+
+  //useEffect that runs when sort state changes
+
+  const sortProducts = (sortOptionName, products) => {
+    let sortedProducts = [];
+
+    console.log("sortOptionName", sortOptionName);
+
+    switch (sortOptionName) {
+      case "Most Popular":
+        sortedProducts = products.sort((a, b) => {
+          return b.rating - a.rating;
+        });
+        break;
+      case "Best Rating":
+        sortedProducts = products.sort((a, b) => {
+          return b.rating - a.rating;
+        });
+        break;
+      case "Newest":
+        //sort by date
+
+        sortedProducts = products.sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        });
+        break;
+
+      case "Price: Low to High":
+        sortedProducts = products.sort((a, b) => {
+          return Number(a.price) - Number(b.price);
+        });
+        break;
+      case "Price: High to Low":
+        //sort by price
+
+        sortedProducts = products.sort((a, b) => {
+          return Number(b.price) - Number(a.price);
+        });
+        break;
+      default:
+        sortedProducts = products;
+    }
+
+    return sortedProducts;
+  };
+
+  useEffect(() => {
+    // Update the component state with the sorted products
+    const selectedSortOption = state.sort.find((option) => option.current);
+
+    if (selectedSortOption) {
+      const sortOptionName = selectedSortOption.name;
+      let sortedProducts = [];
+
+      if (state.filteredProducts.length > 0) {
+        sortedProducts = sortProducts(sortOptionName, state.filteredProducts);
+      } else {
+        sortedProducts = sortProducts(sortOptionName, products);
+      }
+
+      if (state.filteredProducts.length > 0) {
+        dispatch({ type: "SET_FILTERED_PRODUCTS", payload: sortedProducts });
+      } else {
+        setProducts(sortedProducts);
+      }
+    }
+  }, [state.sort, state.filteredProducts, products, setProducts]);
 
   //if sort state changes, console.log sort state
 
-  useEffect(() => {
-    console.log("sortState:", state.sort);
-  }, [state.sort]);
+  //if products get sorted sorted products should be set to products
 
   const productsToRender =
     (state.filteredBrandOptions.options || []).length > 0 ||
     state.filteredVariantOptions.some((option) => option.options.length > 0)
       ? state.filteredProducts
       : products;
+
+  console.log("productsToRender", productsToRender);
+  console.log("state.sort", state.sort);
+  console.log("products", products);
 
   return (
     <div className="bg-white">
