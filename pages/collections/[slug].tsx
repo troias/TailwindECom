@@ -874,6 +874,25 @@ export default function Example({
     }));
 
     dispatch({ type: "SET_SORT", payload: updatedSort });
+
+    sortProductsAndSetState(updatedSort);
+  };
+
+  const sortProductsAndSetState = (sortOptions) => {
+    const selectedSortOption = sortOptions.find((option) => option.current);
+
+    if (selectedSortOption) {
+      const sortOptionName = selectedSortOption.name;
+      let sortedProducts = [];
+
+      if (state.filteredProducts.length > 0) {
+        sortedProducts = sortProducts(sortOptionName, state.filteredProducts);
+        dispatch({ type: "SET_FILTERED_PRODUCTS", payload: sortedProducts });
+      } else {
+        sortedProducts = sortProducts(sortOptionName, products);
+        setProducts(sortedProducts);
+      }
+    }
   };
 
   //useEffect that runs when sort state changes
@@ -922,25 +941,7 @@ export default function Example({
   };
 
   useEffect(() => {
-    // Update the component state with the sorted products
-    const selectedSortOption = state.sort.find((option) => option.current);
-
-    if (selectedSortOption) {
-      const sortOptionName = selectedSortOption.name;
-      let sortedProducts = [];
-
-      if (state.filteredProducts.length > 0) {
-        sortedProducts = sortProducts(sortOptionName, state.filteredProducts);
-      } else {
-        sortedProducts = sortProducts(sortOptionName, products);
-      }
-
-      if (state.filteredProducts.length > 0) {
-        dispatch({ type: "SET_FILTERED_PRODUCTS", payload: sortedProducts });
-      } else {
-        setProducts(sortedProducts);
-      }
-    }
+    sortProductsAndSetState(state.sort);
   }, [state.sort, state.filteredProducts, products, setProducts]);
 
   //if sort state changes, console.log sort state
