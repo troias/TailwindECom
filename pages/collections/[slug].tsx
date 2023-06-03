@@ -425,9 +425,13 @@ export default function Example({
 
       const fetchPage = async (page: number, amountPerPage: number) => {
         try {
+          if (amountPerPage === 0) {
+            return []; // Return an empty array when amountPerPage is 0
+          }
+
           const pageData = await fetchCollectionPage(
             handle,
-            currentAmountPerPage,
+            amountPerPage,
             page,
             cursor
           );
@@ -435,19 +439,24 @@ export default function Example({
         } catch (error) {
           // Handle the fetch error
 
-          // Decrement currentAmountPerPage by 1
-          currentAmountPerPage--;
-
-          if (currentAmountPerPage > 0) {
+          // Check if currentAmountPerPage is greater than 1 before decrementing
+          if (currentAmountPerPage > products.length) {
+            currentAmountPerPage--;
+            console.log("current amount per page:", currentAmountPerPage);
             return fetchPage(page, currentAmountPerPage);
           } else {
-            return [];
+            throw error; // Throw the error to be caught in the outer catch block
           }
         }
       };
 
       try {
         const pageData = await fetchPage(pageNumber, currentAmountPerPage);
+
+        console.log("currentAmountPerPage", currentAmountPerPage);
+        console.log("pageNumber", pageNumber);
+        console.log("products", products);
+        console.log("pageData", pageData);
 
         const reformattedProducts = pageData.map(
           (product: UnformattedProduct) => {
@@ -470,8 +479,11 @@ export default function Example({
             };
           }
         ) as FormattedProduct[];
-
-        setProducts(reformattedProducts);
+        if (products.length > pageData.length) {
+          //do nothing
+        } else {
+          setProducts(reformattedProducts);
+        }
       } catch (error) {
         // Handle the error here
         console.error(
@@ -957,6 +969,13 @@ export default function Example({
       ? state.filteredProducts
       : products;
 
+  // Static data for the collection page
+
+  const formattedHandle = handle
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
   return (
     <div className="bg-white">
       <div className="bg-gray-50">
@@ -1071,7 +1090,7 @@ export default function Example({
             <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
               <div className="py-24 text-center">
                 <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                  New Arrivals
+                  {formattedHandle}
                 </h1>
                 <p className="mx-auto mt-4 max-w-3xl text-base text-gray-500">
                   Thoughtfully designed objects for the workspace, home, and
