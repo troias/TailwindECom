@@ -5,14 +5,18 @@ import { getFooterMenuData } from "../api";
 
 export const useFooter = () => {
   const [footer, setFooter] = useState([]);
+
   useEffect(() => {
-    //when the component is mounted
     const getFooterData = async () => {
-      const footerData = await getFooterMenuData();
-      const footer = addSocialIconsToFooter(footerData, socialMedia);
-      return footer;
+      try {
+        const footerData = await getFooterMenuData();
+        const footer = addSocialIconsToFooter(footerData, socialMedia);
+        return footer;
+      } catch (error) {
+        console.error("Error retrieving footer data:", error);
+        return [];
+      }
     };
-    getFooterData();
 
     getFooterData().then((footer) => {
       setFooter(footer);

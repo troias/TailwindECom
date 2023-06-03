@@ -6,9 +6,12 @@ import {
 } from "../../utils/utils";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { firstLetterUppercase } from "../../utils/dataReformatting";
 
 export default function Footer() {
   const footer = useFooter();
+
+  console.log("footer", footer);
 
   const router = useRouter();
 
@@ -27,7 +30,8 @@ export default function Footer() {
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
-                  {checkArrPopulated(footer) && footer[0].value.title}
+                  {checkArrPopulated(footer) &&
+                    firstLetterUppercase(footer[0].value.title)}
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
                   {checkArrPopulated(footer) &&
@@ -42,7 +46,7 @@ export default function Footer() {
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
-                          {item.title}
+                          {firstLetterUppercase(item.title)}
                         </Link>
                       </li>
                     ))}
@@ -50,7 +54,8 @@ export default function Footer() {
               </div>
               <div className="mt-12 md:mt-0">
                 <h3 className="text-base font-medium text-gray-900">
-                  {checkArrPopulated(footer) && footer[1].value.title}
+                  {checkArrPopulated(footer) &&
+                    firstLetterUppercase(footer[1].value.title)}
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
                   {checkArrPopulated(footer) &&
@@ -65,7 +70,7 @@ export default function Footer() {
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
-                          {item.title}
+                          {firstLetterUppercase(item.title)}
                         </Link>
                       </li>
                     ))}
@@ -75,7 +80,8 @@ export default function Footer() {
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-base font-medium text-gray-900">
-                  {checkArrPopulated(footer) && footer[2].value.title}
+                  {checkArrPopulated(footer) &&
+                    firstLetterUppercase(footer[2].value.title)}
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
                   {checkArrPopulated(footer) &&
@@ -90,7 +96,7 @@ export default function Footer() {
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
                         >
-                          {item.title}
+                          {firstLetterUppercase(item.title)}
                         </Link>
                       </li>
                     ))}

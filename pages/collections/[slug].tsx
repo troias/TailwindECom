@@ -323,13 +323,9 @@ export default function Example({
 
   const productsData = extractPaginationDataShopifyStoreFrontApi(products22);
 
-  console.log("productsData", productsData);
-
   const [products, setProducts] = useState(
     productsData.reformateedProducts || []
   );
-
-  console.log("products", products);
 
   //if intialProducts change update products
   useEffect(() => {
@@ -453,7 +449,7 @@ export default function Example({
           // Check if currentAmountPerPage is greater than 1 before decrementing
           if (currentAmountPerPage > products.length) {
             currentAmountPerPage--;
-            console.log("current amount per page:", currentAmountPerPage);
+
             return fetchPage(page, currentAmountPerPage);
           } else {
             throw error; // Throw the error to be caught in the outer catch block
@@ -463,11 +459,6 @@ export default function Example({
 
       try {
         const pageData = await fetchPage(pageNumber, currentAmountPerPage);
-
-        console.log("currentAmountPerPage", currentAmountPerPage);
-        console.log("pageNumber", pageNumber);
-        console.log("products", products);
-        console.log("pageData", pageData);
 
         const reformattedProducts = pageData.map(
           (product: UnformattedProduct) => {

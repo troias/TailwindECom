@@ -768,6 +768,8 @@ export const getFooterMenuData = async () => {
     footerMenuVars
   );
 
+  console.log("footerMenuData", footerMenuData);
+
   return footerMenuData;
 };
 
