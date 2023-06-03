@@ -586,7 +586,16 @@ export default function Navigation({
                                                               close();
                                                             }}
                                                           >
-                                                            {item.name}
+                                                            {item.name
+                                                              .replace(
+                                                                /-/g,
+                                                                " "
+                                                              )
+                                                              .replace(
+                                                                /\b\w/g,
+                                                                (char) =>
+                                                                  char.toUpperCase()
+                                                              )}
                                                           </Link>
                                                         </li>
                                                       )

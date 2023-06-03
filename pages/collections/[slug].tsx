@@ -28,6 +28,7 @@ import {
   Tab,
   Transition,
 } from "@headlessui/react";
+import Link from "next/link";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
@@ -106,6 +107,7 @@ type PaginationData = {
 type FormattedProduct = {
   id: string;
   name: string;
+  handle: string;
   href: string;
   price: string;
   description: string;
@@ -123,6 +125,7 @@ type FormattedProduct = {
 
 type UnformattedProduct = {
   node: {
+    handle: any;
     id: string;
     name: string;
     title: string;
@@ -160,6 +163,7 @@ type Products22 = {
   totalProductCount: any;
   brands: any;
   variants: any;
+  collectionSubHeading: any;
 };
 
 // Initial filterState
@@ -267,6 +271,7 @@ export default function Example({
   cursor,
   amountPerPage,
   filter,
+  subHeading,
 }: Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -294,12 +299,14 @@ export default function Example({
       return {
         id: product.node.id,
         name: product.node.title,
+        handle: product.node.handle,
         href: "#",
         price: product.node.priceRange.maxVariantPrice.amount,
         description: product.node.description,
         vendor: product.node.vendor,
         variants: variantOptions,
         createdAt: formattedDate,
+        rating: Number(product.node?.metafield?.value) || 0,
         imageSrc: product.node.images.edges[0].node.url,
         imageAlt: product.node.images.edges[0].node.altText,
       };
@@ -316,9 +323,13 @@ export default function Example({
 
   const productsData = extractPaginationDataShopifyStoreFrontApi(products22);
 
+  console.log("productsData", productsData);
+
   const [products, setProducts] = useState(
     productsData.reformateedProducts || []
   );
+
+  console.log("products", products);
 
   //if intialProducts change update products
   useEffect(() => {
@@ -468,12 +479,14 @@ export default function Example({
             return {
               id: product.node.id,
               name: product.node.title,
+              handle: product.node.handle,
               href: "#",
               price: product.node.priceRange.maxVariantPrice.amount,
               description: product.node.description,
               vendor: product.node.vendor,
               variants: variantOptions,
               createdAt: formattedDate,
+              rating: Number(product.node.metafield.value),
               imageSrc: product.node.images.edges[0].node.url,
               imageAlt: "",
             };
@@ -717,11 +730,12 @@ export default function Example({
           return {
             id: product.node.id,
             name: product.node.title,
+            handle: product.node.handle,
             href: "#",
             vendor: product.node.vendor,
             variants: variantOptions,
             createdAt: formattedDate,
-
+            rating: Number(product.node.metafield.value),
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
             imageSrc: product.node.images.edges[0].node.url,
@@ -754,12 +768,14 @@ export default function Example({
           return {
             id: product.node.id,
             name: product.node.title,
+            handle: product.node.handle,
             href: "#",
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
             vendor: product.node.vendor,
             variants: variantOptions,
             createdAt: formattedDate,
+            rating: Number(product.node.metafield.value),
 
             imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
@@ -825,10 +841,12 @@ export default function Example({
           return {
             id: product.node.id,
             name: product.node.title,
+            handle: product.node.handle,
             href: "#",
             price: product.node.priceRange.maxVariantPrice.amount,
             description: product.node.description,
             vendor: product.node.vendor,
+            rating: Number(product.node.metafield.value),
             variants: variantOptions,
             createdAt: formattedDate,
             imageSrc: product.node.images.edges[0].node.url,
@@ -1093,8 +1111,7 @@ export default function Example({
                   {formattedHandle}
                 </h1>
                 <p className="mx-auto mt-4 max-w-3xl text-base text-gray-500">
-                  Thoughtfully designed objects for the workspace, home, and
-                  travel.
+                  {subHeading}
                 </p>
               </div>
 
@@ -1246,7 +1263,11 @@ export default function Example({
 
                 <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
                   {productsToRender?.map((product) => (
-                    <a key={product.id} href={product.href} className="group">
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.handle}`}
+                      passHref
+                    >
                       <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg sm:aspect-h-3 sm:aspect-w-2">
                         <img
                           src={product.imageSrc}
@@ -1261,7 +1282,7 @@ export default function Example({
                       <p className="mt-1 text-sm italic text-gray-500">
                         {product.description}
                       </p>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </section>
@@ -1371,6 +1392,10 @@ export const getStaticProps: GetStaticProps = async (
 
   const filter = [...products.variants, ...products.brands];
 
+  const collectionSubHeadingObj = products.collectionSubHeading;
+  const value = collectionSubHeadingObj?.collection?.metafield?.value;
+  const subHeading = value || "";
+
   //brand = vendor
   //color = variant option 1
   //size = variant option 2
@@ -1393,6 +1418,7 @@ export const getStaticProps: GetStaticProps = async (
   return {
     props: {
       handle: slug && slug,
+      subHeading,
       cursor,
       amountPerPage,
       navigation,

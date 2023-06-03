@@ -123,14 +123,18 @@ export const getNavigation = async () => {
     handle: any;
     items: any[];
   }) => {
+    const replaceWhiteSpace = (str: string) => {
+      return str.replace(/%20|\s/g, "-").toLowerCase();
+    };
+
     return {
       id: menu.id,
-      name: menu.title || menu.handle,
-      handle: menu.handle,
+      name: replaceWhiteSpace(menu.title || menu.handle),
+      handle: replaceWhiteSpace(menu.handle),
       items: menu.items.map((item) => {
         return {
-          name: item.title,
-          href: item.url,
+          name: replaceWhiteSpace(item.title),
+          href: replaceWhiteSpace(item.url),
         };
       }),
     };
@@ -874,7 +878,27 @@ export const getCollectionPageDataByHandle = async (
   };
 
   const totalProductCount = (await getTotalProductCount(handle)) || 0;
-  console.log("totalProductCount", totalProductCount);
+
+  const getCollectionSubHeading = gql`
+    query CollectionByHande($handle: String!) {
+      collection(handle: $handle) {
+        metafield(namespace: "custom", key: "subheadingtext") {
+          namespace
+          value
+          key
+        }
+      }
+    }
+  `;
+
+  const getCollectionSubHeadingVars = {
+    handle: handle,
+  };
+
+  const collectionSubHeading = await graphqlstorefront(
+    getCollectionSubHeading,
+    getCollectionSubHeadingVars
+  );
 
   const collectionPageDataQueryFirst = gql`
     query CollectionByHande($handle: String!, $amount: Int!) {
@@ -884,11 +908,13 @@ export const getCollectionPageDataByHandle = async (
             hasNextPage
             hasPreviousPage
           }
+
           edges {
             cursor
             node {
               id
               title
+              handle
               priceRange {
                 maxVariantPrice {
                   amount
@@ -899,9 +925,9 @@ export const getCollectionPageDataByHandle = async (
               createdAt
               metafield(namespace: "ratings", key: "ratings") {
                 namespace
-
                 value
               }
+
               variants(first: 5) {
                 edges {
                   node {
@@ -951,6 +977,7 @@ export const getCollectionPageDataByHandle = async (
             node {
               id
               title
+              handle
               priceRange {
                 maxVariantPrice {
                   amount
@@ -1039,6 +1066,7 @@ export const getCollectionPageDataByHandle = async (
             node {
               id
               title
+              handle
               priceRange {
                 maxVariantPrice {
                   amount
@@ -1291,6 +1319,7 @@ export const getCollectionPageDataByHandle = async (
     totalProductCount: totalProductCount,
     brands: brandOptions,
     variants: newArr,
+    collectionSubHeading: collectionSubHeading,
   };
 };
 
