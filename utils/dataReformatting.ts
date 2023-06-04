@@ -49,3 +49,9 @@ export function formatDate(dateString) {
 export const firstLetterUppercase = (str: string) => {
   return str.charAt(0).toUpperCase() + str.slice(1);
 };
+export function formatSectionName(section) {
+  return section.name
+    .replace(/-/g, " ")
+    .replace(/(\b\w+)|('\w+)/g, (match) => match.toLowerCase())
+    .replace(/(^|\s)\w/g, (char) => char.toUpperCase());
+}

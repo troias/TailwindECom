@@ -17,6 +17,7 @@ import {
 } from "./dummyNavigationData";
 import CartModal from "../cart/cartModal";
 import { searchMenuQuery } from "../../utils/api";
+import { formatSectionName } from "../../utils/dataReformatting";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -502,7 +503,22 @@ export default function Navigation({
 
                                 <div className="relative bg-white">
                                   <div className="mx-auto max-w-7xl px-8">
-                                    <div className="grid grid-cols-2 gap-y-10 gap-x-8 py-16">
+                                    <div className="flex pt-4 justify-end">
+                                      <button
+                                        type="button"
+                                        className="-m-2 inline-flex items-center justify-center rounded-md pt-2 text-gray-400"
+                                        onClick={() => setOpen(false)}
+                                      >
+                                        <span className="sr-only">
+                                          Close menu
+                                        </span>
+                                        <XMarkIcon
+                                          className="h-6 w-6"
+                                          aria-hidden="true"
+                                        />
+                                      </button>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-y-10 gap-x-8 py-12">
                                       <div className="grid grid-cols-2 grid-rows-1 gap-8 text-sm">
                                         {category.featured.map(
                                           (item, itemIdx) => (
@@ -566,7 +582,7 @@ export default function Navigation({
                                                     id={`${category.id}-${section.id}-heading`}
                                                     className="font-medium text-gray-900"
                                                   >
-                                                    {section.name}
+                                                    {formatSectionName(section)}
                                                   </p>
                                                   <ul
                                                     role="list"
@@ -586,16 +602,9 @@ export default function Navigation({
                                                               close();
                                                             }}
                                                           >
-                                                            {item.name
-                                                              .replace(
-                                                                /-/g,
-                                                                " "
-                                                              )
-                                                              .replace(
-                                                                /\b\w/g,
-                                                                (char) =>
-                                                                  char.toUpperCase()
-                                                              )}
+                                                            {formatSectionName(
+                                                              item
+                                                            )}
                                                           </Link>
                                                         </li>
                                                       )

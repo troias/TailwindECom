@@ -1,3 +1,5 @@
+import { navigationData, mensNavigationData } from "../config/navigationConfig";
+
 type Query = string;
 
 type Variables = {
@@ -99,21 +101,31 @@ export const getCategories = async () => {
 export const getNavigation = async () => {
   // Womens Navigation Data
 
-  const womensNavigationHandle = "Women";
-  const featuredWomenQueryHandle = "title:Women's Featured*" as string;
-  const womensSection1handle = "womens-shoes-and-accessories";
-  const womensSection2Handle = "brands";
-  const womensSection3Handle = "womens-collection";
-  const womensSection4Handle = "womens-collection";
-  const womensSection5Handle = "womens-accessories";
+  //
+
+  const womensNavigationHandle = navigationData.womensNavigationHandle;
+  const featuredWomenQueryHandle = navigationData.featuredWomenQueryHandle;
+  const womensSection1handle =
+    navigationData.womensSectionHandlers.womensSection1handle;
+  const womensSection2Handle =
+    navigationData.womensSectionHandlers.womensSection2Handle;
+  const womensSection3Handle =
+    navigationData.womensSectionHandlers.womensSection3Handle;
+  const womensSection4Handle =
+    navigationData.womensSectionHandlers.womensSection4Handle;
+  const womensSection5Handle =
+    navigationData.womensSectionHandlers.womensSection5Handle;
 
   // Mens Navigation Data
 
-  const mensNavigationHandle = "Men";
-  const mensFeaturedHandle = "Men's Featured";
-  const mensSection1Handle = "mens-shoes-accessories";
-  const mensSection2Handle = "brands";
-  const mensSection3Handle = "mens-collections";
+  const mensNavigationHandle = mensNavigationData.mensNavigationHandle;
+  const mensFeaturedHandle = mensNavigationData.mensFeaturedHandle;
+  const mensSection1Handle =
+    mensNavigationData.mensSectionHandlers.mensSection1Handle;
+  const mensSection2Handle =
+    mensNavigationData.mensSectionHandlers.mensSection2Handle;
+  const mensSection3Handle =
+    mensNavigationData.mensSectionHandlers.mensSection3Handle;
 
   // Mens Navigation Data Reformatter Function to be used in the navigation component on the front end.
 
