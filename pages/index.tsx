@@ -12,10 +12,10 @@ export default function Home({
   heroData: any[];
 }) {
   return (
-    <Layout>
+    <div>
       <PromoSection products={heroData} />
       <Products products={products} />
-    </Layout>
+    </div>
   );
 }
 

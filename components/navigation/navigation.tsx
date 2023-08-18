@@ -1,8 +1,9 @@
 import { Fragment, useState, useRef, useCallback, useEffect } from "react";
-import { useRouter } from "next/router";
+
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 import {
   Bars3Icon,
@@ -28,6 +29,7 @@ export default function Navigation({
 }: {
   navigation: ExtendedNavigation;
 }) {
+  console.log("navigation", navigation);
   const [open, setOpen] = useState(false);
 
   const [cartModalOpen, setCartModalOpen] = useState(false);
@@ -39,6 +41,8 @@ export default function Navigation({
   const searchInputRef = useRef(null);
 
   const router = useRouter();
+
+  const pageURL = router.pathname === "/pages/[slug]" ? "/pages" : "pages";
 
   const closeOnLinkChangeHandler = () => {
     const handleChange = () => {
@@ -627,13 +631,16 @@ export default function Navigation({
                     ))}
 
                     {navigation.pages.map((page) => (
-                      <a
+                      <Link
                         key={page.name}
-                        href={page.href}
+                        href={{
+                          pathname: `${pageURL}/${page.name}`.toLowerCase(),
+                          // query: { id: item.id },
+                        }}
                         className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
                       >
                         {page.name}
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </Popover.Group>

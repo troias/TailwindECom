@@ -7,14 +7,17 @@ import { getNavigation } from ".././utils/api";
 import { useFooter } from "../utils/customHooks/useFooter";
 import { useEffect } from "react";
 import LoadingSpinner from "../components/UI/Spinners/loadingSpinner";
+import Layout from "../components/Layout/layout";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <React.Suspense fallback={<LoadingSpinner />}>
         <Navigation navigation={pageProps.navigation} />
-        <Component {...pageProps} />
-        <Footer />
+        <Layout>
+          <Component {...pageProps} />
+          <Footer />
+        </Layout>
       </React.Suspense>
     </>
     // @ts-ignore

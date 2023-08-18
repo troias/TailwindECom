@@ -55,3 +55,5 @@ export function formatSectionName(section) {
     .replace(/(\b\w+)|('\w+)/g, (match) => match.toLowerCase())
     .replace(/(^|\s)\w/g, (char) => char.toUpperCase());
 }
+
+//Routing helpers
