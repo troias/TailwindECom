@@ -2,6 +2,7 @@ import styles from "../styles/Home.module.css";
 import PromoSection from "../components/promo-sections/promo-section1";
 import Products from "../components/products/products";
 import { getProducts, getNavigation, getHeroProducts } from "../utils/api";
+import Layout from "../components/Layout/layout";
 
 export default function Home({
   products,
@@ -11,10 +12,10 @@ export default function Home({
   heroData: any[];
 }) {
   return (
-    <div className={styles.container}>
+    <Layout>
       <PromoSection products={heroData} />
       <Products products={products} />
-    </div>
+    </Layout>
   );
 }
 
