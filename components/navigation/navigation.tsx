@@ -797,13 +797,13 @@ export default function Navigation({
 
                   {/* Account */}
                   <div className="ml-4 flow-root lg:ml-6 bg-black"></div>
-                  <a
-                    href="#"
+                  <Link
+                    href="/account"
                     className="p-2 text-gray-400 hover:text-gray-500 lg:ml-4"
                   >
                     <span className="sr-only">Account</span>
                     <UserIcon className="h-6 w-6" aria-hidden="true" />
-                  </a>
+                  </Link>
 
                   {/* Cart */}
                   <div className="ml-4 flow-root lg:ml-6">

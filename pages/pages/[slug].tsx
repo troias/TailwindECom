@@ -58,6 +58,11 @@ export const getStaticPaths = async (ctx) => {
   console.log("pages", pages);
 
   //get all slugs from pages
+  
+  // pages: [
+  //   { name: 'Contact', href: '#', handle: 'contact' },
+  //   { name: 'Company', href: '#', handle: 'company' }
+  // ]
 
   const paths = pages.edges.map((page) => {
     return {
