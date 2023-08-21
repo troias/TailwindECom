@@ -6,6 +6,8 @@ import { getFooterMenuData } from "../api";
 export const useFooter = () => {
   const [footer, setFooter] = useState([]);
 
+  console.log("useFooterFooter", footer);
+
   useEffect(() => {
     const getFooterData = async () => {
       try {

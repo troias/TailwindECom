@@ -57,3 +57,11 @@ export function formatSectionName(section) {
 }
 
 //Routing helpers
+
+// get page from url
+
+export const getPageFromUrl = (url: string) => {
+  const page = url.split("/").pop();
+  console.log("getPageFromUrlpage", page);
+  return page;
+};

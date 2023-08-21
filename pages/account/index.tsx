@@ -12,7 +12,7 @@ export const getStaticProps = async (ctx) => {
 
   const navigation = await getNavigation();
 
-  console.log("navigation", navigation);
+  // console.log("navigation", navigation);
 
   return {
     props: {

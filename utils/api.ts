@@ -747,6 +747,7 @@ export const getFooterMenuData = async () => {
         items {
           title
           id
+          url
         }
       }
       menu1: menu(handle: $menu1Handle) {
@@ -754,6 +755,7 @@ export const getFooterMenuData = async () => {
         items {
           title
           id
+          url
         }
       }
       menu2: menu(handle: $menu2Handle) {
@@ -761,6 +763,7 @@ export const getFooterMenuData = async () => {
         items {
           title
           id
+          url
         }
       }
       shop {
@@ -784,6 +787,8 @@ export const getFooterMenuData = async () => {
 
   return footerMenuData;
 };
+
+//Find Page from FooterMenu name
 
 //Get Page Data
 

@@ -1,4 +1,5 @@
 import { useFooter } from "../../utils/customHooks/useFooter";
+
 import {
   capitalizeFirstLetter,
   displayCurrentYear,
@@ -6,7 +7,11 @@ import {
 } from "../../utils/utils";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { firstLetterUppercase } from "../../utils/dataReformatting";
+import {
+  firstLetterUppercase,
+  getPageFromUrl,
+} from "../../utils/dataReformatting";
+import {} from "../../utils/utils";
 
 export default function Footer() {
   const footer = useFooter();
@@ -61,11 +66,10 @@ export default function Footer() {
                   {checkArrPopulated(footer) &&
                     footer[1].value.items.map((item) => (
                       <li key={item.name}>
+                        test
                         <Link
                           href={{
-                            pathname: `${page}/${item.title
-                              .toLowerCase()
-                              .replace(/\s+/g, "-")}`,
+                            pathname: `${page}/${getPageFromUrl(item.url)}`,
                             // query: { id: item.id },
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
@@ -119,7 +123,7 @@ export default function Footer() {
               </div>
             </div>
           </div>
-          <div className="mt-8 xl:mt-0">
+          {/* <div className="mt-8 xl:mt-0">
             <h3 className="text-base font-medium text-gray-900">
               Subscribe to our newsletter
             </h3>
@@ -149,7 +153,7 @@ export default function Footer() {
                 </button>
               </div>
             </form>
-          </div>
+          </div> */}
         </div>
         <div className="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
           <div className="flex space-x-6 md:order-2">
