@@ -44,9 +44,7 @@ export default function Footer() {
                       <li key={item.title}>
                         <Link
                           href={{
-                            pathname: `${page}/${item.title
-                              .toLowerCase()
-                              .replace(/\s+/g, "-")}`,
+                            pathname: `${page}/${getPageFromUrl(item.url)}`,
                             // query: { id: item.id },
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
@@ -66,7 +64,6 @@ export default function Footer() {
                   {checkArrPopulated(footer) &&
                     footer[1].value.items.map((item) => (
                       <li key={item.name}>
-                        test
                         <Link
                           href={{
                             pathname: `${page}/${getPageFromUrl(item.url)}`,
@@ -93,9 +90,7 @@ export default function Footer() {
                       <li key={item.name}>
                         <Link
                           href={{
-                            pathname: `${page}/${item.title
-                              .toLowerCase()
-                              .replace(/\s+/g, "-")}`,
+                            pathname: `${page}/${getPageFromUrl(item.url)}`,
                             // query: { id: item.id },
                           }}
                           className="text-base text-gray-500 hover:text-gray-900"
