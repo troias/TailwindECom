@@ -68,12 +68,12 @@ function classNames(...classes) {
 
 export default function index({}: Props) {
   return (
-    <div className="max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-7xl mx-auto py-16  px-0 sm:px-4 lg:px-8 ">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
         <nav className="flex flex-1 flex-col-">
           <ul role="list" className="flex flex-1 flex-col gap-y-7 w-1/3">
             <li>
-              <ul role="list" className="-mx-2 space-y-1">
+              <ul role="list" className="-mx-2 space-y-1 ">
                 {navigation.map((item) => (
                   <li key={item.name}>
                     {!item.children ? (
@@ -81,7 +81,7 @@ export default function index({}: Props) {
                         href={item.href}
                         className={classNames(
                           item.current ? "bg-gray-50" : "hover:bg-gray-50",
-                          "block rounded-md py-2 pr-2 pl-10 text-sm leading-6 font-semibold text-gray-700"
+                          "block rounded-md py-2 pr-2 pl-2 sm:pl-6 lg:pl-10 text-sm sm:text-lg leading-6 font-semibold text-gray-700"
                         )}
                       >
                         {item.name}
@@ -93,12 +93,12 @@ export default function index({}: Props) {
             </li>
           </ul>
           <div className="w-2/3 h-96 border-x-1 border-gray-100">
-            <h1 className="text-base bg-gray-100  font-semibold text-gray-900 sm:text-xl py-8 pl-8">
+            <h1 className="text-base bg-gray-100  font-semibold text-gray-900 sm:text-lg py-8 px-4 lg:text-xl">
               Account Page Overview
             </h1>
             <div className="flex flex-col gap-y-5">
               <h3
-                className=" px-4 py-8 text-lg  text-gray-900 sm:text-xl
+                className=" px-4 py-8 text-base sm:text-lg  text-gray-900 
 
               "
               >
@@ -122,7 +122,7 @@ export default function index({}: Props) {
                             </Link>
                           </div>
                           <div className="grid gap-4">
-                            <h4 className="text-lg font-semibold">
+                            <h4 className="text-base sm:text-lg font-semibold">
                               {item.subheading}
                             </h4>
                             <p className="text-base">{item.data}</p>
@@ -138,7 +138,7 @@ export default function index({}: Props) {
                               {item.children.map((child) => (
                                 <li key={child.name}>
                                   <div className="flex justify-between">
-                                    <h4 className="text-lg hover:text-gray-700 text-blue-500 mb-1 border-b-2 border-blue-500">
+                                    <h4 className="text-base sm:text-lg hover:text-gray-700 text-blue-500 mb-1 border-b-2 border-blue-500">
                                       {child.name}
                                     </h4>
                                   </div>

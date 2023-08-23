@@ -515,6 +515,7 @@ export const getNavigation = async () => {
           node {
             handle
             title
+            onlineStoreUrl
           }
         }
       }
@@ -526,10 +527,18 @@ export const getNavigation = async () => {
   // Pages Array for Menu
 
   const pages = pageData.pages.edges.map(
-    (page: { node: { title: any; url: any; handle: string } }) => {
+    (page: {
+      node: {
+        onlineStoreUrl: string;
+        title: any;
+        url: any;
+        handle: string;
+      };
+    }) => {
       return {
         name: page.node.title,
         href: page.node.url || "#",
+        url: page.node.onlineStoreUrl || "#",
         handle: page.node.handle || "#",
       };
     }
@@ -782,8 +791,6 @@ export const getFooterMenuData = async () => {
     footerMenuQuery,
     footerMenuVars
   );
-
-  console.log("footerMenuData", footerMenuData);
 
   return footerMenuData;
 };
@@ -1043,14 +1050,6 @@ export const getCollectionPageDataByHandle = async (
     return index;
   }
 
-  // console.log("getValidIndex", getValidIndex(collectionPageDataFirst, amount));
-  // console.log("defaultAmount", amount);
-  // console.log(
-  //   "amountOfProducts",
-  //   collectionPageDataFirst.collection.products.edges.length
-  // );
-  // console.log("collection handle", handle);
-
   // Usage example
 
   const edgeIndex = getValidIndex(collectionPageDataFirst, amount);
@@ -1141,24 +1140,6 @@ export const getCollectionPageDataByHandle = async (
     collectionPageDataQueryPrev,
     collectionPageDataVarsPrev
   );
-
-  // console.log(
-  //   " collectionPageDataNxt.collection.products",
-  //   collectionPageDataNxt.collection.products
-  // );
-
-  // console.log(" collectionPageDataVarsPrev", collectionPageDataVarsPrev);
-
-  // console.log(" collectionPageDataPrev", collectionPageDataPrev);
-  // console.log(
-  //   "collectionPageDataNxt",
-  //   collectionPageDataNxt.collection.products.edges
-  // );
-
-  // console.log(
-  //   "collectionPageDataFirst",
-  //   collectionPageDataFirst.collection.products.edges
-  // );
 
   // FilterLogic for brands/vendor
 
@@ -1260,8 +1241,6 @@ export const getCollectionPageDataByHandle = async (
   // const optionsArray = variantsToArray.map((variant) => {
   //   return filterVariantCreator(variant);
   // });
-
-  // console.log("optionsArray", optionsArray[0].options);
 
   const arrWithSet = [...new Set(variants)];
 
@@ -1430,7 +1409,7 @@ export const fetchCollectionPage = async (
 
     if (currentPage === targetPage) {
       allProducts = edges;
-      // console.log("allProducts", allProducts);
+
       break;
     }
 

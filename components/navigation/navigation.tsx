@@ -29,7 +29,6 @@ export default function Navigation({
 }: {
   navigation: ExtendedNavigation;
 }) {
-  console.log("navigation", navigation);
   const [open, setOpen] = useState(false);
 
   const [cartModalOpen, setCartModalOpen] = useState(false);
@@ -43,6 +42,19 @@ export default function Navigation({
   const router = useRouter();
 
   const pageURL = router.pathname === "/pages/[slug]" ? "/pages" : "pages";
+
+  const getPageURL = (page: {
+    name: string;
+    url: string;
+    handle: string;
+    id: string;
+    href: string;
+  }) => {
+    //gets page by removing last string of online url
+
+    const pageFromUrl = page.url.split("/").pop();
+    return `/${pageURL}/${pageFromUrl}`;
+  };
 
   const closeOnLinkChangeHandler = () => {
     const handleChange = () => {
@@ -135,7 +147,7 @@ export default function Navigation({
                       onClick={() => setOpen(false)}
                     >
                       <span className="sr-only">Close menu</span>
-                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />t
                     </button>
                   </div>
 
@@ -511,7 +523,7 @@ export default function Navigation({
                                       <button
                                         type="button"
                                         className="-m-2 inline-flex items-center justify-center rounded-md pt-2 text-gray-400"
-                                        onClick={() => setOpen(false)}
+                                        onClick={close}
                                       >
                                         <span className="sr-only">
                                           Close menu
@@ -634,7 +646,7 @@ export default function Navigation({
                       <Link
                         key={page.name}
                         href={{
-                          pathname: `${pageURL}/${page.name}`.toLowerCase(),
+                          pathname: getPageURL(page),
                           // query: { id: item.id },
                         }}
                         className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
