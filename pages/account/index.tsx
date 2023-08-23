@@ -1,19 +1,38 @@
 import React from "react";
 import { getNavigation } from "../../utils/api";
-import { Disclosure } from "@headlessui/react";
-import { ChevronRightIcon } from "@heroicons/react/20/solid";
+
 import Link from "next/link";
 
 type Props = {};
 
-const navigation = [
-  { name: "Overview", href: "#", current: true },
-  { name: "Order history", href: "/order-history", current: false },
-  { name: "Delivery addresses", href: "/delivery-addresses", current: false },
+export const navigation = [
+  { name: "Overview", href: "/account", current: true, title: "Overview" },
+  {
+    name: "Order history",
+    href: "/account/order-history",
+    current: false,
+    title: "Order History",
+  },
+  {
+    name: "Delivery addresses",
+    title: "Delivery Addresses",
+    href: "/account/delivery-addresses",
+    current: false,
+  },
 
-  { name: "My details", href: "/my-details", current: false },
-  { name: "Help", href: "/help", current: false },
-  { name: "Sign out", href: "account/signout", current: false },
+  {
+    name: "My details",
+    href: "/account/my-details",
+    current: false,
+    title: "My Details",
+  },
+  { name: "Help", href: "/account/help", current: false, title: "Help" },
+  {
+    name: "Sign out",
+    href: "/account/signout",
+    current: false,
+    title: "Sign Out",
+  },
 ];
 
 const overview = [
