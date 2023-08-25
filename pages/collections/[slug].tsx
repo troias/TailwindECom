@@ -499,7 +499,7 @@ export default function Example({
     };
 
     updateProductsOnAmountPerPageChange();
-  }, [amountPerPagee]);
+  }, [amountPerPagee, page, products.length, cursor, handle]);
 
   // // Filter Logic
 
@@ -574,7 +574,7 @@ export default function Example({
 
       return filteredProducts;
     },
-    [state.filteredVariantOptions, products]
+    [products]
   );
 
   // //Brand Filter Logic
