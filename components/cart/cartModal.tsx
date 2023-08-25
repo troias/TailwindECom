@@ -5,6 +5,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { type } from "os";
+import Image from "next/image";
 
 const products = [
   // {
@@ -82,9 +83,11 @@ export default function CartModal(props: CartModalProps) {
               {products.map((product, productIdx) => (
                 <li key={product.id} className="flex py-6 sm:py-10">
                   <div className="flex-shrink-0">
-                    <img
+                    <Image
                       src={product.imageSrc}
                       alt={product.imageAlt}
+                      width={150}
+                      height={150}
                       className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48"
                     />
                   </div>

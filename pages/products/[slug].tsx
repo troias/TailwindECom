@@ -259,9 +259,11 @@ export default function Example({ product, products }) {
               return (
                 <div key={product.node.id} className="group relative">
                   <div className="w-full min-h-80 bg-gray-100 rounded-lg overflow-hidden group-hover:opacity-75 lg:h-80 lg:w-80">
-                    <img
+                    <Image
                       src={image}
                       alt=""
+                      width={1000}
+                      height={1000}
                       className="w-full h-full object-center object-cover"
                     />
                   </div>
