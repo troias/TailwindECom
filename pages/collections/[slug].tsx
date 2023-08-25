@@ -737,64 +737,61 @@ export default function Example({
     setProducts(reformattedProducts);
   }, []);
 
-  const fetchPreviousPageData = useCallback(
-    async (data: Products22) => {
-      const fetchPreviousPage = async () => {
-        const previousPage = await data.previous;
-        return previousPage;
-      };
+  const fetchPreviousPageData = useCallback(async (data: Products22) => {
+    const fetchPreviousPage = async () => {
+      const previousPage = await data.previous;
+      return previousPage;
+    };
 
-      const previousPage = await fetchPreviousPage();
+    const previousPage = await fetchPreviousPage();
 
-      try {
-        const reformattedProducts = previousPage.collection.products.edges.map(
-          (product: UnformattedProduct) => {
-            const variantOptions = getVariantOptions(product.node);
-            const date = new Date(product.node.createdAt);
+    try {
+      const reformattedProducts = previousPage.collection.products.edges.map(
+        (product: UnformattedProduct) => {
+          const variantOptions = getVariantOptions(product.node);
+          const date = new Date(product.node.createdAt);
 
-            // Get the month, day, and year from the date object
-            const formattedDate = formatDate(date);
-            return {
-              id: product.node.id,
-              name: product.node.title,
-              handle: product.node.handle,
-              href: "#",
-              price: product.node.priceRange.maxVariantPrice.amount,
-              description: product.node.description,
-              vendor: product.node.vendor,
-              variants: variantOptions,
-              createdAt: formattedDate,
-              rating: Number(product.node.metafield.value),
+          // Get the month, day, and year from the date object
+          const formattedDate = formatDate(date);
+          return {
+            id: product.node.id,
+            name: product.node.title,
+            handle: product.node.handle,
+            href: "#",
+            price: product.node.priceRange.maxVariantPrice.amount,
+            description: product.node.description,
+            vendor: product.node.vendor,
+            variants: variantOptions,
+            createdAt: formattedDate,
+            rating: Number(product.node.metafield.value),
 
-              imageSrc: product.node.images.edges[0].node.url,
-              imageAlt: "",
-            };
-          }
-        ) as FormattedProduct[];
-
-        setProducts(reformattedProducts);
-      } catch (error) {
-        console.error("Error fetching previous page data:", error);
-        return [
-          {
-            id: "",
-            name: "",
-            handle: "",
-            href: "",
-            price: "",
-            description: "",
-            vendor: "",
-            variants: { id: "", options: [{ value: "", label: "" }] },
-            createdAt: "",
-            rating: 0,
-            imageSrc: "",
+            imageSrc: product.node.images.edges[0].node.url,
             imageAlt: "",
-          },
-        ];
-      }
-    },
-    [products]
-  );
+          };
+        }
+      ) as FormattedProduct[];
+
+      setProducts(reformattedProducts);
+    } catch (error) {
+      console.error("Error fetching previous page data:", error);
+      return [
+        {
+          id: "",
+          name: "",
+          handle: "",
+          href: "",
+          price: "",
+          description: "",
+          vendor: "",
+          variants: { id: "", options: [{ value: "", label: "" }] },
+          createdAt: "",
+          rating: 0,
+          imageSrc: "",
+          imageAlt: "",
+        },
+      ];
+    }
+  }, []);
 
   // //Pagination Logic
 
