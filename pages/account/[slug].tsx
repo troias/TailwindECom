@@ -10,7 +10,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function index({}: Props) {
+export default function Account({}: Props) {
   const [current, setCurrent] = useState(navigation);
   const router = useRouter();
 
