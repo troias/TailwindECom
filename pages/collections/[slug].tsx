@@ -29,6 +29,7 @@ import {
   Transition,
 } from "@headlessui/react";
 import Link from "next/link";
+import Image from "next/image";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
@@ -888,24 +889,6 @@ export default function Example({
 
   // Initial state for the filter options
 
-  // Handler for setting the sort option
-  const setSortOption = (option) => {
-    dispatch({ type: "SET_SORT", payload: option });
-  };
-
-  // Handler for toggling filter options
-  const toggleFilterOption = (optionValue, filterName) => {
-    dispatch({ type: "TOGGLE_FILTER", payload: { optionValue, filterName } });
-  };
-
-  // Filter handler function passed to the onClick event
-  const filterHandler = (optionValue, filterName) => (e) => {
-    e.preventDefault();
-    toggleFilterOption(optionValue, filterName);
-  };
-
-  // const { sort, filters } = state;
-
   // Sort Logic
   const handleSortOptionClick = (optionName) => {
     // change clicked option to true and all others to false
@@ -988,7 +971,13 @@ export default function Example({
 
   useEffect(() => {
     sortProductsAndSetState(state.sort);
-  }, [state.sort, state.filteredProducts, products, setProducts]);
+  }, [
+    state.sort,
+    state.filteredProducts,
+    products,
+    sortProductsAndSetState,
+    setProducts,
+  ]);
 
   //if sort state changes, console.log sort state
 
@@ -1282,9 +1271,11 @@ export default function Example({
                       passHref
                     >
                       <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg sm:aspect-h-3 sm:aspect-w-2">
-                        <img
+                        <Image
                           src={product.imageSrc}
                           alt={product.imageAlt}
+                          width={500}
+                          height={500}
                           className="h-full w-full object-cover object-center group-hover:opacity-75"
                         />
                       </div>
