@@ -1,11 +1,12 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 
 type Props = {};
 
-export default function cartModal({}: Props) {
+export default function CartModal({}: Props) {
   const [cartModalOpen, setCartModalOpen] = useState(false);
 
   const cartModalHander = () => {
@@ -58,9 +59,11 @@ export default function cartModal({}: Props) {
               <div className="mt-2">
                 <div className="flex justify-between">
                   <div className="flex">
-                    <img
+                    <Image
                       src="https://tailwindui.com/img/ecommerce-images/shopping-cart-page-04-product-01.jpg"
                       alt="Salmon orange fabric pouch with match zipper, gray zipper pull, and adjustable hip belt."
+                      width={80}
+                      height={80}
                       className="w-20 h-20 rounded-md object-center object-cover"
                     />
                     <div className="ml-4">

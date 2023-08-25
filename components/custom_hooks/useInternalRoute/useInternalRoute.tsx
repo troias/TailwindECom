@@ -21,7 +21,7 @@ export function useInternalRoute() {
       router.events.off("routeChangeStart", handleRouteChangeStart);
       router.events.off("routeChangeComplete", handleRouteChangeComplete);
     };
-  }, []);
+  }, [router.events]);
 
   return { isLoading };
 }
