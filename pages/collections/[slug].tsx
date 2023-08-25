@@ -603,7 +603,7 @@ export default function Example({
 
       return filteredProducts;
     },
-    [state.filteredBrandOptions, products]
+    [products]
   );
 
   const updateFilteredProducts = useCallback(
@@ -639,7 +639,7 @@ export default function Example({
       name: brandFilter.name,
       options: checkedOptions,
     };
-  }, [getCheckedOptions]);
+  }, [getCheckedOptions, state.filters]);
 
   useEffect(() => {
     const brandOptions = getBrandOptions;
@@ -701,44 +701,41 @@ export default function Example({
 
   // /// Pagination Logic
 
-  const fetchNextPageData = useCallback(
-    async (data: Products22) => {
-      const fetchNextPage = async () => {
-        const nextPage = await data.next;
-        return nextPage;
-      };
+  const fetchNextPageData = useCallback(async (data: Products22) => {
+    const fetchNextPage = async () => {
+      const nextPage = await data.next;
+      return nextPage;
+    };
 
-      const nextPage = await fetchNextPage();
+    const nextPage = await fetchNextPage();
 
-      const reformattedProducts = nextPage.collection.products.edges.map(
-        (product: UnformattedProduct) => {
-          const variantOptions = getVariantOptions(product.node);
-          const date = new Date(product.node.createdAt);
+    const reformattedProducts = nextPage.collection.products.edges.map(
+      (product: UnformattedProduct) => {
+        const variantOptions = getVariantOptions(product.node);
+        const date = new Date(product.node.createdAt);
 
-          // Get the month, day, and year from the date object
-          const formattedDate = formatDate(date);
+        // Get the month, day, and year from the date object
+        const formattedDate = formatDate(date);
 
-          return {
-            id: product.node.id,
-            name: product.node.title,
-            handle: product.node.handle,
-            href: "#",
-            vendor: product.node.vendor,
-            variants: variantOptions,
-            createdAt: formattedDate,
-            rating: Number(product.node.metafield.value),
-            price: product.node.priceRange.maxVariantPrice.amount,
-            description: product.node.description,
-            imageSrc: product.node.images.edges[0].node.url,
-            imageAlt: "",
-          };
-        }
-      ) as FormattedProduct;
+        return {
+          id: product.node.id,
+          name: product.node.title,
+          handle: product.node.handle,
+          href: "#",
+          vendor: product.node.vendor,
+          variants: variantOptions,
+          createdAt: formattedDate,
+          rating: Number(product.node.metafield.value),
+          price: product.node.priceRange.maxVariantPrice.amount,
+          description: product.node.description,
+          imageSrc: product.node.images.edges[0].node.url,
+          imageAlt: "",
+        };
+      }
+    ) as FormattedProduct;
 
-      setProducts(reformattedProducts);
-    },
-    [products]
-  );
+    setProducts(reformattedProducts);
+  }, []);
 
   const fetchPreviousPageData = useCallback(
     async (data: Products22) => {
