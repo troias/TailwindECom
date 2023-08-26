@@ -1,4 +1,4 @@
-import styles from "../styles/Home.module.css";
+import React from "react";
 import PromoSection from "../components/promo-sections/promo-section1";
 import Products from "../components/products/products";
 import { getProducts, getNavigation, getHeroProducts } from "../utils/api";

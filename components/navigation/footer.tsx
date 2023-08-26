@@ -1,3 +1,4 @@
+import React from "react";
 import { useFooter } from "../../utils/customHooks/useFooter";
 
 import {

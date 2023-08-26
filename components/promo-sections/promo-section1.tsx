@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import React from "react";
 
 type Props = {
   id: string;

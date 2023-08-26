@@ -4,8 +4,7 @@ import type { AppProps } from "next/app";
 import Navigation from "../components/navigation/navigation";
 import Footer from "../components/navigation/footer";
 import { getNavigation } from ".././utils/api";
-import { useFooter } from "../utils/customHooks/useFooter";
-import { useEffect } from "react";
+
 import LoadingSpinner from "../components/UI/Spinners/loadingSpinner";
 import Layout from "../components/Layout/layout";
 

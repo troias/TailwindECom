@@ -1,3 +1,4 @@
+import React from "react";
 import { Product } from "@shopify/hydrogen/dist/esnext/storefront-api-types";
 import Link from "next/link";
 import Image from "next/image";

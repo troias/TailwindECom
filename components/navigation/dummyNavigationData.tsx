@@ -1,4 +1,4 @@
-import { id } from "date-fns/locale";
+import React from "react";
 
 interface NavigationCategory {
   id: string;

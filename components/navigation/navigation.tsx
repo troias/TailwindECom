@@ -1,4 +1,10 @@
-import { Fragment, useState, useRef, useCallback, useEffect } from "react";
+import React, {
+  Fragment,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+} from "react";
 
 import { Dialog, Popover, Tab, Transition } from "@headlessui/react";
 import Link from "next/link";
@@ -88,7 +94,7 @@ export default function Navigation({
       const data = await searchMenuQuery(input);
       setSearchResults(data);
     },
-    [searchMenuQuery, setSearchResults]
+    [setSearchResults]
   );
 
   const handleSearchInputChange = useCallback(
