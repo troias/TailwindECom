@@ -189,6 +189,7 @@ export default function Navigation({
                               <Link
                                 href={`/collections/${item.handle}`}
                                 onClick={closeOnLinkChangeHandler}
+                                key={item.name}
                               >
                                 <div
                                   key={itemIdx}
@@ -238,6 +239,7 @@ export default function Navigation({
                                       section: section.name,
                                     },
                                   }}
+                                  key={section.name}
                                   onClick={closeOnLinkChangeHandler}
                                 >
                                   <div key={section.name}>
@@ -665,7 +667,7 @@ export default function Navigation({
                 </Popover.Group>
 
                 {/* Logo */}
-                <a href="/" className="flex">
+                <Link href="/" className="flex">
                   <span className="sr-only">Grey-Mon</span>
                   <Image
                     className="h-12 w-auto"
@@ -674,7 +676,7 @@ export default function Navigation({
                     width={200}
                     height={200}
                   />
-                </a>
+                </Link>
 
                 <div className="flex flex-1 items-center justify-end">
                   {/* Search */}
