@@ -49,16 +49,12 @@ export default function Navigation({
 
   const pageURL = router.pathname === "/pages/[slug]" ? "/pages" : "pages";
 
-  const getPageURL = (page: {
-    name: string;
-    url: string;
-    handle: string;
-    id: string;
-    href: string;
-  }) => {
+  console.log("navigation", navigation);
+
+  const getPageURL = (pageInner: any) => {
     //gets page by removing last string of online url
 
-    const pageFromUrl = page.url.split("/").pop();
+    const pageFromUrl = pageInner.url.split("/").pop();
     return `/${pageURL}/${pageFromUrl}`;
   };
 
@@ -651,16 +647,15 @@ export default function Navigation({
                       </Popover>
                     ))}
 
-                    {navigation.pages.map((page) => (
+                    {navigation.pages.map((pageInner) => (
                       <Link
-                        key={page.name}
+                        key={pageInner.name}
                         href={{
-                          pathname: getPageURL(page),
-                          // query: { id: item.id },
+                          pathname: getPageURL(pageInner),
                         }}
                         className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-800"
                       >
-                        {page.name}
+                        {pageInner.name}
                       </Link>
                     ))}
                   </div>
