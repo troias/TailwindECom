@@ -7,6 +7,19 @@ import {
 import { type } from "os";
 import Image from "next/image";
 
+type CartProducts = {
+  id: number;
+  name: string;
+  href: string;
+  price: string;
+  color: string;
+  inStock: boolean;
+  size?: string;
+  leadTime?: string;
+  imageSrc: string;
+  imageAlt: string;
+};
+
 const products = [
   // {
   //   id: 1,
@@ -44,7 +57,7 @@ const products = [
   //     "https://tailwindui.com/img/ecommerce-images/shopping-cart-page-01-product-03.jpg",
   //   imageAlt: "Insulated bottle with white base and black snap lid.",
   // },
-];
+] as CartProducts[];
 
 type CartModalProps = {
   handler: () => void;
