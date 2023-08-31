@@ -10,7 +10,7 @@ export default function Custom404() {
   );
 }
 
-export const getStaticProps = async (ctx) => {
+export const getStaticProps = async (ctx: { params: { slug: string } }) => {
   const navigation = await getNavigation();
   // const slug = params.slug;
 
