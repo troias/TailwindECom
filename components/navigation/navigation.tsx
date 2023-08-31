@@ -82,7 +82,7 @@ export default function Navigation({
 
       if (searchModalOpen) {
         if (isDefined(searchInputRef.current)) {
-          searchInputRef.current.focus();
+          (searchInputRef.current as HTMLInputElement).focus();
         }
         setSearchModalHack(true);
       }
