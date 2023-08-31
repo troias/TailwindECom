@@ -163,7 +163,7 @@ export default function Navigation({
                       <Tab.List className="-mb-px flex space-x-8 px-4 ">
                         {navigation.categories.map((category) => (
                           <Tab
-                            key={category.name}
+                            key={category.id}
                             className={({ selected }) =>
                               classNames(
                                 selected
@@ -291,7 +291,7 @@ export default function Navigation({
 
                   <div className="border-t border-gray-200 py-6 px-4">
                     <a href="#" className="-m-2 flex items-center p-2">
-                      <img
+                      <Image
                         src="https://tailwindui.com/img/flags/flag-canada.svg"
                         alt=""
                         className="block h-auto w-5 flex-shrink-0"
@@ -549,6 +549,7 @@ export default function Navigation({
                                               onClick={() => {
                                                 close();
                                               }}
+                                              key={item.name}
                                             >
                                               <div
                                                 key={item.name}
@@ -666,7 +667,13 @@ export default function Navigation({
                 {/* Logo */}
                 <a href="/" className="flex">
                   <span className="sr-only">Grey-Mon</span>
-                  <img className="h-12 w-auto" src="/Logo.svg" alt="" />
+                  <Image
+                    className="h-12 w-auto"
+                    src="/Logo.svg"
+                    alt=""
+                    width={200}
+                    height={200}
+                  />
                 </a>
 
                 <div className="flex flex-1 items-center justify-end">

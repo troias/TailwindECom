@@ -1,5 +1,7 @@
 import Link from "next/link";
 import React from "react";
+import Image from "next/image";
+import { type } from "os";
 
 type Props = {
   id: string;
@@ -19,7 +21,17 @@ type Props = {
   subHeading?: string;
 };
 
-export default function PromoSection({ products, title, subHeading }: Props) {
+type Product = {
+  id: number;
+  name: string;
+  tags: string[];
+  images: {
+    id: number;
+    src: string;
+  }[];
+};
+
+export default function promoSection({ products, title, subHeading }: Props) {
   // A function to shuffle an array randomly
   function shuffleArray(array: any[], limit: number = 0) {
     let currentIndex = array.length,
@@ -52,6 +64,8 @@ export default function PromoSection({ products, title, subHeading }: Props) {
 
   const productsData = products[0].products;
 
+  console.log("productsData", productsData);
+
   const dummyData = {
     id: 1,
     title: "Summer styles are finally here",
@@ -82,11 +96,16 @@ export default function PromoSection({ products, title, subHeading }: Props) {
                   <div className="flex items-center space-x-6 lg:space-x-8">
                     <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
                       {/* two products  */}
-                      {shuffleArray(productsData, 2).map((product) => (
-                        <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
-                          <img
+                      {shuffleArray(productsData, 2).map((product: Product) => (
+                        <div
+                          className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100"
+                          key={product.id}
+                        >
+                          <Image
                             src={product.images[0].src}
                             alt=""
+                            width={200}
+                            height={200}
                             className="h-full w-full object-cover object-center"
                           />
                         </div>
@@ -96,11 +115,16 @@ export default function PromoSection({ products, title, subHeading }: Props) {
                     <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
                       {/* three products  */}
 
-                      {shuffleArray(productsData, 3).map((product) => (
-                        <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
-                          <img
+                      {shuffleArray(productsData, 3).map((product: Product) => (
+                        <div
+                          className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100"
+                          key={product.id}
+                        >
+                          <Image
                             src={product.images[0].src}
                             alt=""
+                            width={200}
+                            height={200}
                             className="h-full w-full object-cover object-center"
                           />
                         </div>
@@ -110,11 +134,16 @@ export default function PromoSection({ products, title, subHeading }: Props) {
                     <div className="grid flex-shrink-0 grid-cols-1 gap-y-6 lg:gap-y-8">
                       {/* two products  */}
 
-                      {shuffleArray(productsData, 2).map((product) => (
-                        <div className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100">
-                          <img
+                      {shuffleArray(productsData, 2).map((product: Product) => (
+                        <div
+                          className="h-64 w-44 overflow-hidden rounded-lg sm:opacity-0 lg:opacity-100"
+                          key={product.id}
+                        >
+                          <Image
                             src={product.images[0].src}
                             alt=""
+                            width={200}
+                            height={200}
                             className="h-full w-full object-cover object-center"
                           />
                         </div>
