@@ -8,6 +8,7 @@ type Props = {
   name: string;
   handle: string;
   products: {
+    [key: string]: any;
     id: number;
     name: string;
     tags: string[];
@@ -54,10 +55,9 @@ export default function promoSection({ products, title, subHeading }: Props) {
     if (limit > 0) {
       return array.slice(0, limit);
     }
-    //remove duplicates
 
-    const itemSet = new Set(array);
-    return itemSet;
+    // If no limit is specified, just return the shuffled array as is
+    return array;
   }
 
   // Shuffle the products array so that the products displayed are random and not the same every time
