@@ -3,22 +3,24 @@ import {
   ArrowLongRightIcon,
 } from "@heroicons/react/20/solid";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
 export default function CenterPagination({
   totalPages: totalPages = () => 10,
 
-  gotoPage: gotoPage = (page) => {},
+  gotoPage: gotoPage = (page: number) => {},
 
   handleMoveLeft = () => {},
   handleMoveRight = () => {},
 }) {
-  const handlePageClick = (page) => {
+  const handlePageClick = (page: number) => {
     gotoPage(page);
     setCurrentPage(page);
   };
 
-  const handleNextClick = (e) => {
+  const handleNextClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
     // e.preventDefault();
     handleMoveRight();
     setCurrentPage(() => {
@@ -30,7 +32,9 @@ export default function CenterPagination({
     });
   };
 
-  const handlePreviousClick = (e) => {
+  const handlePreviousClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
     // e.preventDefault();
     handleMoveLeft();
     setCurrentPage(() => {
