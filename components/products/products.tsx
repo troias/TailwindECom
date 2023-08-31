@@ -4,7 +4,19 @@ import Link from "next/link";
 import Image from "next/image";
 import { formatPrice } from "../../utils/utils";
 
-export default function Products({ products }: { products: any }) {
+interface ExtendedProduct extends Product {
+  imgSrc: string;
+  imgAlt: string;
+  name: string;
+  color: string;
+  price: string;
+}
+
+export default function Products({
+  products,
+}: {
+  products: ExtendedProduct[];
+}) {
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl py-16 px-4 sm:py-24 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -19,12 +31,12 @@ export default function Products({ products }: { products: any }) {
                     .join(',')} alt="Picture of the author" width={250} height={250} /> */}
 
         <div className="mt-6 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
-          {products.map((product: Product) => (
+          {products.map((product: ExtendedProduct) => (
             <div key={product.id} className="group relative">
               <div className="  overflow-hidden rounded-md bg-gray-200 group-hover:opacity-75  ">
                 <Image
                   src={product.imgSrc}
-                  alt={product.name}
+                  alt={product.imgAlt}
                   width={1000}
                   height={1000}
                   className="rounded-md "
