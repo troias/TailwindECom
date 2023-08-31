@@ -14,8 +14,26 @@ import {
 } from "../../utils/dataReformatting";
 import {} from "../../utils/utils";
 
+interface FooterItem {
+  key: string;
+  value: {
+    map(
+      arg0: (item: { name: string; href: string; icon: any }) => JSX.Element
+    ): React.ReactNode;
+    title: string;
+    items?:
+      | {
+          title: string;
+          url: string;
+        }[]
+      | undefined;
+    name?: string | undefined;
+    href?: string | undefined;
+  };
+}
+
 export default function Footer() {
-  const footer = useFooter();
+  const footer: FooterItem[] = useFooter();
 
   console.log("footer", footer);
 
@@ -41,19 +59,21 @@ export default function Footer() {
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
                   {checkArrPopulated(footer) &&
-                    footer[0].value.items.map((item) => (
-                      <li key={item.title}>
-                        <Link
-                          href={{
-                            pathname: `${page}/${getPageFromUrl(item.url)}`,
-                            // query: { id: item.id },
-                          }}
-                          className="text-base text-gray-500 hover:text-gray-900"
-                        >
-                          {firstLetterUppercase(item.title)}
-                        </Link>
-                      </li>
-                    ))}
+                    footer[0].value.items?.map(
+                      (item: { title: string; url: string }) => (
+                        <li key={item.title}>
+                          <Link
+                            href={{
+                              pathname: `${page}/${getPageFromUrl(item.url)}`,
+                              // query: { id: item.id },
+                            }}
+                            className="text-base text-gray-500 hover:text-gray-900"
+                          >
+                            {firstLetterUppercase(item.title)}
+                          </Link>
+                        </li>
+                      )
+                    )}
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
@@ -63,8 +83,8 @@ export default function Footer() {
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
                   {checkArrPopulated(footer) &&
-                    footer[1].value.items.map((item) => (
-                      <li key={item.name}>
+                    footer[1].value.items?.map((item) => (
+                      <li key={item.title}>
                         <Link
                           href={{
                             pathname: `${page}/${getPageFromUrl(item.url)}`,
@@ -87,8 +107,8 @@ export default function Footer() {
                 </h3>
                 <ul role="list" className="mt-4 space-y-4">
                   {checkArrPopulated(footer) &&
-                    footer[2].value.items.map((item) => (
-                      <li key={item.name}>
+                    footer[2].value.items?.map((item) => (
+                      <li key={item.title}>
                         <Link
                           href={{
                             pathname: `${page}/${getPageFromUrl(item.url)}`,
@@ -154,23 +174,25 @@ export default function Footer() {
         <div className="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
           <div className="flex space-x-6 md:order-2">
             {checkArrPopulated(footer) &&
-              footer[4].value.map((item) => (
-                <Link
-                  key={item.name}
-                  href={`${page}/${item.name
-                    .toLowerCase()
-                    .replace(/\s+/g, "-")}`}
-                  className="text-gray-400 hover:text-gray-500"
-                >
-                  <span className="sr-only">{item.name}</span>
-                  <item.icon className="h-6 w-6" aria-hidden="true" />
-                </Link>
-              ))}
+              footer[4].value.map(
+                (item: { name: string; href: string; icon: any }) => (
+                  <Link
+                    key={item.name}
+                    href={`${page}/${item.name
+                      .toLowerCase()
+                      .replace(/\s+/g, "-")}`}
+                    className="text-gray-400 hover:text-gray-500"
+                  >
+                    <span className="sr-only">{item.name}</span>
+                    <item.icon className="h-6 w-6" aria-hidden="true" />
+                  </Link>
+                )
+              )}
           </div>
           <p className="mt-8 text-base text-gray-400 md:order-1 md:mt-0">
             &copy; {displayCurrentYear} &nbsp;
             {checkArrPopulated(footer) &&
-              capitalizeFirstLetter(footer[3].value.name)}
+              capitalizeFirstLetter(footer[3].value.name || "")}{" "}
             , Inc. All rights reserved.
           </p>
         </div>
