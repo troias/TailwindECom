@@ -6,7 +6,7 @@ import { navigation } from "./index";
 
 type Props = {};
 
-function classNames(...classes) {
+function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -16,7 +16,7 @@ export default function Account({}: Props) {
 
   console.log("router", router);
 
-  const checkIfCurrent = (path) => {
+  const checkIfCurrent = (path: string) => {
     //loop through navigation and check if any of the hrefs match the current path
 
     const newCurrent = navigation.map((item) => {
@@ -34,7 +34,12 @@ export default function Account({}: Props) {
     checkIfCurrent(router.asPath);
   }, [router.asPath]);
 
-  const link = (item) => {
+  const link = (item: {
+    name: string;
+    href: string;
+    current: boolean;
+    children?: undefined;
+  }) => {
     //if item href matches the current path dont render a link
     if (item.href === router.asPath) {
       return item.href;
@@ -53,21 +58,28 @@ export default function Account({}: Props) {
           <ul role="list" className="flex flex-1 flex-col gap-y-7 w-1/3">
             <li>
               <ul role="list" className="-mx-2 space-y-1">
-                {current.map((item) => (
-                  <li key={item.name}>
-                    {!item.children ? (
-                      <Link
-                        href={link(item)}
-                        className={classNames(
-                          item.current ? "bg-gray-50" : "hover:bg-gray-50",
-                          "block rounded-md py-2 pr-2 pl-10 text-sm leading-6 font-semibold text-gray-700"
-                        )}
-                      >
-                        {item.name}
-                      </Link>
-                    ) : null}
-                  </li>
-                ))}
+                {current.map(
+                  (item: {
+                    name: string;
+                    href: string;
+                    current: boolean;
+                    children?: undefined;
+                  }) => (
+                    <li key={item.name}>
+                      {!item.children ? (
+                        <Link
+                          href={link(item)}
+                          className={classNames(
+                            item.current ? "bg-gray-50" : "hover:bg-gray-50",
+                            "block rounded-md py-2 pr-2 pl-10 text-sm leading-6 font-semibold text-gray-700"
+                          )}
+                        >
+                          {item.name}
+                        </Link>
+                      ) : null}
+                    </li>
+                  )
+                )}
               </ul>
             </li>
           </ul>
@@ -93,7 +105,7 @@ export default function Account({}: Props) {
   );
 }
 
-export const getStaticProps = async (ctx) => {
+export const getStaticProps = async (ctx: { params: { slug: string } }) => {
   //get navigation
 
   const navigation = await getNavigation();
