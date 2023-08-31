@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../UI/Spinners/loadingSpinner";
 import { useInternalRoute } from "../custom_hooks/useInternalRoute/useInternalRoute";
-const Layout = ({ children }) => {
+
+// Explicitly type the children prop
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { isLoading } = useInternalRoute();
   console.log("isLoading", isLoading);
 
