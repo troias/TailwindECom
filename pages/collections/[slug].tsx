@@ -1,3 +1,4 @@
+import React from "react";
 import {
   getNavigation,
   graphqlstorefront,
@@ -264,6 +265,7 @@ type Props = {
   cursor: string;
   amountPerPage: number;
   filter: any;
+  subHeading: string;
 };
 
 export default function Example({
@@ -366,26 +368,31 @@ export default function Example({
             // Add "Brand" options from products
             const brands = products?.map((product) => product.vendor);
             const uniqueBrands = [...new Set(brands)];
-            const filteredBrandOptions = filter.options.filter((option) =>
-              uniqueBrands.includes(option.value)
+            const filteredBrandOptions = filter.options.filter(
+              (option: { value: string; checked: boolean }) =>
+                uniqueBrands.includes(option.value)
             );
             return {
               ...filter,
-              options: filteredBrandOptions.map((option) => ({
-                ...option,
-                checked: option.checked === false ? false : option.checked,
-              })),
+              options: filteredBrandOptions.map(
+                (option: { value: string; checked: boolean }) => ({
+                  ...option,
+                  checked: option.checked === false ? false : option.checked,
+                })
+              ),
             };
           }
           if (filter.options) {
-            const filteredOptions = filter.options.filter((option) =>
-              products.some((product) =>
-                product.variants.some((variant) =>
-                  variant.options.some(
-                    (variantOption) => variantOption.value === option.value
+            const filteredOptions = filter.options.filter(
+              (option: { value: string; checked: boolean }) =>
+                products.some((product) =>
+                  product.variants.some(
+                    (variant: { options: { value: string }[] }) =>
+                      variant.options.some(
+                        (variantOption) => variantOption.value === option.value
+                      )
                   )
                 )
-              )
             );
             return { ...filter, options: filteredOptions };
           }
@@ -410,7 +417,11 @@ export default function Example({
   }, [products]);
 
   const amountPerPageOptions = state.filters[0].options.filter(
-    (option) => option.checked
+    (option: {
+      value: string | number;
+      label: string | number;
+      checked: boolean;
+    }) => option.checked
   ) || [
     {
       value: amountPerPage,
@@ -509,28 +520,33 @@ export default function Example({
   const getListOfCheckedVariantOptions = useCallback(() => {
     // get all variant options
 
-    const variantOptions = state.filters.filter((filter) => {
-      //everything that is not "amountPerPage" or "brand"
-      return filter.id !== "amountPerPage" && filter.id !== "brand";
-    });
+    const variantOptions = state.filters.filter(
+      (filter: { id: string; options: any[] }) => {
+        //everything that is not "amountPerPage" or "brand"
+        return filter.id !== "amountPerPage" && filter.id !== "brand";
+      }
+    );
 
     // go over variant options and return an array of checked options objects
 
-    const checkedVariantOptions = variantOptions.map((variantOption) => {
-      const checkedOptions = variantOption.options.filter(
-        (option) => option.checked
-      );
+    const checkedVariantOptions = variantOptions.map(
+      (variantOption: { id: string; name: string; options: any[] }) => {
+        const checkedOptions = variantOption.options.filter(
+          (option) => option.checked
+        );
 
-      const checkedOptionsObject = {
-        id: variantOption.id,
-        name: variantOption.name,
-        options: checkedOptions,
-      };
+        const checkedOptionsObject = {
+          id: variantOption.id,
+          name: variantOption.name,
+          options: checkedOptions,
+        };
 
-      //return array filled with objects
+        //return array filled with objects
 
-      return checkedOptionsObject;
-    }, []);
+        return checkedOptionsObject;
+      },
+      []
+    );
 
     return checkedVariantOptions;
   }, [state.filters]);
@@ -549,12 +565,21 @@ export default function Example({
   //Variant Logic for filters
 
   const filterProductsByVariant = useCallback(
-    (variantOptions) => {
+    (variantOptions: any[]) => {
       // Get checked variant options and their values
       const checkedOptions = variantOptions.flatMap((variantOption) =>
         variantOption.options
-          .filter((option) => option.checked)
-          .map((option) => option.value)
+          .filter(
+            (option: { checked: boolean; value: string | number }) =>
+              option.checked
+          )
+          .map(
+            (option: {
+              checked: boolean;
+              value: string | number;
+              label: string | number;
+            }) => option.value
+          )
       );
 
       // Filter products and return only products that match any of the checked options and values
@@ -562,12 +587,13 @@ export default function Example({
         const productVariants = product.variants;
 
         // Check if any product variant matches any of the checked options and values
-        const hasMatch = productVariants.some((variant) =>
-          checkedOptions.some((checkedValue) =>
-            variant.options.some(
-              (variantOption) => variantOption.value === checkedValue
+        const hasMatch = productVariants.some(
+          (variant: { options: { value: string | number }[] }) =>
+            checkedOptions.some((checkedValue) =>
+              variant.options.some(
+                (variantOption) => variantOption.value === checkedValue
+              )
             )
-          )
         );
 
         return hasMatch;
@@ -581,8 +607,12 @@ export default function Example({
   // //Brand Filter Logic
 
   const filterProducts = useCallback(
-    (brandOptions) => {
-      let checkedBrandOptions = [];
+    (brandOptions: {
+      id: string;
+      name: string;
+      options: { value: string; checked: boolean }[];
+    }) => {
+      let checkedBrandOptions = [] as any[];
 
       try {
         checkedBrandOptions = brandOptions.options.filter(
@@ -608,7 +638,11 @@ export default function Example({
   );
 
   const updateFilteredProducts = useCallback(
-    (brandOptions) => {
+    (brandOptions: {
+      id: string;
+      name: string;
+      options: { value: string; checked: boolean }[];
+    }) => {
       const filteredProducts = filterProducts(brandOptions);
 
       return filteredProducts;
@@ -617,19 +651,26 @@ export default function Example({
   );
 
   const getCheckedOptions = useCallback(() => {
-    const brandFilter = state.filters.find((filter) => filter.id === "brand");
+    const brandFilter = state.filters.find(
+      (filter: { id: string; options: any[] }) => filter.id === "brand"
+    );
 
     if (!brandFilter) {
       return [];
     }
 
-    return brandFilter.options.filter((option) => option.checked);
+    return brandFilter.options.filter(
+      (option: { checked: boolean; value: string | number }) => option.checked
+    );
   }, [state.filters]);
 
   const getBrandOptions = useMemo(() => {
     const checkedOptions = getCheckedOptions();
 
-    const brandFilter = state.filters.find((filter) => filter.id === "brand");
+    const brandFilter = state.filters.find(
+      (filter: { id: string; name: string; options: any[] }) =>
+        filter.id === "brand"
+    );
 
     if (!brandFilter) {
       return [];
@@ -663,8 +704,8 @@ export default function Example({
     });
 
     function mergeFilteredProducts(
-      filteredProductsByVariant = [],
-      filteredProductsByBrand = []
+      filteredProductsByVariant = [] as any[],
+      filteredProductsByBrand = [] as any[]
     ) {
       // Perform the merging logic here
       // For example, you can concatenate the two arrays
@@ -733,7 +774,7 @@ export default function Example({
           imageAlt: "",
         };
       }
-    ) as FormattedProduct;
+    );
 
     setProducts(reformattedProducts);
   }, []);
@@ -770,7 +811,7 @@ export default function Example({
             imageAlt: "",
           };
         }
-      ) as FormattedProduct[];
+      );
 
       setProducts(reformattedProducts);
     } catch (error) {
@@ -867,7 +908,7 @@ export default function Example({
             imageAlt: "",
           };
         }
-      ) as FormattedProduct[];
+      );
 
       //set products for page
       setProducts(reformattedProducts);
@@ -890,40 +931,67 @@ export default function Example({
   // Initial state for the filter options
 
   // Sort Logic
-  const handleSortOptionClick = (optionName) => {
+  const handleSortOptionClick = (optionName: {
+    name: string;
+    href: string;
+    current: boolean;
+  }) => {
     // change clicked option to true and all others to false
 
     // Change clicked option to true and all others to false
-    const updatedSort = state.sort.map((option) => ({
-      ...option,
-      current: option.name === optionName ? !option.current : false,
-    }));
+    const updatedSort = state.sort.map(
+      (option: {
+        name: { name: string; href: string; current: boolean };
+        current: any;
+      }) => ({
+        ...option,
+        current: option.name === optionName ? !option.current : false,
+      })
+    );
 
     dispatch({ type: "SET_SORT", payload: updatedSort });
 
     sortProductsAndSetState(updatedSort);
   };
 
-  const sortProductsAndSetState = (sortOptions) => {
-    const selectedSortOption = sortOptions.find((option) => option.current);
+  const sortProductsAndSetState = useCallback(
+    (
+      sortOptions: {
+        name: string;
+        href: string;
+        current: boolean;
+      }[]
+    ) => {
+      const selectedSortOption = sortOptions.find((option) => option.current);
 
-    if (selectedSortOption) {
-      const sortOptionName = selectedSortOption.name;
-      let sortedProducts = [];
+      if (selectedSortOption) {
+        const sortOptionName = selectedSortOption.name;
+        let sortedProducts = [];
 
-      if (state.filteredProducts.length > 0) {
-        sortedProducts = sortProducts(sortOptionName, state.filteredProducts);
-        dispatch({ type: "SET_FILTERED_PRODUCTS", payload: sortedProducts });
-      } else {
-        sortedProducts = sortProducts(sortOptionName, products);
-        setProducts(sortedProducts);
+        if (state.filteredProducts.length > 0) {
+          sortedProducts = sortProducts(sortOptionName, state.filteredProducts);
+          dispatch({ type: "SET_FILTERED_PRODUCTS", payload: sortedProducts });
+        } else {
+          sortedProducts = sortProducts(sortOptionName, products);
+
+          //potential issue
+          // setProducts(sortedProducts);
+        }
       }
-    }
-  };
+    },
+    [state.filteredProducts, products]
+  );
 
   //useEffect that runs when sort state changes
 
-  const sortProducts = (sortOptionName, products) => {
+  const sortProducts = (
+    sortOptionName: string,
+    products: {
+      rating: number;
+      createdAt: string;
+      price: string;
+    }[]
+  ) => {
     try {
       let sortedProducts = [];
 
@@ -939,10 +1007,12 @@ export default function Example({
           });
           break;
         case "Newest":
-          // sort by date
+          // Sort by date (newest first)
 
-          sortedProducts = products.sort((a, b) => {
-            return new Date(b.createdAt) - new Date(a.createdAt);
+          sortedProducts = products.slice().sort((a, b) => {
+            const dateA = new Date(a.createdAt);
+            const dateB = new Date(b.createdAt);
+            return dateB.getTime() - dateA.getTime();
           });
           break;
 
@@ -985,7 +1055,10 @@ export default function Example({
 
   const productsToRender =
     (state.filteredBrandOptions.options || []).length > 0 ||
-    state.filteredVariantOptions.some((option) => option.options.length > 0)
+    state.filteredVariantOptions.some(
+      (option: { options: { value: string | number }[] }) =>
+        option.options.length > 0
+    )
       ? state.filteredProducts
       : products;
 
