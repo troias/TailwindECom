@@ -62,7 +62,7 @@ const overview = [
   },
 ];
 
-function classNames(...classes) {
+function classNames(...classes: any[]) {
   return classes.filter(Boolean).join(" ");
 }
 
@@ -74,21 +74,28 @@ export default function index({}: Props) {
           <ul role="list" className="flex flex-1 flex-col gap-y-7 w-1/3">
             <li>
               <ul role="list" className="-mx-2 space-y-1 ">
-                {navigation.map((item) => (
-                  <li key={item.name}>
-                    {!item.children ? (
-                      <Link
-                        href={item.href}
-                        className={classNames(
-                          item.current ? "bg-gray-50" : "hover:bg-gray-50",
-                          "block rounded-md py-2 pr-2 pl-2 sm:pl-6 lg:pl-10 text-sm sm:text-lg leading-6 font-semibold text-gray-700"
-                        )}
-                      >
-                        {item.name}
-                      </Link>
-                    ) : null}
-                  </li>
-                ))}
+                {navigation.map(
+                  (item: {
+                    name: string;
+                    href: string;
+                    current: boolean;
+                    children?: any;
+                  }) => (
+                    <li key={item.name}>
+                      {!item.children ? (
+                        <Link
+                          href={item.href}
+                          className={classNames(
+                            item.current ? "bg-gray-50" : "hover:bg-gray-50",
+                            "block rounded-md py-2 pr-2 pl-2 sm:pl-6 lg:pl-10 text-sm sm:text-lg leading-6 font-semibold text-gray-700"
+                          )}
+                        >
+                          {item.name}
+                        </Link>
+                      ) : null}
+                    </li>
+                  )
+                )}
               </ul>
             </li>
           </ul>
@@ -160,7 +167,7 @@ export default function index({}: Props) {
   );
 }
 
-export const getStaticProps = async (ctx) => {
+export const getStaticProps = async (ctx: any) => {
   //get navigation
 
   const navigation = await getNavigation();
